@@ -4,7 +4,7 @@ import { applyState, State } from "./StateManager";
 type StateProps = ReturnType<ReturnType<typeof mappedState>>;
 type TableHeaderComponent = React.FunctionComponent<StateProps>;
 
-export const TableColumns: TableHeaderComponent = (props) => {
+const TableColumns: TableHeaderComponent = (props) => {
   const { columns } = props;
 
   return (

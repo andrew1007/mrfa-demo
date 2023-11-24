@@ -14,7 +14,7 @@ export type TableProps = {
   onAllCheck: React.InputHTMLAttributes<HTMLInputElement>["onChange"];
 };
 
-export const Table: React.FC<TableProps> = (props) => {
+const Table: React.FC<TableProps> = (props) => {
   const { rows, columns, onEditCell, onCheck, selected, onAllCheck } = props;
 
   const allCheckboxChecked = selected.length === rows.length;
@@ -41,7 +41,7 @@ export const Table: React.FC<TableProps> = (props) => {
               <td>
                 <RowCheckbox
                   checked={selected.includes(row.id)}
-                  onChange={() => onCheck(row.id)}
+                  onChange={onCheck(row.id)}
                 />
               </td>
               {columns.map(({ key }) => {

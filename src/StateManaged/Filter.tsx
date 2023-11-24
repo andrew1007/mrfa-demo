@@ -5,7 +5,7 @@ type FilterStateProps = ReturnType<ReturnType<typeof mappedState>>;
 type FilterComponent = React.FunctionComponent<FilterStateProps>;
 type UpdateFocusedFilter = ChangeEventHandler<HTMLSelectElement>;
 
-export const Filter: FilterComponent = (props) => {
+const Filter: FilterComponent = (props) => {
   const { options, value } = props;
   const dispatch = useDispatch();
 

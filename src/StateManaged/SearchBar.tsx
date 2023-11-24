@@ -5,7 +5,7 @@ type SearchBarStateProps = ReturnType<ReturnType<typeof mappedState>>;
 type SearchBarComponent = React.FunctionComponent<SearchBarStateProps>;
 type HandleTextUpdate = ChangeEventHandler<HTMLInputElement>;
 
-export const SearchBar: SearchBarComponent = (props) => {
+const SearchBar: SearchBarComponent = (props) => {
   const { text } = props;
   const dispatch = useDispatch();
 

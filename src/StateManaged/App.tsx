@@ -6,7 +6,7 @@ import Table from "./Table";
 import "./styles.css";
 import { fetchColumns, fetchFilters, fetchRows } from "../resources/requests";
 
-export const App: React.FunctionComponent = () => {
+const App: React.FunctionComponent = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {

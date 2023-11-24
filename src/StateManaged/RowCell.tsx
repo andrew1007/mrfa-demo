@@ -2,7 +2,7 @@ import { applyState, useDispatch, State, Row } from "./StateManager";
 import React from "react";
 import EditableCell, { EditableCellProps } from "../resources/EditableCell";
 
-export type RowCellProps = {
+type RowCellProps = {
   id: string;
   field: keyof Row;
 };
@@ -13,7 +13,7 @@ type RowCellComponent = React.FunctionComponent<
 >;
 type HandleEdit = EditableCellProps["onEditCell"];
 
-export const RowCell: RowCellComponent = (props) => {
+const RowCell: RowCellComponent = (props) => {
   const { value, id, field } = props;
   const dispatch = useDispatch();
 

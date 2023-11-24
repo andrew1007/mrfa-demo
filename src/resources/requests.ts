@@ -1,8 +1,9 @@
-import { State, Row } from "./types";
+import { State, Row } from "../library/types";
 
-const names = ["andrew", "alice", "arik", "frank", "may"];
+const names = ["Andrew", "Alice", "Arik", "Frank", "May"];
 const ages = ["24", "31", "34", "30", "45"];
 const height = ["58", "56", "54", "53", "52"];
+
 const random = (array: string[]) =>
   array[Math.floor(Math.random() * array.length)];
 

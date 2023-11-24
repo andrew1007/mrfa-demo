@@ -3,7 +3,7 @@ import React from "react";
 import RowCheckbox from "./RowCheckbox";
 import EditableCell, { EditableCellProps } from "../resources/EditableCell";
 
-export type TableRowProps = {
+type TableRowProps = {
   id: string;
 };
 type TableRowStateProps = ReturnType<ReturnType<typeof mappedState>>;
@@ -12,7 +12,7 @@ type TableRowComponent = React.FunctionComponent<
 >;
 type HandleEdit = EditableCellProps["onEditCell"];
 
-export const TableRow: TableRowComponent = (props) => {
+const TableRow: TableRowComponent = (props) => {
   const { row, columns } = props;
   const dispatch = useDispatch();
 
