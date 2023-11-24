@@ -1,5 +1,6 @@
 import React from "react";
 import EditableCell, { EditableCellProps } from "../resources/EditableCell";
+import RowCheckbox from "./RowCheckbox";
 import { State, Row } from "./types";
 
 export type TableProps = {
@@ -23,10 +24,9 @@ export const Table: React.FC<TableProps> = (props) => {
       <thead>
         <tr>
           <td>
-            <input
+            <RowCheckbox
               onChange={onAllCheck}
               checked={allCheckboxChecked}
-              type="checkbox"
             />
           </td>
           {columns.map(({ label, key }) => {
@@ -39,10 +39,9 @@ export const Table: React.FC<TableProps> = (props) => {
           return (
             <tr key={row.id}>
               <td>
-                <input
+                <RowCheckbox
                   checked={selected.includes(row.id)}
-                  onChange={onCheck(row.id)}
-                  type="checkbox"
+                  onChange={() => onCheck(row.id)}
                 />
               </td>
               {columns.map(({ key }) => {
