@@ -1,0 +1,26 @@
+import React from "react";
+import { useDispatch, applyState, State } from "./StateManager";
+
+type StateProps = ReturnType<ReturnType<typeof mappedState>>;
+type Component = React.FunctionComponent<StateProps>;
+type ToggleCheck = React.InputHTMLAttributes<HTMLInputElement>["onChange"];
+
+const AllCheckbox: Component = (props) => {
+  const { allSelected } = props;
+
+  const dispatch = useDispatch();
+
+  const toggleCheck: ToggleCheck = () => {
+    dispatch(({ rowIds }) => ({
+      selected: allSelected ? [] : [...rowIds],
+    }));
+  };
+
+  return <input onChange={toggleCheck} checked={allSelected} type="checkbox" />;
+};
+
+const mappedState = () => (state: State) => ({
+  allSelected: state.selected.length === state.rowIds.length,
+});
+
+export default applyState(mappedState)(AllCheckbox);

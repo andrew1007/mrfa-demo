@@ -1,0 +1,167 @@
+.button {
+  background: transparent;
+  border-radius: 5px;
+  color: black;
+  padding: 0 3px;
+  height: 15px;
+  width: 15px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid grey;
+  margin-right: 5px;
+}
+
+.read-container {
+  display: flex;
+  align-items: center;
+}
+
+.read-text {
+  margin-right: 5px;
+}
+
+.cell {
+  padding: 3px 15px 3px 5px;
+}
+
+.value-edit {
+  width: 60px;
+  height: 20px;
+  margin-right: 5px;
+}
+
+.edit-container {
+  display: flex;
+  align-items: center;
+}
+
+.play:before {
+  content: "\25BA";
+  background: #00a6ed;
+  color: #ffffff;
+  font-size: 16px;
+  border-radius: 2px;
+}
+
+.pause:before {
+  content: "\23F8";
+}
+
+.back:before {
+  content: "\23EE";
+}
+
+.forward:before {
+  content: "\23ED";
+}
+
+.edit:before {
+  content: "\270E";
+  font-size: 8px;
+}
+
+.close:before {
+  content: "\2716";
+  font-size: 8px;
+}
+
+.confirm:before {
+  content: "\2713";
+  font-size: 8px;
+}
+
+.add:before {
+  content: "\002B";
+}
+
+.repeat:before {
+  content: "\2B6F";
+}
+
+.shuffle:before {
+  content: "\1f500";
+}
+
+.repeat:before {
+  content: "\1f501";
+}
+
+.login-root {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.playlist-root {
+  flex-grow: 1;
+}
+
+.songs-root {
+  height: 330px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.route-container {
+  display: flex;
+  flex-grow: 1;
+  height: 400px;
+}
+
+.song-root {
+  display: grid;
+  grid-template-areas:
+    "sa sb sb sd"
+    "sa sc sc sd";
+  grid-template-columns: auto 1fr auto;
+}
+
+.song-icon {
+  grid-area: sa;
+  align-self: center;
+}
+
+.song-title {
+  word-break: break-word;
+  grid-area: sb;
+}
+
+.song-artist {
+  word-break: break-word;
+  grid-area: sc;
+}
+
+.song-duration {
+  grid-area: sd;
+  align-self: center;
+}
+
+.queue-entry-root {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+}
+
+.queue-root {
+  display: grid;
+  row-gap: 5px;
+}
+
+.horizontal {
+  display: flex;
+  gap: 5px;
+}
+
+.total-progress {
+  width: 300px;
+  background: grey;
+  height: 2px;
+}
+
+.line {
+  background: blue;
+  height: 2px;
+}
