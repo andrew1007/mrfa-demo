@@ -1,24 +1,19 @@
-import React from 'react';
-import logo from './logo.svg';
+import { useState } from 'react';
 import './App.css';
+import { LocalState } from './LocalState';
+import StateManaged from './StateManaged';
 
 function App() {
+  const [showStateManaged, setShowStateManaged] = useState(true)
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <button onClick={() => setShowStateManaged(prev => !prev)}>
+        Swap to {showStateManaged ? 'Local state implementation' : 'State managed implementation'}
+      </button>
+      <div>
+        {showStateManaged ? <StateManaged /> : <LocalState />}
+      </div>
     </div>
   );
 }

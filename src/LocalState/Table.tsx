@@ -19,7 +19,7 @@ export const Table: React.FC<TableProps> = (props) => {
   const allCheckboxChecked = selected.length === rows.length;
 
   return (
-    <table>
+    <table style={{ margin: 'auto' }}>
       <thead>
         <tr>
           <td>

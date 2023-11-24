@@ -5,7 +5,7 @@ import TableRows from "./TableRows";
 
 export const Table = () => {
   return (
-    <table>
+    <table style={{ margin: 'auto' }}>
       <thead>
         <tr>
           <td>

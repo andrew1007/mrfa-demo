@@ -6,6 +6,7 @@ import React, {
   Dispatch,
   FunctionComponent,
   useMemo,
+  memo,
 } from "react";
 
 const noop = () => null;
@@ -42,6 +43,7 @@ function makeProvider<T>(initialState: T) {
   type MappedState<T, P, V = any> = () => (state: T, ownProps: P) => V;
   function applyState<P>(mappedState: MappedState<T, P>) {
     return (Component: FunctionComponent<any>) => {
+      const MemoedComponent = memo(Component)
       const ApplyStateComponent = (props: P) => {
         const mappedStateInstance = useMemo(() => mappedState(), []);
         const state = useContext(StateContext);
@@ -51,7 +53,7 @@ function makeProvider<T>(initialState: T) {
           ...mappedStateInstance(state, props),
         };
 
-        return <Component {...mergedProps} />;
+        return <MemoedComponent {...mergedProps} />;
       };
       ApplyStateComponent.displayName = `applyState{${Component.name}}`;
       return ApplyStateComponent;

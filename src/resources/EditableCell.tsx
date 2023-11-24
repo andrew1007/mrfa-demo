@@ -1,4 +1,5 @@
 import React, { ChangeEventHandler, useEffect, useState } from "react";
+import { Close, ModeEdit, Check } from '@mui/icons-material';
 
 export type EditableCellProps = {
   value: string;
@@ -41,17 +42,17 @@ const EditableCell: React.FC<EditableCellProps> = (props) => {
             className="value-edit"
           />
           <button className="button" onClick={handleSave}>
-            <div className="confirm" />
+            <Check className="icon" />
           </button>
           <button className="button" onClick={() => setEditState(false)}>
-            <div className="close" />
+            <Close className="icon" />
           </button>
         </div>
       ) : (
         <div className="read-container">
           <span className="read-text">{value}</span>
           <button className="button" onClick={() => setEditState(true)}>
-            <div className="edit" />
+            <ModeEdit className="icon" />
           </button>
         </div>
       )}

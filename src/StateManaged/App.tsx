@@ -23,11 +23,11 @@ export const App: React.FunctionComponent = () => {
   }, [dispatch]);
 
   return (
-    <>
+    <div>
       <Filter />
       <SearchBar />
       <Table />
-    </>
+    </div>
   );
 };
 
