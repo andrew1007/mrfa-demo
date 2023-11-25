@@ -23,7 +23,6 @@ const Filter: React.FC<FilterProps> = (props) => {
 
   return (
     <div>
-      <input value={searchText} onChange={updateSearchText} />
       <select onChange={updateFocusedFilter}>
         <option value={""}>None</option>
         {options.map(({ id, label }) => {
@@ -34,6 +33,7 @@ const Filter: React.FC<FilterProps> = (props) => {
           );
         })}
       </select>
+      <input value={searchText} onChange={updateSearchText} />
     </div>
   );
 };

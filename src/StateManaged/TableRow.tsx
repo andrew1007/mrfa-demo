@@ -19,7 +19,7 @@ const TableRow: TableRowComponent = (props) => {
       <td>
         <RowCheckbox id={row.id} />
       </td>
-      {columns.map(({ key }) => <RowCell field={key} id={id} />)}
+      {columns.map(({ key }) => <RowCell key={key} field={key} id={id} />)}
     </tr>
   );
 };

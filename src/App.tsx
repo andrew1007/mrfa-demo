@@ -8,9 +8,17 @@ function App() {
 
   return (
     <div className="App">
-      <button onClick={() => setShowStateManaged(prev => !prev)}>
-        Swap to {showStateManaged ? 'Local state implementation' : 'State managed implementation'}
-      </button>
+      <form onChange={(e) => {
+        // @ts-ignore
+        setShowStateManaged(e.target?.value === 'optimized')
+      }}>
+        <fieldset id="group1">
+          <input type="radio" defaultChecked value="optimized" name="group1" />
+          <label>Optimized</label>
+          <input type="radio" value="local" name="group1" />
+          <label>Local state</label>
+        </fieldset>
+      </form>
       <div>
         {showStateManaged ? <StateManaged /> : <LocalState />}
       </div>
