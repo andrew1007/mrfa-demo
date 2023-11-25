@@ -93,24 +93,27 @@ ReactDOM.render(
 );
 ```
 
-It would be naive to think that we're done. Any professional developer knows that this example looks nothing like enterprise software. We need to develop a full-scale architecture in order to leverage the power of `React.memo` in apps that render thousands of DOM nodes and trigger hundreds of render cycles (possibly thousands) per minute.
+It would be naive to think that we're done. Any professional developer knows that this example looks nothing like enterprise software. We need to develop a full-scale architecture in order to leverage the power of `React.memo` in apps that render thousands of DOM nodes and trigger hundreds of heavy render cycles (possibly thousands) per minute.
 
-In order to see what a fast implementation looks like, first we need to look at one that is slow. Here is the implementation of a searchable and selectable table using local state. Because data is required in many locations, a god component is necessary when using local state. Code snippets here will not be type defined. The repo here has the full code in TypeScript. The most important part of this is to see that all of the managed data needs to be passed down from the top of the component hierarchy.
+In order to see what a fast implementation looks like, first we need to look at one that is slow. The full app (with type definitions) can be found in this repo.
+
+Here is the god component of a searchable, filterable, and selectable table using local state. Because data is required in many locations, this god component is necessary to manage data and event handlers. Data needs to be passed down from the top of the component hierarchy.
 
 ```jsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Filter from "./Filter";
-import { fetchColumns, fetchFilters, fetchRows } from "./requests";
 import Table from "./Table";
+import { fetchColumns, fetchFilters, fetchRows } from "../resources/requests";
 
 const App = () => {
   const [rows, setRows] = useState([]);
   const [columns, setColumns] = useState([]);
   const [filters, setFilters] = useState([]);
+  const [searchText, setSearchText] = useState("");
   const [focusedFilter, setFocusedFilter] = useState("");
   const [selected, setSelected] = useState([]);
 
-  // fetch all table data from an endpoint
+  // load data from mock api on mount
   useEffect(() => {
     Promise.all([fetchRows(), fetchFilters(), fetchColumns()]).then(
       ([rows, filters, columns]) => {
@@ -121,10 +124,10 @@ const App = () => {
     );
   }, []);
 
-  // using the current selected filter conditions, filter our non-matching rows
+  // compute which rows match the current search + filter criteria
   const getFilteredRows = () => {
     const currentFilter = filters.find(({ id }) => id === focusedFilter);
-    if (!currentFilter) {
+    if (!currentFilter && !searchText) {
       return rows;
     }
 
@@ -134,9 +137,10 @@ const App = () => {
           (cond) => row[cond.key] === cond.value
         ) ?? true
       )
+      .filter(({ name }) => name.includes(searchText));
   };
 
-  // update table data on save
+  // update text in cell
   const handleCellEdit = ({ id, key, value }) => {
     setRows((prevRows) => {
       return prevRows.map((row) => {
@@ -148,7 +152,7 @@ const App = () => {
     });
   };
 
-  // update array of selected checkbox
+  // toggle a row checkbox
   const toggleCheckChange = (id) => (e) => {
     if (e.target.checked) {
       return setSelected((prevSelected) => [...prevSelected, id]);
@@ -159,7 +163,7 @@ const App = () => {
     }
   };
 
-  // select or deselect all, based on current state of selected checkboxes
+  // toggle checkbox that selects/deselects all
   const toggleCheckAll = () => {
     if (selected.length === rows.length) {
       setSelected([]);
@@ -173,6 +177,8 @@ const App = () => {
       <Filter
         options={filters}
         onFilterChange={setFocusedFilter}
+        onSearchChange={setSearchText}
+        searchText={searchText}
       />
       <Table
         rows={getFilteredRows()}
@@ -191,21 +197,21 @@ It is telling about useless rerenders when inspecting the flame graph, On checkb
 
 Technically, this could be solved with `useCallback` and `useMemo`. But these should be avoided as often as possible. They are brittle to use and must be vigilantly maintained. These hooks rely on a dependency array, which is susceptible to ineffective memoization and returning stale values.
 
-Traditional performance techniques, like `useCallback` and `useMemo`, inevitably become liabilities in large applications. All of these issues and considerations are a non-issue if a different data management design pattern is used. It starts with shared state: the Context API.
+Traditional performance techniques, like `useCallback` and `useMemo`, inevitably become liabilities in large applications. All of these issues and considerations are a non-issue if a different data management design pattern is used. It starts with managing data outside of the component hierarchy: the Context API.
 
 ### Performant Context
 
-The guiding principle is minimizing reliance of UI on other UI. The more data is passed from parent to child, the harder it is to optimize. In order to directly pass data to the components that need it, the context API is needed.
+The guiding principle of fast components is the minimization of UI relying on other UI for data. The more data is passed from parent to child, the harder it is to becomes to optimize. In order to directly pass data to the components that need it, the context API is needed.
 
-Context is widely regarded as slow; with claims that it does not scale. This is a half-truth. In reality, context is not intrinsically slow. What is slow is the downstream consequences of data updating. `useContext` triggers rerenders every time data updates. Triggering reconciliation on DOM nodes is slow.
+Context is widely regarded as slow; with claims that it does not scale. This is a half-truth. Context is not intrinsically slow. What is slow is the downstream consequences of its usage. `useContext` triggers rerenders every time data updates. So in reality, the perception of context "being slow" is actually commentary on the speed of the reconciliation algorithm.
 
-But this is based on the most common design pattern that is used with context, which is calling `useContext` directly inside the UI component that needs the data. The key phrase is "UI component". Of course, `useContext` must be called in a component; but nothing is stopping us from using it in a component that has no HTML.
+This performance critique is based on the most common design pattern, which is calling `useContext` directly inside the UI component that needs the data. The key phrase is "UI component". Of course, `useContext` must be called in a component; but nothing is stopping us from using it in a component that has no HTML.
 
 Here is a basic state management library that can be used to suppress rerenders. It is a scalable implementation that works in applications of any size. It leverages the following concepts:
 
-- Context to store state
-- useReducer to dispatch and transform state data
-- higher order component to process data before it is passed to a component.
+- `Context` to store data
+- `useReducer` to dispatch and transform state data
+- Higher order component to process data before it is passed to a component.
 
 ```jsx
 import React, {
@@ -240,17 +246,19 @@ function makeProvider(initialState) {
   };
 
   // HOC to connect state to components
-  function applyState(mappedStateFn) {
+  function applyState(mappedState) {
     return (Component) => {
-      const ApplyStateComponent = (props: P) => {
-        const state = useContext(StateContext);
+      const MemoComponent = memo(Component);
+      const ApplyStateComponent = (props) => {
+        const mappedStateInstance = useMemo(() => mappedState?.(), []);
 
-        const mergedProps = {
+        const state = useContext(StateContext);
+        const combinedProps = {
           ...props,
-          ...mappedStateFn(state, props),
+          ...mappedStateInstance?.(state, props),
         };
 
-        return <Component {...mergedProps} />;
+        return <MemoComponent {...combinedProps} />;
       };
       ApplyStateComponent.displayName = `applyState{${Component.name}}`;
       return ApplyStateComponent;
@@ -269,7 +277,7 @@ function makeProvider(initialState) {
 export default makeProvider;
 ```
 
-The high order component `applyState` is the secret sauce here. Instead of exposing all of state to a component, `applyState` accepts a function resolver that allows pre-processing data before it is passed down to the component. By strategically parsing, extracting, and computing data inside `applyState`, `React.memo` (which is embedded in the implementation of `applyState`) can properly detect and suppress rerenders.
+The high order component `applyState` is the secret sauce here. Instead of exposing all of state to a component, `applyState` accepts a function resolver. This allows pre-processing of data before it is passed down to the component. By strategically parsing, extracting, and computing data inside `applyState`, `React.memo` (which is embedded in the implementation of `applyState`) can properly detect and suppress useless rerenders.
 
 The `dispatch` function is in its own context and directly exposed (via `useDispatch`). This is because `dispatch` is a stable dependency. It is safe to use as a hook directly in components because it will never trigger a rerender. The full state tree is available in the callback argument. You can think of this `dispatch` pattern as a (less powerful) thunk that can be directly called in a component.
 
@@ -281,14 +289,16 @@ Designing optimized components is about creating a logical separation of UI elem
 
 To conceptualize this, we can revisit our naive table. What is the logical separation of data, based on the minimum amount of data that is required for rendering? To explore this properly, we need to tabulate the features of the table and the correlating data that is required from them.
 
-To accomplish this, we start at the bottom of the component hierarchy and work up. The lower in the hierarchy we can isolate heavy data access, the better.
+To accomplish this, we start at the bottom of the component hierarchy and work up. In most cases, the lower in the hierarchy heavy data access occurs, the better.
 
 Cell:
 Each cell is technically the true rendering location (AKA the HTML) of the data in the table. The minimum amount of information that is required is the text to be rendered. The checkbox cell's minimum amount of information to render is a `checked` boolean.
 
 The cell is where all of the heavy lifting occurs. It only stands to reason that the rest of the components should be designed to suppress useless rerenders for cells. Ticking a checkbox doesn't need to rerender checkboxes for other rows. Filtering out rows by selection doesn't need to rerender cells. To accomplish this, data access needs to circumvent the component hierarchy as much as possible. This is where our custom context abstraction, `applyState` comes into play.
 
-Make no mistake: passing data down from parent to child is oftentimes required. The difference between the optimized and naive approach is making strategic decisions to minimize the amount of information to pass down. In an overwhelming majority of situations, the minimum amount of information is an id. Passing down an id (which are primitives) from parent to child won't trigger a useless rerender when the component is wrapped in `React.memo`. `applyState` embeds `React.memo`; if a component is wrapped in it, `React.memo` does not need to be wrapped again. The `id` from the parent and direct data access + computation inside `applyState` is how strict equality for all incoming props will be met.
+Make no mistake: passing data down from parent to child is oftentimes required. The difference between the optimized and naive approach is making strategic decisions to minimize the amount of information to pass down. In most situations, components that are iterated over (`TableRow`) only need to accept an `id` from its parent. Passing down only an `id` won't trigger a useless rerender, because `id` will meet strict equality.
+
+The `id` from the parent and direct data access + computation inside `applyState` is how strict equality for all incoming props will be met.
 
 ## Optimized Component Design
 
