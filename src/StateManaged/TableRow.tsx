@@ -17,9 +17,9 @@ const TableRow: TableRowComponent = (props) => {
   return (
     <tr>
       <td>
-        <RowCheckbox id={row.id} />
+        <RowCheckbox id={id} />
       </td>
-      {columns.map(({ key }) => <RowCell key={key} field={key} id={id} />)}
+      {columns.map(({ key }) => <RowCell key={key} field={key} id={row.id} />)}
     </tr>
   );
 };
