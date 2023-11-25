@@ -8,11 +8,17 @@ export type EditableCellProps = {
   id: string;
 };
 
+const heavy = () => {
+  for (let i = 0; i < 100; i++) {
+    JSON.stringify({});
+  }
+};
+
 const EditableCell: React.FC<EditableCellProps> = (props) => {
   const { value, onConfirm, id, field } = props;
   const [editState, setEditState] = useState(false);
   const [editValue, setEditValue] = useState("");
-
+  heavy()
   useEffect(() => {
     if (!editState) {
       setEditValue(value);
