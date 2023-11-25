@@ -6,7 +6,7 @@ import { State, Row } from "./types";
 export type TableProps = {
   rows: Row[];
   columns: State["columns"];
-  onEditCell: EditableCellProps["onEditCell"];
+  onEditCell: EditableCellProps["onConfirm"];
   onCheck: (
     id: string
   ) => React.InputHTMLAttributes<HTMLInputElement>["onChange"];
@@ -51,7 +51,7 @@ const Table: React.FC<TableProps> = (props) => {
                     value={row[key]}
                     id={row.id}
                     field={key}
-                    onEditCell={onEditCell}
+                    onConfirm={onEditCell}
                   />
                 );
               })}

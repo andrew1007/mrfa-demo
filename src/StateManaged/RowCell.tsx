@@ -11,7 +11,7 @@ type RowCellStateProps = ReturnType<ReturnType<typeof mappedState>>;
 type RowCellComponent = React.FunctionComponent<
   RowCellProps & RowCellStateProps
 >;
-type HandleEdit = EditableCellProps["onEditCell"];
+type HandleEdit = EditableCellProps["onConfirm"];
 
 const RowCell: RowCellComponent = (props) => {
   const { value, id, field } = props;
@@ -32,7 +32,7 @@ const RowCell: RowCellComponent = (props) => {
   };
 
   return (
-    <EditableCell field={field} id={id} value={value} onEditCell={handleEdit} />
+    <EditableCell field={field} id={id} value={value} onConfirm={handleEdit} />
   );
 };
 

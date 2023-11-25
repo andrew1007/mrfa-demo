@@ -12,7 +12,7 @@ type Filters = State["filters"];
 type SearchText = State["searchText"];
 type FocusedFilter = State["focusedFilter"];
 type Selected = State["selected"];
-type HandleCellEdit = EditableCellProps["onEditCell"];
+type HandleCellEdit = EditableCellProps["onConfirm"];
 type ToggleCheckChange = TableProps["onCheck"];
 type ToggleCheckAll = TableProps["onAllCheck"];
 

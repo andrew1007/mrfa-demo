@@ -306,8 +306,6 @@ With the prerequisite knowledge out of the way, we can finally get started with 
 
 ### Reference data using ids
 
-
-
 ### Compute to primitive outside of UI
 
 The easiest way to maximize strict equality is to only pass primitives. This can be seen with the implementation of `RowCheckbox`. The resulting `checked` `boolean` changes far less often than the array of selected checkboxes. By reducing this data into a `boolean` in the function resolver of `applyState`, it is an easy win.
@@ -411,6 +409,12 @@ export default React.memo(Table);
 
 ### Tightly scope event handlers and data
 
+In most cases, it is better to have data close to the UI that use it. `RowCell` is a good case study for how this can be done.
+
+Data comes from `state` and functions leverage `dispatch`. The two are fundamentally different, and as a consequence have different strategies.
+
+This is where the convenience of `useDispatch` comes into play. Because `dispatch` is accessible from anywhere in the component hierarchy, there is no need to prop drill functions. Function handlers are no longer a source of useless rerenders. This is all provided for free. `useCallback` is not necessary.
+
 Passing data from `TableRow` down to `TableCell` is an open-ended problem. There are a multiple to approaches, but the common goals are the same
 
 1. The cell is its own component.
@@ -420,11 +424,11 @@ For `TableCell`, the `id` is not enough information. The field name is required 
 
 The minimum amount of information (that also passes strict equality) is passed from parent UI to its children. In `applyState`, the entire state tree is available, so we can use the identifiers (`id` and `fieldName`) to access data. The heavy lifting can be done inside `applyState` and data that will always pass strict equality (in this case a string) can be passed down. This takes care of rendering the cell's read state.
 
-### Performance scaling
+## Performance scaling
 
-The rerender overhead of typical apps scales linearly (1:1). If rerenders are not suppressed, twice the amount of HTML means twice the amount of nodes that the reconciliation algorithm needs to diff. But this is a non-issue when useless rerender suppression strategies are performed. When done correctly, the responsiveness of the app and the size of the DOM have no correlation (aside from initial mounting). This can be seen by comparing the performance as the table grows in size. As the DOM size grows, the god component implementation responsiveness scales into the stratosphere. The optimized app has zero scaling issues in most use cases. Here is a comparison for ticking a row's checkbox.
+The rerender overhead of typical architectures scale linearly. If rerenders are not suppressed, twice the amount of HTML means twice the number of nodes that the reconciliation algorithm needs to diff. But this is a non-issue when useless rerender suppression strategies are utilized. When done correctly, the responsiveness of the app and the size of the DOM have no correlation (aside from initial mounting). This can be seen by comparing the performance as the table grows in size. As the DOM size grows, the god component implementation responsiveness scales into the stratosphere. The optimized app has zero scaling issues (in most use cases). Here is a comparison for ticking a row's checkbox.
 
-There is one operation that scales linearly in the optimized app: it is ticking the "all" checkbox. But despite this, the scaling is leaps and bounds better than the god component app. The god component app scales with the entire table and the optimized app only scales with the checkboxes.
+There is one operation that scales linearly in the optimized app: it is ticking the "all" checkbox. But despite this, the scaling is leaps and bounds better. The god component app scales with the entire table and the optimized app only scales with checkboxes.
 
 ## Algorithms Outside of UI
 
@@ -465,7 +469,7 @@ const mappedState = () => (state: State) => {
 export default applyState(mappedState)(TableRows);
 ```
 
-This true, but impractical. Maintainability, in an overwhelming number of cases, comes first for enterprise software. Algorithms in components violate separation of concerns and they cannot be reused in other locations. On top of that, there is already a solution for this. Functional (pure) memoization strategies enable patterns that are robust, extremely effective (when used correctly), and reusable. The negligible performance tradeoff is worth the massive increases in scalability of this pattern.
+This true, but impractical. Maintainability, in an overwhelming number of cases, comes first for enterprise software. Algorithms in components violate separation of concerns and they cannot be reused in other locations. On top of that, there is already a solution for this. Functional (pure) memoization strategies enable patterns that are robust, extremely effective (when used correctly), and reusable. There is no denying that memoization has performance penalties. But the impact is normally small and provides massive increases in scalability. It is almost always worth it.
 
 With these concepts, typical web apps gain huge performance wins. This is only scratching the surface of the knowledge to write a fully optimized React app. To get the full picture, these topics need to be covered.
 

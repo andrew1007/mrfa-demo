@@ -1,7 +1,7 @@
-import { applyState, useDispatch, State } from "./StateManager";
+import { applyState, State } from "./StateManager";
 import React from "react";
 import RowCheckbox from "./RowCheckbox";
-import EditableCell, { EditableCellProps } from "../resources/EditableCell";
+import RowCell from "./RowCell";
 
 type TableRowProps = {
   id: string;
@@ -10,42 +10,16 @@ type TableRowStateProps = ReturnType<ReturnType<typeof mappedState>>;
 type TableRowComponent = React.FunctionComponent<
   TableRowProps & TableRowStateProps
 >;
-type HandleEdit = EditableCellProps["onEditCell"];
 
 const TableRow: TableRowComponent = (props) => {
-  const { row, columns } = props;
-  const dispatch = useDispatch();
-
-  const handleEdit: HandleEdit = ({ id, key, value }) => {
-    dispatch(({ rows }) => {
-      const nextRows = { ...rows };
-      nextRows[id] = {
-        ...nextRows[id],
-        [key]: value,
-      };
-
-      return {
-        rows: nextRows,
-      };
-    });
-  };
+  const { row, columns, id } = props;
 
   return (
     <tr>
       <td>
         <RowCheckbox id={row.id} />
       </td>
-      {columns.map(({ key }) => {
-        return (
-          <EditableCell
-            key={key}
-            field={key}
-            id={row.id}
-            value={row[key]}
-            onEditCell={handleEdit}
-          />
-        );
-      })}
+      {columns.map(({ key }) => <RowCell field={key} id={id} />)}
     </tr>
   );
 };

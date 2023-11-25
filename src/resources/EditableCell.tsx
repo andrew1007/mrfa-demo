@@ -3,13 +3,13 @@ import { Close, ModeEdit, Check } from '@mui/icons-material';
 
 export type EditableCellProps = {
   value: string;
-  onEditCell: (params: { id: string; key: string; value: string }) => void;
+  onConfirm: (params: { id: string; key: string; value: string }) => void;
   field: string;
   id: string;
 };
 
 const EditableCell: React.FC<EditableCellProps> = (props) => {
-  const { value, onEditCell, id, field } = props;
+  const { value, onConfirm, id, field } = props;
   const [editState, setEditState] = useState(false);
   const [editValue, setEditValue] = useState("");
 
@@ -24,7 +24,7 @@ const EditableCell: React.FC<EditableCellProps> = (props) => {
   };
 
   const handleSave = () => {
-    onEditCell({
+    onConfirm({
       id,
       key: field,
       value: editValue,
