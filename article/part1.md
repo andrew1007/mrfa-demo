@@ -2,7 +2,7 @@
 
 It really is a shame that there is no style guide. The freedom to do whatever you want is the freedom to create poor experiences for users of your application. One of the biggest mistakes that is made, almost without fail, is poor performance. The core architecture of many apps inevitably out-scale itself. React apps start fine, but slowly accumulate performance problems. But make no mistake: React is not inherently slow. But it is easy to make architectural decisions that make it slow.
 
-I want to set the record straight and show you the true potential of React. I would not be arrogant enough to say that my way is the definitive approach. I am only here to show you one way that I have developed through personal experience. It has been proven itself in my personal and professional projects that I develop at TikTok. 
+I want to set the record straight and show you the true potential of React. I would not be arrogant enough to say that my way is the definitive approach. I am only here to show you one way that I have developed through personal experience. It has been proven itself in my personal and professional projects that I develop at TikTok.
 
 But this is not easy to teach. It requires a deep understanding of React, data structure mutations, and established design patterns. The first step is to learn what the virtual DOM is and the reconciliation algorithm.
 
@@ -199,7 +199,7 @@ Technically, this could be solved with `useCallback` and `useMemo`. But these sh
 
 Traditional performance techniques, like `useCallback` and `useMemo`, inevitably become liabilities in large applications. All of these issues and considerations are a non-issue if a different data management design pattern is used. It starts with managing data outside of the component hierarchy: the Context API.
 
-### Performant Context
+## Performant Context
 
 The guiding principle of fast components is the minimization of UI relying on other UI for data. The more data is passed from parent to child, the harder it is to becomes to optimize. In order to directly pass data to the components that need it, the context API is needed.
 
@@ -304,41 +304,36 @@ The `id` from the parent and direct data access + computation inside `applyState
 
 With the prerequisite knowledge out of the way, we can finally get started with component design. Note that the algorithms I will be writing are not ideal. What should be focused on are the rerender-suppression strategies. Robust and optimized algorithms are part of the overall architecture. But not enough topics have been covered yet to talk about them.
 
-### Isolate Zero-dependency UI
-For brevity's sake, I will concentrate on the content in the `tbody` content and "select all" checkbox. Conceptually, the way columns work are identical.
+### Reference data using ids
 
-Only the minimum amount of information should be passed down. In this use case, `table`, `tbody` and `tr` for the column headers never change, so it makes sense to group them into a component that do not accept nor provide any `props`. It is ideal to group zero-dependency UI into a separate component; they will never have a reason to rerender itself, nor propagate rerenders down to its children. Remember to wrap this in `React.memo`.
+
+
+### Compute to primitive outside of UI
+
+The easiest way to maximize strict equality is to only pass primitives. This can be seen with the implementation of `RowCheckbox`. The resulting `checked` `boolean` changes far less often than the array of selected checkboxes. By reducing this data into a `boolean` in the function resolver of `applyState`, it is an easy win.
 
 ```jsx
-import React from "react";
-import TableColumns from "./TableColumns";
-import AllCheckbox from "./AllCheckbox";
-import TableRows from "./TableRows";
+import { applyState, State } from "./StateManager";
 
-export const Table = () => {
-  return (
-    <table>
-      <thead>
-        <tr>
-          <td>
-            <AllCheckbox />
-          </td>
-          <TableColumns />
-        </tr>
-      </thead>
-      <tbody>
-        <TableRows />
-      </tbody>
-    </table>
-  );
+const RowCheckbox: RowCheckboxComponent = (props) => {
+  const { checked } = props;
+
+  // Don't worry about this handler. We're concentrating on the pre-computation aspect of this code snippet
+  const toggleCheck: ToggleCheck = (e) => null
+
+  return <input onChange={toggleCheck} type="checkbox" checked={checked} />;
 };
 
-export default React.memo(Table);
+const mappedState = () => (state: State, ownProps: ParentProps) => ({
+  checked: state.selected.includes(ownProps.id),
+});
+
+export default applyState(mappedState)(RowCheckbox);
 ```
 
-### Row Optimization
+### Isolate un-optimizable UI
 
-The next logical separation is the iteration of the table rows, where each `tr` is its own component. The minimum amount of information required to track what data maps to which `tr` is the `id` of the data record.
+The rows to render is dynamic because of search and filtering. `rowIds`, always fails strict equality, which triggers a rerender on every state update. This useless rerender is virtually unavoidable, based on our (currently) limited knowledge set. But there is a way around this. Isolate this difficult-to-suppress operation from the rest of the system. Make sure that the children of this component are designed in a way to minimize propagating render cycles. In this common situation, it is easily done by only passing down `id`.
 
 ```jsx
 import React from "react";
@@ -381,11 +376,43 @@ const mappedState = () => (state: State) => {
 export default applyState(mappedState)(TableRows);
 ```
 
-`rowIds`, which always fails strict equality, triggers a rerender on every render cycle. With our current set of knowledge, this rerender is virtually unavoidable. But this is of little consequence. This difficult-to-suppress operation is completely isolated from the rest of the system. Due to the content of the component. There is almost no rerender overhead, nor do rerenders propagate down. Strict equality is met as often as possible, because `TableRow`'s only prop is `id`.
+Inspection of the flame graph shows the result. Completely isolating this data computation, from the rest of the UI, provides the luxury to always fail strict equality with no consequence. A UI render cycle occurs on *any* state update, but it does not meaningfully affect performance.
 
-### Cell Optimization
+### Isolate zero-dependency and static UI
+
+It is ideal to group zero-dependency UI into a separate component; they will never have a reason to rerender itself, nor propagate rerenders down to its children. In this use case, `table`, `tbody` and `tr` for the column headers never change, so it makes sense to group them into a component that do not accept nor provide any data. The DOM nodes in this component will never have a reason to be checked for differences. Remember to wrap these types of components in `React.memo`.
+
+```jsx
+import React from "react";
+import TableColumns from "./TableColumns";
+import AllCheckbox from "./AllCheckbox";
+import TableRows from "./TableRows";
+
+export const Table = () => {
+  return (
+    <table>
+      <thead>
+        <tr>
+          <td>
+            <AllCheckbox />
+          </td>
+          <TableColumns />
+        </tr>
+      </thead>
+      <tbody>
+        <TableRows />
+      </tbody>
+    </table>
+  );
+};
+
+export default React.memo(Table);
+```
+
+### Tightly scope event handlers and data
 
 Passing data from `TableRow` down to `TableCell` is an open-ended problem. There are a multiple to approaches, but the common goals are the same
+
 1. The cell is its own component.
 2. The data computed in `applyState` should pass strict equality as often as possible.
 
@@ -393,46 +420,54 @@ For `TableCell`, the `id` is not enough information. The field name is required 
 
 The minimum amount of information (that also passes strict equality) is passed from parent UI to its children. In `applyState`, the entire state tree is available, so we can use the identifiers (`id` and `fieldName`) to access data. The heavy lifting can be done inside `applyState` and data that will always pass strict equality (in this case a string) can be passed down. This takes care of rendering the cell's read state.
 
-### Checkbox Optimization
+### Performance scaling
 
-The checkbox requires a different approach. Only the `id` is required to track which row's checkbox is currently being rendered. Passing the entire array of selected rows is a bad idea. This data structure will change when a checkbox is interacted with and will fail reference equality for all checkboxes simultaneously. Instead, the calculation can be done inside `applyState` and a simple `boolean` can be passed down. By doing this, only the checkbox that has changed will rerender.
+The rerender overhead of typical apps scales linearly (1:1). If rerenders are not suppressed, twice the amount of HTML means twice the amount of nodes that the reconciliation algorithm needs to diff. But this is a non-issue when useless rerender suppression strategies are performed. When done correctly, the responsiveness of the app and the size of the DOM have no correlation (aside from initial mounting). This can be seen by comparing the performance as the table grows in size. As the DOM size grows, the god component implementation responsiveness scales into the stratosphere. The optimized app has zero scaling issues in most use cases. Here is a comparison for ticking a row's checkbox.
 
-### Performance visualization
-
-Given a large table, any of these operations would bring a naive implementation to its knees. Every cell would rerender in any interaction. But because we are accessing data in such a granular and targeted way, this is a non-issue. The flame graphs say it all.
+There is one operation that scales linearly in the optimized app: it is ticking the "all" checkbox. But despite this, the scaling is leaps and bounds better than the god component app. The god component app scales with the entire table and the optimized app only scales with the checkboxes.
 
 ## Algorithms Outside of UI
 
-Front-loading the computation in `applyState` may seem like a waste of resources. If the entire subtree is passed to the component, useless recomputation of O(n) or even O(n^2) would be circumvented.
+Front-loading the computation in `applyState`, which recomputes on every render cycle, may seem like an unnecessary use of client resources. It may seem alluring to pass the pass the entire subtree to the component and compute inside the component. This way, useless computations would be circumvented.
+
+For example, if the algorithm in `getFilteredRows` existed inside `TableRows` were in the component, strict equality would be met more often.
 
 ```jsx
-const RowCheckbox = (props) => {
-  const { id, selected } = props;
-  const dispatch = useDispatch();
-  
-  const checked = selected.includes(id)
+import { applyState, State } from "./StateManager";
+import React from "react";
+import TableRow from "./TableRow";
 
-  const toggleCheck = (e) => {
-    dispatch(({ selected }) => ({
-      selected: e.target.checked
-        ? [...selected, id]
-        : selected.filter((selectedId) => selectedId !== id),
-    }));
-  };
+const TableRows = (props) => {
+    const { filters, focusedFilter, searchText, rows, rowIds } = props
+    const currentFilter = filters.find(({ id }) => id === focusedFilter);
 
-  return <input onChange={toggleCheck} type="checkbox" checked={checked} />;
+    const filteredRowIds = rowIds.filter((rowId) =>
+        currentFilter?.conditions.every(
+            (cond) => rows[rowId][cond.key] === cond.value
+        ) ?? true
+    )
+        .filter((rowId) => rows[rowId].name.includes(searchText));
+
+    return (
+        <>
+            {filteredRowIds.map((id) => {
+                return <TableRow id={id} key={id} />;
+            })}
+        </>
+    );
 };
 
-const mappedState = () => (state: State) => ({
-  selected: state.selected,
-});
+const mappedState = () => (state: State) => {
+    const { filters, focusedFilter, searchText, rowIds, rows } = state
+    return { filters, focusedFilter, searchText, rowIds, rows }
+};
 
-export default applyState(mappedState)(RowCheckbox);
+export default applyState(mappedState)(TableRows);
 ```
 
-This true, but impractical. Remember that this architecture is for enterprise software; maintainability comes first. Algorithms in components violate separation of concerns and they cannot be reused in other locations. On top of that, there is already a solution for this. Functional (pure) memoization strategies enable patterns that are robust and reusable. The negligible performance tradeoff is worth the massive increases in scalability of the architecture.
+This true, but impractical. Maintainability, in an overwhelming number of cases, comes first for enterprise software. Algorithms in components violate separation of concerns and they cannot be reused in other locations. On top of that, there is already a solution for this. Functional (pure) memoization strategies enable patterns that are robust, extremely effective (when used correctly), and reusable. The negligible performance tradeoff is worth the massive increases in scalability of this pattern.
 
-With these concepts, an app gains huge performance wins in many situations. This is only scratching the surface of the knowledge to write a fully optimized React app. To get the full picture, these topics need to be covered.
+With these concepts, typical web apps gain huge performance wins. This is only scratching the surface of the knowledge to write a fully optimized React app. To get the full picture, these topics need to be covered.
 
 - Robust memoization strategies for computed data
 - Structuring normalized state trees

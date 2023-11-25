@@ -26,7 +26,7 @@ export const fetchFilters = (): Promise<Filters> =>
     {
       id: "1",
       label: "Andrews",
-      conditions: [{ key: "name", value: "andrew" }],
+      conditions: [{ key: "name", value: "Andrew" }],
     },
     {
       id: "2",

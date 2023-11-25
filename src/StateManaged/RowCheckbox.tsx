@@ -1,5 +1,5 @@
 import React from "react";
-import { useDispatch, applyState, State } from "./StateManager";
+import { applyState, State } from "./StateManager";
 
 type ParentProps = {
   id: string;
@@ -10,17 +10,10 @@ type RowCheckboxComponent = React.FunctionComponent<ParentProps & StateProps>;
 type ToggleCheck = React.InputHTMLAttributes<HTMLInputElement>["onChange"];
 
 const RowCheckbox: RowCheckboxComponent = (props) => {
-  const { id, checked } = props;
+  const { checked } = props;
 
-  const dispatch = useDispatch();
-
-  const toggleCheck: ToggleCheck = (e) => {
-    dispatch(({ selected }) => ({
-      selected: e.target.checked
-        ? [...selected, id]
-        : selected.filter((selectedId) => selectedId !== id),
-    }));
-  };
+  // Don't worry about this handler. We're concentrating on the pre-computation aspect of this code snippet
+  const toggleCheck: ToggleCheck = (e) => null
 
   return <input onChange={toggleCheck} type="checkbox" checked={checked} />;
 };
