@@ -60,7 +60,7 @@ ReactDOM.render(
 );
 ```
 
-A button click triggers a render cycle by invoking `setCounter`. Visually, `App` has experience a DOM update. But reconciliation is diffing more DOM nodes than one might expect.
+A button click triggers a render cycle by invoking `setCounter`. Visually, `App` has experienced a DOM update. But reconciliation is diffing more DOM nodes than one might expect.
 
 No props have been passed down to Table and Row. It is fundamentally impossible for these components be affected by the parent's App.jsx state change. But cascading rerenders for every child in the component is the default behavior. Updating App.jsx causes reconciliation to uselessly trigger for all of its children. This consumes precious resources on the client.
 
@@ -446,7 +446,7 @@ With the necessary identifiers to get the current data value, the data to render
 ```jsx
 import { applyState, useDispatch, State, Row } from "./StateManager";
 import React from "react";
-import EditableCell, { EditableCellProps } from "../resources/EditableCell";
+import EditableCell from "../resources/EditableCell";
 
 const RowCell = (props) => {
   const { value, id, field } = props;
