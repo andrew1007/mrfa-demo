@@ -17,12 +17,12 @@ const RowCell: RowCellComponent = (props) => {
   const { value, id, field } = props;
   const dispatch = useDispatch();
 
-  const handleEdit: HandleEdit = ({ id, key, value }) => {
+  const handleEdit: HandleEdit = (value) => {
     dispatch((prevState) => {
       const nextRows = { ...prevState.rows };
       nextRows[id] = {
         ...nextRows[id],
-        [key]: value,
+        [field]: value,
       };
 
       return {
@@ -32,7 +32,7 @@ const RowCell: RowCellComponent = (props) => {
   };
 
   return (
-    <EditableCell field={field} id={id} value={value} onConfirm={handleEdit} />
+    <EditableCell value={value} onConfirm={handleEdit} />
   );
 };
 

@@ -3,7 +3,6 @@ import Filter from "./Filter";
 import Table, { TableProps } from "./Table";
 import "./styles.css";
 import { State, Row } from "./types";
-import { EditableCellProps } from "../resources/EditableCell";
 import { fetchColumns, fetchFilters, fetchRows } from "../resources/requests";
 
 type Rows = Row[];
@@ -12,7 +11,7 @@ type Filters = State["filters"];
 type SearchText = State["searchText"];
 type FocusedFilter = State["focusedFilter"];
 type Selected = State["selected"];
-type HandleCellEdit = EditableCellProps["onConfirm"];
+export type HandleCellEdit = ({ id, key, value }: { id: string; key: string; value: string }) => void;
 type ToggleCheckChange = TableProps["onCheck"];
 type ToggleCheckAll = TableProps["onAllCheck"];
 

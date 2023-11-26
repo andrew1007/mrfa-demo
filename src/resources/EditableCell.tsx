@@ -3,9 +3,7 @@ import { Close, ModeEdit, Check } from '@mui/icons-material';
 
 export type EditableCellProps = {
   value: string;
-  onConfirm: (params: { id: string; key: string; value: string }) => void;
-  field: string;
-  id: string;
+  onConfirm: (value: string) => void;
 };
 
 const heavy = () => {
@@ -15,7 +13,7 @@ const heavy = () => {
 };
 
 const EditableCell: React.FC<EditableCellProps> = (props) => {
-  const { value, onConfirm, id, field } = props;
+  const { value, onConfirm } = props;
   const [editState, setEditState] = useState(false);
   const [editValue, setEditValue] = useState("");
   heavy()
@@ -30,11 +28,7 @@ const EditableCell: React.FC<EditableCellProps> = (props) => {
   };
 
   const handleSave = () => {
-    onConfirm({
-      id,
-      key: field,
-      value: editValue,
-    });
+    onConfirm(editValue);
     setEditState(false);
   };
 

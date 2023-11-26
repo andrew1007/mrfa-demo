@@ -1,12 +1,13 @@
 import React from "react";
-import EditableCell, { EditableCellProps } from "../resources/EditableCell";
+import EditableCell from "../resources/EditableCell";
 import RowCheckbox from "./RowCheckbox";
 import { State, Row } from "./types";
+import { HandleCellEdit } from "./App";
 
 export type TableProps = {
   rows: Row[];
   columns: State["columns"];
-  onEditCell: EditableCellProps["onConfirm"];
+  onEditCell: HandleCellEdit;
   onCheck: (
     id: string
   ) => React.InputHTMLAttributes<HTMLInputElement>["onChange"];
@@ -49,9 +50,13 @@ const Table: React.FC<TableProps> = (props) => {
                   <EditableCell
                     key={key}
                     value={row[key]}
-                    id={row.id}
-                    field={key}
-                    onConfirm={onEditCell}
+                    onConfirm={(value) => {
+                      onEditCell({
+                        id: row.id,
+                        key,
+                        value
+                      })
+                    }}
                   />
                 );
               })}
