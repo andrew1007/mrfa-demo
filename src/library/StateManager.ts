@@ -14,6 +14,5 @@ const initialState: State = {
 export const {
   Provider,
   applyState,
-  // createSelector,
   useDispatch,
 } = makeProvider(initialState);

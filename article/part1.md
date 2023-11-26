@@ -313,16 +313,16 @@ The easiest way to maximize strict equality is to only pass primitives. This can
 ```jsx
 import { applyState, State } from "./StateManager";
 
-const RowCheckbox: RowCheckboxComponent = (props) => {
+const RowCheckbox = (props) => {
   const { checked } = props;
 
   // Don't worry about this handler. We're concentrating on the pre-computation aspect of this code snippet
-  const toggleCheck: ToggleCheck = (e) => null
+  const toggleCheck = (e) => null
 
   return <input onChange={toggleCheck} type="checkbox" checked={checked} />;
 };
 
-const mappedState = () => (state: State, ownProps: ParentProps) => ({
+const mappedState = () => (state, ownProps) => ({
   checked: state.selected.includes(ownProps.id),
 });
 
@@ -409,20 +409,78 @@ export default React.memo(Table);
 
 ### Tightly scope event handlers and data
 
-In most cases, it is better to have data close to the UI that use it. `RowCell` is a good case study for how this can be done.
+In most cases, it is better to have data close to the UI that use it. `RowCell` is a good case study for how this can be done. In most cases, it is better to create event handlers in the locations where they are used. It is also better to extract data from state where it is used. In most cases, only the `id` should be necessary for this. But in the case of individual cells, the name of the column is also required. The `TableRow` needs to pass down the column name. In order to do this, `TableRow` needs to know what `columns` to render.
 
-Data comes from `state` and functions leverage `dispatch`. The two are fundamentally different, and as a consequence have different strategies.
+```jsx
+import { applyState, State } from "./StateManager";
+import React from "react";
+import RowCheckbox from "./RowCheckbox";
+import RowCell from "./RowCell";
 
-This is where the convenience of `useDispatch` comes into play. Because `dispatch` is accessible from anywhere in the component hierarchy, there is no need to prop drill functions. Function handlers are no longer a source of useless rerenders. This is all provided for free. `useCallback` is not necessary.
+const TableRow = (props) => {
+  const { row, columns, id } = props;
 
-Passing data from `TableRow` down to `TableCell` is an open-ended problem. There are a multiple to approaches, but the common goals are the same
+  return (
+    <tr>
+      <td>
+        <RowCheckbox id={id} />
+      </td>
+      {columns.map(({ key }) => <RowCell key={key} field={key} id={row.id} />)}
+    </tr>
+  );
+};
 
-1. The cell is its own component.
-2. The data computed in `applyState` should pass strict equality as often as possible.
+const mappedState = () => (state, ownProps) => {
+  const { rows } = state;
+  return {
+    row: rows[ownProps.id],
+    columns: state.columns,
+  };
+};
 
-For `TableCell`, the `id` is not enough information. The field name is required as well. In this use case, passing the column in its entirety to each row component is perfectly fine, from a performance standpoint. In this use case, the data in the store never changes. Strict equality will be met when passing the entire array of columns down.
+export default applyState(mappedState)(TableRow);
+```
 
-The minimum amount of information (that also passes strict equality) is passed from parent UI to its children. In `applyState`, the entire state tree is available, so we can use the identifiers (`id` and `fieldName`) to access data. The heavy lifting can be done inside `applyState` and data that will always pass strict equality (in this case a string) can be passed down. This takes care of rendering the cell's read state.
+With the necessary identifiers to get the current data value, the data to render can now be computed inside `applyState`'s function resolver. In this use case, the value is a string, which will suppress useless rerenders.
+
+```jsx
+import { applyState, useDispatch, State, Row } from "./StateManager";
+import React from "react";
+import EditableCell, { EditableCellProps } from "../resources/EditableCell";
+
+const RowCell = (props) => {
+  const { value, id, field } = props;
+  const dispatch = useDispatch();
+
+  const handleEdit = ({ id, key, value }) => {
+    dispatch((prevState) => {
+      const nextRows = { ...prevState.rows };
+      nextRows[id] = {
+        ...nextRows[id],
+        [key]: value,
+      };
+
+      return {
+        rows: nextRows,
+      };
+    });
+  };
+
+  return (
+    <EditableCell field={field} id={id} value={value} onConfirm={handleEdit} />
+  );
+};
+
+const mappedState = () => (state, ownProps) => {
+  const { rows } = state;
+  const { field, id } = ownProps;
+  return {
+    value: rows[id][field],
+  };
+};
+
+export default applyState(mappedState)(RowCell);
+```
 
 ## Performance scaling
 
