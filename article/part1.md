@@ -2,8 +2,6 @@
 
 ## React can be fast
 
-![performance of click all checkbox using unoptimized app](../images/local-state-all-checkbox.png)
-
 It really is a shame that there is no style guide. The freedom to do whatever you want is the freedom to create poor experiences for users of your application. One of the biggest mistakes that is made, almost without fail, is poor performance. The core architecture of many apps inevitably out-scale itself. React apps start fine, but slowly accumulate performance problems. But make no mistake: React is not inherently slow. But it is easy to make architectural decisions that make it slow.
 
 I want to set the record straight and show you the true potential of React. I would not be arrogant enough to say that my way is the definitive approach. I am only here to show you one way that I have developed through personal experience. It has been proven itself in my personal and professional projects that I develop at TikTok.
@@ -20,7 +18,7 @@ This rendering strategy can create crippling performance issues in large applica
 
 Rerenders are not inherently bad. After all, they are necessary for an application to be responsive. It is when rerenders occur many times and, most importantly, when they are triggered in unnecessary places.
 
-Discovering performance woes is easy (fixing them is another story) with the browser extension React Developer Tools. It has a performance profiler that visualizes component render cycles, via flame graph.
+Discovering performance woes is easy (fixing them is another story) with the browser extension [React Developer Tools](https://chromewebstore.google.com/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi?pli=1). It has a performance profiler that visualizes component render cycles, via flame graph.
 
 To visualize this, a small application is needed. This app has a button that increments a counter and a basic table implementation. Note that this table, on a conceptual level, is unrelated to the button and its incrementing UI.
 
@@ -103,7 +101,7 @@ It would be naive to think that we're done. Any professional developer knows tha
 
 ## God components are slow
 
-In order to see what a fast implementation looks like, first we need to look at one that is slow. The full app (with type definitions) can be found in this repo.
+In order to see what a fast implementation looks like, first we need to look at one that is slow. The full app (with type definitions) can be found in [this repo](https://github.com/andrew1007/mrfa-demo/tree/main).
 
 Here is the god component of a searchable, filterable, and selectable table using local state. Because data is required in many locations, this god component is necessary to manage data and event handlers. Data needs to be passed down from the top of the component hierarchy.
 
@@ -506,6 +504,7 @@ Here is a comparison for ticking a row's checkbox using the unoptimized app. Ren
 ![performance of click all checkbox using unoptimized app](../images/local-state-all-checkbox.png)
 
 In the optimized app, it is a render speed of 8.7ms. A substantial improvement.
+![performance of click all checkbox using unoptimized app](../images/optimized-all-checkbox.png)
 
 To see how it truly scales, we can insert an algorithm to artificially slow down the app. The following function will be run in every cell on each render cycle.
 
@@ -518,8 +517,6 @@ const heavy = () => {
 ```
 
 Here is how the render cycle speed changes, as the number of iterations increases
-
-There is one operation that scales linearly in the optimized app: it is ticking the "all" checkbox. But despite this, the scaling is leaps and bounds better. The god component app scales with the entire table and the optimized app only scales with checkboxes.
 
 iterations | Unoptimized (ms) | Optimized (ms)
 --|----|----
