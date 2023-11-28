@@ -35,17 +35,14 @@ const App = () => {
 
   const getFilteredRows = () => {
     const currentFilter = filters.find(({ id }) => id === focusedFilter);
-    if (!currentFilter && !searchText) {
-      return rows;
-    }
-
+ 
     return rows
       .filter((row) =>
         currentFilter?.conditions.every(
           (cond) => row[cond.key] === cond.value
         ) ?? true
       )
-      .filter(({ name }) => name.includes(searchText));
+      .filter(({ name }) => name.includes(searchText) || !searchText);
   };
 
   const handleCellEdit: HandleCellEdit = ({ id, key, value }) => {

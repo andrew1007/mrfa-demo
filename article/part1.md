@@ -1,10 +1,14 @@
 # Make React Fast Again Part 1: Reconciliation
 
+## React can be fast
+
 It really is a shame that there is no style guide. The freedom to do whatever you want is the freedom to create poor experiences for users of your application. One of the biggest mistakes that is made, almost without fail, is poor performance. The core architecture of many apps inevitably out-scale itself. React apps start fine, but slowly accumulate performance problems. But make no mistake: React is not inherently slow. But it is easy to make architectural decisions that make it slow.
 
 I want to set the record straight and show you the true potential of React. I would not be arrogant enough to say that my way is the definitive approach. I am only here to show you one way that I have developed through personal experience. It has been proven itself in my personal and professional projects that I develop at TikTok.
 
 But this is not easy to teach. It requires a deep understanding of React, data structure mutations, and established design patterns. The first step is to learn what the virtual DOM is and the reconciliation algorithm.
+
+## The Virtual DOM
 
 The virtual DOM is React’s approach to high-performance DOM changes. The virtual DOM is an un-rendered representation of the previous DOM state. When a change occurs, optimal transformation strategies are performed by comparing the virtual DOM to the DOMs next incoming state.
 
@@ -94,6 +98,8 @@ ReactDOM.render(
 ```
 
 It would be naive to think that we're done. Any professional developer knows that this example looks nothing like enterprise software. We need to develop a full-scale architecture in order to leverage the power of `React.memo` in apps that render thousands of DOM nodes and trigger hundreds of heavy render cycles (possibly thousands) per minute.
+
+## God components are slow
 
 In order to see what a fast implementation looks like, first we need to look at one that is slow. The full app (with type definitions) can be found in this repo.
 
@@ -283,30 +289,38 @@ The `dispatch` function is in its own context and directly exposed (via `useDisp
 
 This is one step closer to applying this to enterprise software. But we aren't there yet. There is an art to meeting strict equality for all incoming data as often as possible.
 
-In this article, I will cover the easiest one: component design.
+## Optimized Component Design
+
+With the prerequisite knowledge out of the way, we can finally get started with component design. Note that the algorithms I will be writing are not ideal. What should be focused on are the rerender-suppression strategies. Robust and optimized algorithms are part of the overall architecture. But not enough topics have been covered yet to talk about them. In this article, I will cover the easiest one: component design.
 
 Designing optimized components is about creating a logical separation of UI elements based on the data they use. Size of a component is not the causation of optimized components; it is a correlation.
 
-To conceptualize this, we can revisit our naive table. What is the logical separation of data, based on the minimum amount of data that is required for rendering? To explore this properly, we need to tabulate the features of the table and the correlating data that is required from them.
-
-To accomplish this, we start at the bottom of the component hierarchy and work up. In most cases, the lower in the hierarchy heavy data access occurs, the better.
-
-Cell:
-Each cell is technically the true rendering location (AKA the HTML) of the data in the table. The minimum amount of information that is required is the text to be rendered. The checkbox cell's minimum amount of information to render is a `checked` boolean.
-
-The cell is where all of the heavy lifting occurs. It only stands to reason that the rest of the components should be designed to suppress useless rerenders for cells. Ticking a checkbox doesn't need to rerender checkboxes for other rows. Filtering out rows by selection doesn't need to rerender cells. To accomplish this, data access needs to circumvent the component hierarchy as much as possible. This is where our custom context abstraction, `applyState` comes into play.
-
-Make no mistake: passing data down from parent to child is oftentimes required. The difference between the optimized and naive approach is making strategic decisions to minimize the amount of information to pass down. In most situations, components that are iterated over (`TableRow`) only need to accept an `id` from its parent. Passing down only an `id` won't trigger a useless rerender, because `id` will meet strict equality.
-
-The `id` from the parent and direct data access + computation inside `applyState` is how strict equality for all incoming props will be met.
-
-## Optimized Component Design
-
-With the prerequisite knowledge out of the way, we can finally get started with component design. Note that the algorithms I will be writing are not ideal. What should be focused on are the rerender-suppression strategies. Robust and optimized algorithms are part of the overall architecture. But not enough topics have been covered yet to talk about them.
-
 ### Reference data using ids
 
-### Compute to primitive outside of UI
+Make no mistake: passing data down from parent to child is oftentimes required. However, making strategic decisions on what to pass down is the difference between the optimized and naive approach.
+
+In a majority of cases, only `id` needs to be passed down from parent to child. As long as `state` is well-structured (normalized), this should be the only thing necessary to get the necessary information. This concept will be leveraged heavily. For sake of example simplicity, the code snippet doesn't include the search/filtering algorithm.
+
+```jsx
+const TableRows = (props) => {
+  const { rowIds } = props;
+  return (
+    <>
+      {rowIds.map((id) => {
+        return <TableRow id={id} key={id} />;
+      })}
+    </>
+  );
+};
+
+const mappedState = () => (state: State) => ({
+  rowIds: state.rowIds,
+})
+
+export default applyState(mappedState)(TableRows);
+```
+
+### Compute to primitives outside of UI
 
 The easiest way to maximize strict equality is to only pass primitives. This can be seen with the implementation of `RowCheckbox`. The resulting `checked` `boolean` changes far less often than the array of selected checkboxes. By reducing this data into a `boolean` in the function resolver of `applyState`, it is an easy win.
 
@@ -528,6 +542,8 @@ export default applyState(mappedState)(TableRows);
 ```
 
 This true, but impractical. Maintainability, in an overwhelming number of cases, comes first for enterprise software. Algorithms in components violate separation of concerns and they cannot be reused in other locations. On top of that, there is already a solution for this. Functional (pure) memoization strategies enable patterns that are robust, extremely effective (when used correctly), and reusable. There is no denying that memoization has performance penalties. But the impact is normally small and provides massive increases in scalability. It is almost always worth it.
+
+## To be continued
 
 With these concepts, typical web apps gain huge performance wins. This is only scratching the surface of the knowledge to write a fully optimized React app. To get the full picture, these topics need to be covered.
 
