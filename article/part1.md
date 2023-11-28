@@ -201,6 +201,8 @@ const App = () => {
 
 It is telling about useless rerenders when inspecting the flame graph, On checkbox select and selecting new filter conditions, a complete rerender of the entire table occurs. When inspecting the props that are passed down from `App` to `Table`, you can see that it is fundamentally impossible to ever suppress rerenders; even if `Table` is wrapped in a `React.memo`. `getFilteredRows()`, `handleCellEdit`, `toggleCheckChange`, and `toggleCheckAll` fail reference equality on every render cycle.
 
+![performance of click all checkbox using unoptimized app](../images/local-state-dev-tool.png)
+
 Technically, this could be solved with `useCallback` and `useMemo`. But these should be avoided as often as possible. They are brittle to use and must be vigilantly maintained. These hooks rely on a dependency array, which is susceptible to ineffective memoization and returning stale values.
 
 Traditional performance techniques, like `useCallback` and `useMemo`, inevitably become liabilities in large applications. All of these issues and considerations are a non-issue if a different data management design pattern is used. It starts with managing data outside of the component hierarchy: the Context API.
