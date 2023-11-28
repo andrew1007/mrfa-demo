@@ -7,7 +7,7 @@ export type EditableCellProps = {
 };
 
 const heavy = () => {
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 1750; i++) {
     JSON.stringify({});
   }
 };

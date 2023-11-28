@@ -2,6 +2,8 @@
 
 ## React can be fast
 
+![performance of click all checkbox using unoptimized app](../images/local-state-all-checkbox.png)
+
 It really is a shame that there is no style guide. The freedom to do whatever you want is the freedom to create poor experiences for users of your application. One of the biggest mistakes that is made, almost without fail, is poor performance. The core architecture of many apps inevitably out-scale itself. React apps start fine, but slowly accumulate performance problems. But make no mistake: React is not inherently slow. But it is easy to make architectural decisions that make it slow.
 
 I want to set the record straight and show you the true potential of React. I would not be arrogant enough to say that my way is the definitive approach. I am only here to show you one way that I have developed through personal experience. It has been proven itself in my personal and professional projects that I develop at TikTok.
@@ -498,9 +500,40 @@ export default applyState(mappedState)(RowCell);
 
 ## Performance scaling
 
-The rerender overhead of typical architectures scale linearly. If rerenders are not suppressed, twice the amount of HTML means twice the number of nodes that the reconciliation algorithm needs to diff. But this is a non-issue when useless rerender suppression strategies are utilized. When done correctly, the responsiveness of the app and the size of the DOM have no correlation (aside from initial mounting). This can be seen by comparing the performance as the table grows in size. As the DOM size grows, the god component implementation responsiveness scales into the stratosphere. The optimized app has zero scaling issues (in most use cases). Here is a comparison for ticking a row's checkbox.
+The rerender overhead of typical architectures scale linearly. If rerenders are not suppressed, twice the amount of HTML means twice the number of nodes that the reconciliation algorithm needs to diff. But this is a non-issue when useless rerender suppression strategies are utilized. When done correctly, the responsiveness of the app and the size of the DOM have no correlation (aside from initial mounting). This can be seen by comparing the performance as the table grows in size. As the DOM size grows, the god component implementation responsiveness scales into the stratosphere. The optimized app has, in relative terms, no scaling issues (in most use cases).
+
+Here is a comparison for ticking a row's checkbox using the unoptimized app. Render time is 28ms.
+![performance of click all checkbox using unoptimized app](../images/local-state-all-checkbox.png)
+
+In the optimized app, it is a render speed of 8.7ms. A substantial improvement.
+
+To see how it truly scales, we can insert an algorithm to artificially slow down the app. The following function will be run in every cell on each render cycle.
+
+```javascript
+const heavy = () => {
+  for (let i = 0; i < 100; i++) {
+    JSON.stringify({});
+  }
+};
+```
+
+Here is how the render cycle speed changes, as the number of iterations increases
 
 There is one operation that scales linearly in the optimized app: it is ticking the "all" checkbox. But despite this, the scaling is leaps and bounds better. The god component app scales with the entire table and the optimized app only scales with checkboxes.
+
+iterations | Unoptimized (ms) | Optimized (ms)
+--|----|----
+|100|28|8.7|
+200|41.4|12
+300|55.9|11.4
+400|66.9|11.7
+500|81.3|13.6
+1000|149.2|11.1
+1250|182.5|11.2
+1500|215.1|12.5
+1750|240.4|10.8
+
+![scaling of clicking all checkbox using unoptimized app](../images/select-all-checkbox-scaling.png)
 
 ## Algorithms Outside of UI
 
