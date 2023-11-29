@@ -107,7 +107,7 @@ It would be naive to think that we're done. Any professional developer knows tha
 
 ## God components are slow
 
-In order to see what a fast implementation looks like, first we need to look at one that is slow. The full app (with type definitions) can be found in [repo.](https://github.com/andrew1007/mrfa-demo/tree/main)
+In order to see what a fast implementation looks like, first we need to look at one that is slow. The full app (with type definitions) can be found in this [repo.](https://github.com/andrew1007/mrfa-demo/tree/main)
 
 Here is the god component of a searchable, filterable, and selectable table using local state. Because data is required in many locations, this god component needs to manage data and event handlers. Data needs to be passed down from the top of the component hierarchy.
 
