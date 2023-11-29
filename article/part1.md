@@ -74,7 +74,7 @@ No props have been passed down to Table and Row. It is fundamentally impossible 
 
 Imagine one state change triggering useless render cycles on hundreds DOM elements. What if something trivial like an `input` did this on every keystroke? This is the silent killer of enterprise software.
 
-The defacto solution exists for useless rerender suppression, called `React.memo`. It performs a shallow equality check (JavaScript's strict equality operator) on all incoming props from the parent component. In the sample code, simply wrapping the child components with it.
+The defacto solution exists for useless rerender suppression, called `React.memo`. It performs a shallow equality check (JavaScript's strict equality operator) on all incoming props from the parent component. In the sample code, simply wrapping the child components with it suppresses the useless rerenders.
 
 ```jsx
 import React, { useState } from "react";
@@ -99,7 +99,7 @@ ReactDOM.render(
 );
 ```
 
-With this simple change, the flame graph has changed. There are now gray cells. These represent components that did not rerender during a particular render cycle in the app.
+The flame graph has changed. There are now gray cells. These represent components that did not rerender during a particular render cycle in the app.
 
 ![memoed to prevent cascading rerenders](../images/memoed-supressed-rerender.png)
 
