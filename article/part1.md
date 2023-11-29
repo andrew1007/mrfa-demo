@@ -107,7 +107,7 @@ It would be naive to think that we're done. Any professional developer knows tha
 
 ## God components are slow
 
-In order to see what a fast implementation looks like, first we need to look at one that is slow. The full app (with type definitions) can be found in [this repo](https://github.com/andrew1007/mrfa-demo/tree/main).
+In order to see what a fast implementation looks like, first we need to look at one that is slow. The full app (with type definitions) can be found in [repo.](https://github.com/andrew1007/mrfa-demo/tree/main)
 
 Here is the god component of a searchable, filterable, and selectable table using local state. Because data is required in many locations, this god component needs to manage data and event handlers. Data needs to be passed down from the top of the component hierarchy.
 
@@ -291,7 +291,7 @@ function makeProvider(initialState) {
 export default makeProvider;
 ```
 
-The high order component `applyState` is the secret sauce. Instead of exposing all of state to a component, `applyState` accepts a function resolver. This allows pre-processing of data before it is passed down to the component. By strategically parsing, extracting, and computing data inside `applyState`, `React.memo` (which is embedded in the implementation of `applyState`) can properly detect and suppress useless rerenders. The interface of `applyState` is akin to `connect` in `redux`. The function resolver is essentially `mapStateToProps`. The documentation can be found [here]((https://react-redux.js.org/api/connect)).
+The high orderer component `applyState` is the secret sauce. Instead of exposing all of state to a component, `applyState` accepts a function resolver. This allows pre-processing of data before it is passed down to the component. By strategically parsing, extracting, and computing data inside `applyState`, `React.memo` (which is embedded in the implementation of `applyState`) can properly detect and suppress useless rerenders. The interface of `applyState` is akin to `connect` in `redux`. The function resolver is essentially `mapStateToProps`. The documentation can be found [here]((https://react-redux.js.org/api/connect)).
 
 The `dispatch` function is in its own context and directly exposed (via `useDispatch`). This is because `dispatch` is a stable dependency. It is safe to use as a hook directly in components because it will never trigger a rerender. The full state tree is available in the callback argument. You can think of this `dispatch` pattern as a (less powerful) thunk that can be directly called in a component.
 
@@ -394,7 +394,7 @@ const mappedState = () => (state: State) => {
 export default applyState(mappedState)(TableRows);
 ```
 
-Inspection of the flame graph shows the result. Completely isolating this data computation, from the rest of the UI, provides the luxury to always fail strict equality with virtually no consequence. A `0.7` ms rerender speed is miniscule. On top of that, the rerender overhead of this component stays constant, regardless of the number of `TableRow` elements that are rendered. A UI render cycle occurs on *any* state update, but it does not meaningfully affect performance.
+Inspection of the flame graph shows the result. Completely isolating this data computation, from the rest of the UI, provides the luxury to always fail strict equality with virtually no consequence. A 0.7 ms rerender speed is miniscule. On top of that, the rerender overhead of this component stays constant, regardless of the number of `TableRow` elements that are rendered. A UI render cycle occurs on *any* state update, but it does not meaningfully affect performance.
 
 ![performance of click all checkbox using unoptimized app](../images/table-rows-rerender-overhead.png)
 
@@ -508,9 +508,9 @@ export default applyState(mappedState)(RowCell);
 
 The rerender overhead of typical architectures scale linearly. If rerenders are not suppressed, twice the amount of HTML means twice the number of nodes that the reconciliation algorithm needs to diff. This problem is compounded when algorithms are constantly recomputed on rerenders. But this is a non-issue when useless rerender suppression strategies are utilized.
 
-When done correctly, the responsiveness of the app and the size of the DOM have no correlation (aside from initial mounting). This can be seen by comparing the performance as the table grows in size. As the DOM size grows, the god component implementation responsiveness scales into the stratosphere. The optimized app has, in relative terms, no scaling issues (in most use cases).
+When done correctly, the responsiveness of the app and the size of the DOM have no correlation (aside from initial mounting). This can be seen by comparing the performance as the table grows in size. As the DOM size grows, the god component's responsiveness scales into the stratosphere. The optimized app, on the other hand, is much more resistant to scaling issues (in most use cases).
 
-Here is a comparison for ticking a row's checkbox using the unoptimized app. Render time is 28ms.
+Here is a comparison for ticking the table's "All" checkbox. With the unoptimized app, render time is 28ms.
 ![performance of click all checkbox using unoptimized app](../images/local-state-all-checkbox.png)
 
 In the optimized app, it is a render speed of 8.7ms. A substantial improvement.
