@@ -18,6 +18,8 @@ This rendering strategy can create crippling performance issues in large applica
 
 Rerenders are not inherently bad. After all, they are necessary for an application to be responsive. It is when rerenders occur many times and, most importantly, when they are triggered in unnecessary places.
 
+## Leveraging React Developer Tools
+
 Discovering performance woes is easy (fixing them is another story) with the browser extension [React Developer Tools](https://chromewebstore.google.com/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi?pli=1). It has a performance profiler that visualizes component render cycles, via flame graph.
 
 To visualize this, a small application is needed. This app has a button that increments a counter and a basic table implementation. Note that this table, on a conceptual level, is unrelated to the button and its incrementing UI.
@@ -66,13 +68,13 @@ ReactDOM.render(
 
 A button click triggers a render cycle by invoking `setCounter`. Visually, `App` has experienced a DOM update. But reconciliation is diffing more DOM nodes than one might expect.
 
-No props have been passed down to Table and Row. It is fundamentally impossible for these components be affected by the parent's App.jsx state change. But cascading rerenders for every child in the component is the default behavior. Updating App.jsx causes reconciliation to uselessly trigger for all of its children. This consumes precious resources on the client.
+No props have been passed down to Table and Row. It is fundamentally impossible for these components be affected by the parent's `App.jsx` state change. But cascading rerenders for every child in the component is the default behavior. Updating `App.jsx` causes reconciliation to uselessly trigger for all of its children. This consumes precious resources on the client.
+
+![uncontrolled cascading rerenders](../images/no-memo-rerender.png)
 
 Imagine one state change triggering useless render cycles on hundreds DOM elements. What if something trivial like an `input` did this on every keystroke? This is the silent killer of enterprise software.
 
-A defacto solution exists for useless rerender suppression, called `React.memo`. It performs a shallow equality check (JavaScript's strict equality operator) on all incoming props from the parent component. In the sample code, simply wrapping the child components with it.
-
-With this simple change, the flame graph has changed. There are now gray cells. These represent components that did not rerender during a particular render cycle in the app.
+The defacto solution exists for useless rerender suppression, called `React.memo`. It performs a shallow equality check (JavaScript's strict equality operator) on all incoming props from the parent component. In the sample code, simply wrapping the child components with it.
 
 ```jsx
 import React, { useState } from "react";
@@ -97,13 +99,17 @@ ReactDOM.render(
 );
 ```
 
+With this simple change, the flame graph has changed. There are now gray cells. These represent components that did not rerender during a particular render cycle in the app.
+
+![memoed to prevent cascading rerenders](../images/memoed-supressed-rerender.png)
+
 It would be naive to think that we're done. Any professional developer knows that this example looks nothing like enterprise software. We need to develop a full-scale architecture in order to leverage the power of `React.memo` in apps that render thousands of DOM nodes and trigger hundreds of heavy render cycles (possibly thousands) per minute.
 
 ## God components are slow
 
 In order to see what a fast implementation looks like, first we need to look at one that is slow. The full app (with type definitions) can be found in [this repo](https://github.com/andrew1007/mrfa-demo/tree/main).
 
-Here is the god component of a searchable, filterable, and selectable table using local state. Because data is required in many locations, this god component is necessary to manage data and event handlers. Data needs to be passed down from the top of the component hierarchy.
+Here is the god component of a searchable, filterable, and selectable table using local state. Because data is required in many locations, this god component needs to manage data and event handlers. Data needs to be passed down from the top of the component hierarchy.
 
 ```jsx
 import { useEffect, useState } from "react";
@@ -209,7 +215,7 @@ Traditional performance techniques, like `useCallback` and `useMemo`, inevitably
 
 ## Performant Context
 
-The guiding principle of fast components is the minimization of UI relying on other UI for data. The more data is passed from parent to child, the harder it is to becomes to optimize. In order to directly pass data to the components that need it, the context API is needed.
+The guiding principle of fast components is the minimization of UI relying on other UI for data. The more data is passed from parent to child, the harder it is to optimize. In order to directly pass data to the components that need it, the context API is needed.
 
 Context is widely regarded as slow; with claims that it does not scale. This is a half-truth. Context is not intrinsically slow. What is slow is the downstream consequences of its usage. `useContext` triggers rerenders every time data updates. So in reality, the perception of context "being slow" is actually commentary on the speed of the reconciliation algorithm.
 
@@ -285,7 +291,7 @@ function makeProvider(initialState) {
 export default makeProvider;
 ```
 
-The high order component `applyState` is the secret sauce here. Instead of exposing all of state to a component, `applyState` accepts a function resolver. This allows pre-processing of data before it is passed down to the component. By strategically parsing, extracting, and computing data inside `applyState`, `React.memo` (which is embedded in the implementation of `applyState`) can properly detect and suppress useless rerenders.
+The high order component `applyState` is the secret sauce. Instead of exposing all of state to a component, `applyState` accepts a function resolver. This allows pre-processing of data before it is passed down to the component. By strategically parsing, extracting, and computing data inside `applyState`, `React.memo` (which is embedded in the implementation of `applyState`) can properly detect and suppress useless rerenders. The interface of `applyState` is akin to `connect` in `redux`. The function resolver is essentially `mapStateToProps`. The documentation can be found [here]((https://react-redux.js.org/api/connect)).
 
 The `dispatch` function is in its own context and directly exposed (via `useDispatch`). This is because `dispatch` is a stable dependency. It is safe to use as a hook directly in components because it will never trigger a rerender. The full state tree is available in the callback argument. You can think of this `dispatch` pattern as a (less powerful) thunk that can be directly called in a component.
 
@@ -390,7 +396,9 @@ const mappedState = () => (state: State) => {
 export default applyState(mappedState)(TableRows);
 ```
 
-Inspection of the flame graph shows the result. Completely isolating this data computation, from the rest of the UI, provides the luxury to always fail strict equality with no consequence. A UI render cycle occurs on *any* state update, but it does not meaningfully affect performance.
+Inspection of the flame graph shows the result. Completely isolating this data computation, from the rest of the UI, provides the luxury to always fail strict equality with virtually no consequence. A `0.7` ms rerender speed is miniscule. On top of that, the rerender overhead of this component stays constant, regardless of the number of `TableRow` elements that are rendered. A UI render cycle occurs on *any* state update, but it does not meaningfully affect performance.
+
+![performance of click all checkbox using unoptimized app](../images/table-rows-rerender-overhead.png)
 
 ### Isolate zero-dependency and static UI
 
@@ -500,7 +508,7 @@ export default applyState(mappedState)(RowCell);
 
 ## Performance scaling
 
-The rerender overhead of typical architectures scale linearly. If rerenders are not suppressed, twice the amount of HTML means twice the number of nodes that the reconciliation algorithm needs to diff. But this is a non-issue when useless rerender suppression strategies are utilized. When done correctly, the responsiveness of the app and the size of the DOM have no correlation (aside from initial mounting). This can be seen by comparing the performance as the table grows in size. As the DOM size grows, the god component implementation responsiveness scales into the stratosphere. The optimized app has, in relative terms, no scaling issues (in most use cases).
+The rerender overhead of typical architectures scale linearly. If rerenders are not suppressed, twice the amount of HTML means twice the number of nodes that the reconciliation algorithm needs to diff. This problem is compounded when algorithms are constantly recomputed on rerenders. But this is a non-issue when useless rerender suppression strategies are utilized. When done correctly, the responsiveness of the app and the size of the DOM have no correlation (aside from initial mounting). This can be seen by comparing the performance as the table grows in size. As the DOM size grows, the god component implementation responsiveness scales into the stratosphere. The optimized app has, in relative terms, no scaling issues (in most use cases).
 
 Here is a comparison for ticking a row's checkbox using the unoptimized app. Render time is 28ms.
 ![performance of click all checkbox using unoptimized app](../images/local-state-all-checkbox.png)
