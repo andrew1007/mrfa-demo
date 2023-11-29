@@ -299,9 +299,7 @@ This is one step closer to applying this to enterprise software. But we aren't t
 
 ## Optimized Component Design
 
-With the prerequisite knowledge out of the way, we can finally get started with component design. Note that the algorithms I will be writing are not ideal. What should be focused on are the rerender-suppression strategies. Robust and optimized algorithms are part of the overall architecture. But not enough topics have been covered yet to talk about them. In this article, I will cover the easiest one: component design.
-
-Designing optimized components is about creating a logical separation of UI elements based on the data they use. Size of a component is not the causation of optimized components; it is a correlation.
+With the prerequisite knowledge out of the way, we can finally get started with component design. Designing optimized components is about creating a logical separation of UI elements based on the data they use. Size of a component is not the causation of optimized components; it is a correlation.
 
 ### Reference data using ids
 
