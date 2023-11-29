@@ -508,7 +508,7 @@ export default applyState(mappedState)(RowCell);
 
 The rerender overhead of typical architectures scale linearly. If rerenders are not suppressed, twice the amount of HTML means twice the number of nodes that the reconciliation algorithm needs to diff. This problem is compounded when algorithms are constantly recomputed on rerenders. But this is a non-issue when useless rerender suppression strategies are utilized.
 
-When done correctly, the responsiveness of the app and the size of the DOM have no correlation (aside from initial mounting). This can be seen by comparing the performance as the table grows in size. As the DOM size grows, the god component's responsiveness scales into the stratosphere. The optimized app, on the other hand, is much more resistant to scaling issues (in most use cases).
+When done correctly, the responsiveness of the app and the size of the DOM have no correlation (aside from initial mounting). This can be seen by comparing the performance as the table grows algorithmic complexity. As the resource requirements grows, the god component's responsiveness scales into the stratosphere. The optimized app, on the other hand, is much more resistant to scaling issues (in most use cases).
 
 Here is a comparison for ticking the table's "All" checkbox. With the unoptimized app, render time is 28ms.
 ![performance of click all checkbox using unoptimized app](../images/local-state-all-checkbox.png)
