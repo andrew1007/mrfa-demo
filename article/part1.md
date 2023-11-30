@@ -291,7 +291,7 @@ function makeProvider(initialState) {
 export default makeProvider;
 ```
 
-The high orderer component `applyState` is the secret sauce. `applyState` acts as a proxy for context access. Components never have direct access to context. `applyState` accepts a function resolver, allowing data processing before it is passed down to the component.
+The high orderer component `applyState` is the secret sauce. `applyState` acts as a proxy for context access. Components never have direct access to context. `applyState` accepts a function resolver, allowing data processing before it is passed down to the component. `useContext` is still called in `applyState`. The higher order component always gets rerendered. But the computational overhead of each `applyState` is miniscule compared to a rerender of a component with DOM nodes.
 
 By strategically parsing, extracting, and computing data inside `applyState`, `React.memo` (which is embedded in `applyState`) can properly detect and suppress useless rerenders. The interface of `applyState` is akin to [`connect`](https://react-redux.js.org/api/connect) in `redux`. The function resolver is essentially `mapStateToProps`.
 
