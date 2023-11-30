@@ -321,7 +321,7 @@ const TableRows = (props) => {
   );
 };
 
-const mappedState = () => (state: State) => ({
+const mappedState = () => (state) => ({
   rowIds: state.rowIds,
 })
 
@@ -387,7 +387,7 @@ const getFilteredRowIds = (state) => {
     .map(({ id }) => id)
 };
 
-const mappedState = () => (state: State) => {
+const mappedState = () => (state) => {
   return {
     rowIds: getFilteredRowIds(state),
   }
@@ -575,7 +575,7 @@ const TableRows = (props) => {
     );
 };
 
-const mappedState = () => (state: State) => {
+const mappedState = () => (state) => {
     const { filters, focusedFilter, searchText, rowIds, rows } = state
     return { filters, focusedFilter, searchText, rowIds, rows }
 };
