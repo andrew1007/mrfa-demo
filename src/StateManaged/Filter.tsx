@@ -2,7 +2,7 @@ import { applyState, State, useDispatch } from "./StateManager";
 import React, { ChangeEventHandler } from "react";
 
 type FilterStateProps = ReturnType<ReturnType<typeof mappedState>>;
-type FilterComponent = React.FunctionComponent<FilterStateProps>;
+type FilterComponent = React.FC<FilterStateProps>;
 type UpdateFocusedFilter = ChangeEventHandler<HTMLSelectElement>;
 
 const Filter: FilterComponent = (props) => {

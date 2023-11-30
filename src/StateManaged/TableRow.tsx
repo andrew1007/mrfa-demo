@@ -7,7 +7,7 @@ type TableRowProps = {
   id: string;
 };
 type TableRowStateProps = ReturnType<ReturnType<typeof mappedState>>;
-type TableRowComponent = React.FunctionComponent<
+type TableRowComponent = React.FC<
   TableRowProps & TableRowStateProps
 >;
 

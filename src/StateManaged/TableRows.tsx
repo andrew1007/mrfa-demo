@@ -4,7 +4,7 @@ import TableRow from "./TableRow";
 import { getFilteredRowIds } from "./selectors";
 
 type TableRowsStateProps = ReturnType<ReturnType<typeof mappedState>>;
-type TableRowsComponent = React.FunctionComponent<TableRowsStateProps>;
+type TableRowsComponent = React.FC<TableRowsStateProps>;
 
 const TableRows: TableRowsComponent = (props) => {
   const { rowIds } = props;

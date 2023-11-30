@@ -4,7 +4,7 @@ import {
   useContext,
   useReducer,
   Dispatch,
-  FunctionComponent,
+  FC,
   useMemo,
   memo,
 } from "react";
@@ -20,7 +20,7 @@ function makeProvider<T>(initialState: T) {
   );
 
   // Provider component with state management hook
-  const Provider: FunctionComponent<{ children: ReactNode }> = ({
+  const Provider: FC<{ children: ReactNode }> = ({
     children,
   }) => {
     const reducer = (state: T, action: DispatchCb) => ({
@@ -42,7 +42,7 @@ function makeProvider<T>(initialState: T) {
   // HOC to connect state to components
   type MappedState<T, P, V = any> = () => (state: T, ownProps: P) => V;
   function applyState<P>(mappedState: MappedState<T, P>) {
-    return (Component: FunctionComponent<any>) => {
+    return (Component: FC<any>) => {
       const MemoedComponent = memo(Component)
       const ApplyStateComponent = (props: P) => {
         const mappedStateInstance = useMemo(() => mappedState(), []);

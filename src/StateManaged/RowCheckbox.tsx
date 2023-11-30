@@ -5,7 +5,7 @@ type ParentProps = {
   id: string;
 };
 type StateProps = ReturnType<ReturnType<typeof mappedState>>;
-type RowCheckboxComponent = React.FunctionComponent<ParentProps & StateProps>;
+type RowCheckboxComponent = React.FC<ParentProps & StateProps>;
 
 type ToggleCheck = React.InputHTMLAttributes<HTMLInputElement>["onChange"];
 

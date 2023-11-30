@@ -2,7 +2,7 @@ import React, { ChangeEventHandler } from "react";
 import { applyState, State, useDispatch } from "./StateManager";
 
 type SearchBarStateProps = ReturnType<ReturnType<typeof mappedState>>;
-type SearchBarComponent = React.FunctionComponent<SearchBarStateProps>;
+type SearchBarComponent = React.FC<SearchBarStateProps>;
 type HandleTextUpdate = ChangeEventHandler<HTMLInputElement>;
 
 const SearchBar: SearchBarComponent = (props) => {

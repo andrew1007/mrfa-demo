@@ -2,7 +2,7 @@ import React from "react";
 import { useDispatch, applyState, State } from "./StateManager";
 
 type StateProps = ReturnType<ReturnType<typeof mappedState>>;
-type Component = React.FunctionComponent<StateProps>;
+type Component = React.FC<StateProps>;
 type ToggleCheck = React.InputHTMLAttributes<HTMLInputElement>["onChange"];
 
 const AllCheckbox: Component = (props) => {

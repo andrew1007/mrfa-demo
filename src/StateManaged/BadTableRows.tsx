@@ -3,7 +3,7 @@ import React from "react";
 import TableRow from "./TableRow";
 
 type TableRowsStateProps = ReturnType<ReturnType<typeof mappedState>>;
-type TableRowsComponent = React.FunctionComponent<TableRowsStateProps>;
+type TableRowsComponent = React.FC<TableRowsStateProps>;
 
 const TableRows: TableRowsComponent = (props) => {
     const { filters, focusedFilter, searchText, rows, rowIds } = props

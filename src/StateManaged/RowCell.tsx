@@ -8,9 +8,7 @@ type RowCellProps = {
 };
 
 type RowCellStateProps = ReturnType<ReturnType<typeof mappedState>>;
-type RowCellComponent = React.FunctionComponent<
-  RowCellProps & RowCellStateProps
->;
+type RowCellComponent = React.FC<RowCellProps & RowCellStateProps>;
 type HandleEdit = EditableCellProps["onConfirm"];
 
 const RowCell: RowCellComponent = (props) => {
