@@ -12,7 +12,7 @@ But this is not easy to teach. It requires a deep understanding of React, data s
 
 The virtual DOM is React’s approach to high-performance DOM changes. The virtual DOM is an un-rendered representation of the previous DOM state. When a change occurs, optimal transformation strategies are performed by comparing the virtual DOM to the DOMs next incoming state.
 
-The comparison process utilizes the reconciliation algorithm. The DOM diffing process of a mounted component is commonly referred to as a rerender. When a component rerenders, its children (at all levels of nesting) trigger render cycles. Render cycles are triggered when data is updated (usually with the `useState` hook).
+The comparison process utilizes the reconciliation algorithm. The DOM diffing process of a mounted component is commonly referred to as a rerender. When a component rerenders, its children (at all levels of nesting) trigger render cycles. Render cycles are triggered when data is updated (usually with the [`useState`](https://react.dev/reference/react/useState) hook).
 
 This rendering strategy can create crippling performance issues in large applications. Rerender propagation is an obfuscated process for the untrained eye. When, why, and where rerenders are is lost in the sauce for large applications.
 
@@ -217,14 +217,14 @@ Traditional performance techniques, like `useCallback` and `useMemo`, inevitably
 
 The guiding principle of fast components is the minimization of UI relying on other UI for data. The more data is passed from parent to child, the harder it is to optimize. In order to directly pass data to the components that need it, the context API is needed.
 
-Context is widely regarded as slow; with claims that it does not scale. This is a half-truth. Context is not intrinsically slow. What is slow is the downstream consequence of its usage in a React component. `useContext` triggers a rerender every time data updates. So in reality, the perception of context "being slow" is actually commentary on the speed of the reconciliation algorithm.
+Context is widely regarded as slow; with claims that it does not scale. This is a half-truth. Context is not intrinsically slow. What is slow is the downstream consequence of its usage in a React component. [`useContext`](https://react.dev/reference/react/useContext) triggers a rerender every time data updates. So in reality, the perception of context "being slow" is actually commentary on the speed of the reconciliation algorithm.
 
 This performance critique is based on the most common design pattern, which is calling `useContext` directly inside the UI component that needs the data. The key phrase is "UI component". Of course, `useContext` must be called in a component; but nothing is stopping us from using it in a component that has no HTML.
 
 Here is a basic state management library that can be used to suppress rerenders. It is a scalable implementation that works in applications of any size. It leverages the following concepts:
 
-- `Context` to store data
-- `useReducer` to dispatch and transform state data
+- [`Context`](https://react.dev/reference/react/createContext) to store data
+- [`useReducer`](https://react.dev/reference/react/useReducer) to dispatch and transform state data
 - Higher order component to access context data and process data before it is passed to a component.
 
 ```jsx
@@ -291,9 +291,9 @@ function makeProvider(initialState) {
 export default makeProvider;
 ```
 
-The high orderer component `applyState` is the secret sauce. With this pattern, `applyState` acts as a proxy for context access. Components never have direct access to context. `applyState` accepts a function resolver, allowing data processing before it is passed down to the component.
+The high orderer component `applyState` is the secret sauce. `applyState` acts as a proxy for context access. Components never have direct access to context. `applyState` accepts a function resolver, allowing data processing before it is passed down to the component.
 
-By strategically parsing, extracting, and computing data inside `applyState`, `React.memo` (which is embedded in the implementation of `applyState`) can properly detect and suppress useless rerenders. The interface of `applyState` is akin to `connect` in `redux`. The function resolver is essentially `mapStateToProps`. The documentation can be found [here](https://react-redux.js.org/api/connect).
+By strategically parsing, extracting, and computing data inside `applyState`, `React.memo` (which is embedded in `applyState`) can properly detect and suppress useless rerenders. The interface of `applyState` is akin to [`connect`](https://react-redux.js.org/api/connect) in `redux`. The function resolver is essentially `mapStateToProps`.
 
 The `dispatch` function is in its own context and directly exposed (via `useDispatch`). This is because `dispatch` is a stable dependency. It is safe to use as a hook directly in components because it will never trigger a rerender. The full state tree is available in the callback argument. You can think of this `dispatch` pattern as a (less powerful) thunk that can be directly called in a component.
 
