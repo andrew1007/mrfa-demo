@@ -293,7 +293,7 @@ export default makeProvider;
 
 The high orderer component `applyState` is the secret sauce. With this pattern, `applyState` acts as a proxy for context access. Components never have direct access to context. `applyState` accepts a function resolver, allowing data processing before it is passed down to the component.
 
-By strategically parsing, extracting, and computing data inside `applyState`, `React.memo` (which is embedded in the implementation of `applyState`) can properly detect and suppress useless rerenders. The interface of `applyState` is akin to `connect` in `redux`. The function resolver is essentially `mapStateToProps`. The documentation can be found [here]((https://react-redux.js.org/api/connect)).
+By strategically parsing, extracting, and computing data inside `applyState`, `React.memo` (which is embedded in the implementation of `applyState`) can properly detect and suppress useless rerenders. The interface of `applyState` is akin to `connect` in `redux`. The function resolver is essentially `mapStateToProps`. The documentation can be found [here](https://react-redux.js.org/api/connect).
 
 The `dispatch` function is in its own context and directly exposed (via `useDispatch`). This is because `dispatch` is a stable dependency. It is safe to use as a hook directly in components because it will never trigger a rerender. The full state tree is available in the callback argument. You can think of this `dispatch` pattern as a (less powerful) thunk that can be directly called in a component.
 
