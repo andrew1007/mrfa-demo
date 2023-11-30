@@ -6,7 +6,7 @@ It really is a shame that there is no style guide. The freedom to do whatever yo
 
 I want to set the record straight and show you the true potential of React. I would not be arrogant enough to say that my way is the definitive approach. I am only here to show you one way that I have developed through personal experience. It has been proven itself in my personal and professional projects that I develop at TikTok.
 
-But this is not easy to teach. It requires a deep understanding of React, data structure mutations, and established design patterns. The first step is to learn what the virtual DOM is and the reconciliation algorithm.
+But this is not easy to teach. It requires a deep understanding of React, data structure mutations, and established design patterns. The first step is to learn what the [virtual DOM](https://legacy.reactjs.org/docs/faq-internals.html) is and the [reconciliation algorithm](https://legacy.reactjs.org/docs/reconciliation.html).
 
 ## The Virtual DOM
 
@@ -68,13 +68,13 @@ ReactDOM.render(
 
 A button click triggers a render cycle by invoking `setCounter`. Visually, `App` has experienced a DOM update. But reconciliation is diffing more DOM nodes than one might expect.
 
-No props have been passed down to Table and Row. It is fundamentally impossible for these components be affected by the parent's `App.jsx` state change. But cascading rerenders for every child in the component is the default behavior. Updating `App.jsx` causes reconciliation to uselessly trigger for all of its children. This consumes precious resources on the client.
+No `props` are passed down to `Table` and `Row`. It is fundamentally impossible for these components be affected by `App`'s state change. But cascading rerenders down to child components is the default behavior. Updating `App` causes reconciliation to trigger in unnecessary locations. This consumes precious resources on the client.
 
 ![uncontrolled cascading rerenders](../images/no-memo-rerender.png)
 
 Imagine one state change triggering useless render cycles on hundreds DOM elements. What if something trivial like an `input` did this on every keystroke? This is the silent killer of enterprise software.
 
-The defacto solution exists for useless rerender suppression, called `React.memo`. It performs a shallow equality check (JavaScript's strict equality operator) on all incoming props from the parent component. In the sample code, simply wrapping the child components with it suppresses the useless rerenders.
+There is a defacto solution exists for useless rerender suppression: `React.memo`. It performs a shallow equality check (JavaScript's strict equality operator) on all incoming `props` from the parent component. In the sample code, simply wrapping the child components with it suppresses the useless rerenders.
 
 ```jsx
 import React, { useState } from "react";
@@ -217,7 +217,7 @@ Traditional performance techniques, like `useCallback` and `useMemo`, inevitably
 
 The guiding principle of fast components is the minimization of UI relying on other UI for data. The more data is passed from parent to child, the harder it is to optimize. In order to directly pass data to the components that need it, the context API is needed.
 
-Context is widely regarded as slow; with claims that it does not scale. This is a half-truth. Context is not intrinsically slow. What is slow is the downstream consequences of its usage. `useContext` triggers rerenders every time data updates. So in reality, the perception of context "being slow" is actually commentary on the speed of the reconciliation algorithm.
+Context is widely regarded as slow; with claims that it does not scale. This is a half-truth. Context is not intrinsically slow. What is slow is the downstream consequence of its usage in a React component. `useContext` triggers a rerender every time data updates. So in reality, the perception of context "being slow" is actually commentary on the speed of the reconciliation algorithm.
 
 This performance critique is based on the most common design pattern, which is calling `useContext` directly inside the UI component that needs the data. The key phrase is "UI component". Of course, `useContext` must be called in a component; but nothing is stopping us from using it in a component that has no HTML.
 
@@ -225,7 +225,7 @@ Here is a basic state management library that can be used to suppress rerenders.
 
 - `Context` to store data
 - `useReducer` to dispatch and transform state data
-- Higher order component to process data before it is passed to a component.
+- Higher order component to access context data and process data before it is passed to a component.
 
 ```jsx
 import React, {
@@ -291,7 +291,9 @@ function makeProvider(initialState) {
 export default makeProvider;
 ```
 
-The high orderer component `applyState` is the secret sauce. Instead of exposing all of state to a component, `applyState` accepts a function resolver. This allows pre-processing of data before it is passed down to the component. By strategically parsing, extracting, and computing data inside `applyState`, `React.memo` (which is embedded in the implementation of `applyState`) can properly detect and suppress useless rerenders. The interface of `applyState` is akin to `connect` in `redux`. The function resolver is essentially `mapStateToProps`. The documentation can be found [here]((https://react-redux.js.org/api/connect)).
+The high orderer component `applyState` is the secret sauce. With this pattern, `applyState` acts as a proxy for context access. Components never have direct access to context. `applyState` accepts a function resolver, allowing data processing before it is passed down to the component.
+
+By strategically parsing, extracting, and computing data inside `applyState`, `React.memo` (which is embedded in the implementation of `applyState`) can properly detect and suppress useless rerenders. The interface of `applyState` is akin to `connect` in `redux`. The function resolver is essentially `mapStateToProps`. The documentation can be found [here]((https://react-redux.js.org/api/connect)).
 
 The `dispatch` function is in its own context and directly exposed (via `useDispatch`). This is because `dispatch` is a stable dependency. It is safe to use as a hook directly in components because it will never trigger a rerender. The full state tree is available in the callback argument. You can think of this `dispatch` pattern as a (less powerful) thunk that can be directly called in a component.
 
