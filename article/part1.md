@@ -508,15 +508,15 @@ export default applyState(mappedState)(RowCell);
 
 ## Performance scaling
 
-The rerender overhead of typical architectures scale linearly. If rerenders are not suppressed, twice the amount of HTML means twice the number of nodes that the reconciliation algorithm needs to diff. This problem is compounded when algorithms are constantly recomputed on rerenders. But this is a non-issue when useless rerender suppression strategies are utilized.
+The rerender overhead of typical architectures scale linearly. If rerenders are not suppressed, twice the amount of HTML means twice the number of nodes that the reconciliation algorithm needs to diff. This problem is compounded when algorithms are constantly recomputed on rerenders. But this is a non-issue when useless rerender suppression strategies are utilized. When done correctly, apps become very resistant to scaling issues. In many cases, complexity increases have no impact on responsiveness.
 
-When done correctly, the responsiveness of the app and the size of the DOM have no correlation (aside from initial mounting). This can be seen by comparing the performance as the table grows algorithmic complexity. As the resource requirements grows, the god component's responsiveness scales into the stratosphere. The optimized app, on the other hand, is much more resistant to scaling issues. In many cases, complexity increases have no impact on responsiveness.
+This can be seen by comparing the performance as the table grows algorithmic complexity. As the resource requirements grows, the god component's responsiveness scales into the stratosphere. The optimized app, on the other hand, has no issues.
 
 Here is a comparison for ticking the table's "All" checkbox. With the unoptimized app, render time is 28ms.
 ![performance of click all checkbox using unoptimized app](../images/local-state-all-checkbox.png)
 
 In the optimized app, it is a render speed of 8.7ms. A substantial improvement.
-![performance of click all checkbox using unoptimized app](../images/optimized-all-checkbox.png)
+![performance of click all checkbox using optimized app](../images/optimized-all-checkbox.png)
 
 To see how it truly scales, we can insert an algorithm to artificially slow down the app. The following function will be run in every cell on each render cycle.
 
@@ -548,7 +548,7 @@ iterations | Unoptimized (ms) | Optimized (ms)
 
 Front-loading the computation in `applyState`, which recomputes on every render cycle, may seem like an unnecessary use of client resources. It may seem alluring to pass the pass the entire subtree to the component and compute inside the component. This way, useless computations would be circumvented.
 
-For example, if the algorithm in `getFilteredRows` existed inside `TableRows` were in the component, strict equality would be met more often.
+For example, if the algorithm in `getFilteredRows` existed inside `TableRows`, strict equality would be met more often (as opposed to never met).
 
 ```jsx
 import { applyState, State } from "./StateManager";
