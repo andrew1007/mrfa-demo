@@ -1,22 +1,19 @@
 import React, { ChangeEventHandler, useEffect, useState } from "react";
 import { Close, ModeEdit, Check } from '@mui/icons-material';
+import { heavy } from "./utils";
 
 export type EditableCellProps = {
   value: string;
   onConfirm: (value: string) => void;
 };
 
-const heavy = () => {
-  for (let i = 0; i < 1750; i++) {
-    JSON.stringify({});
-  }
-};
-
 const EditableCell: React.FC<EditableCellProps> = (props) => {
   const { value, onConfirm } = props;
   const [editState, setEditState] = useState(false);
   const [editValue, setEditValue] = useState("");
-  heavy()
+
+  heavy();
+
   useEffect(() => {
     if (!editState) {
       setEditValue(value);

@@ -221,14 +221,14 @@ Traditional performance techniques, like `useCallback` and `useMemo`, inevitably
 
 The guiding principle of fast components is the minimization of UI relying on other UI for data. The more data is passed from parent to child, the harder it is to optimize. In order to directly pass data to the components that need it, the context API is needed.
 
-Context is widely regarded as slow; with claims that it does not scale. This is a half-truth. Context is not intrinsically slow. What is slow is the downstream consequence of its usage in a React component. [`useContext`](https://react.dev/reference/react/useContext) triggers a rerender every time data updates. So in reality, the perception of context "being slow" is actually commentary on the speed of the reconciliation algorithm.
+Context is widely regarded as slow; with claims that it does not scale. This is a half-truth. Context is not intrinsically slow. What is slow is the downstream consequence of its usage in a React component. [`useContext`](https://react.dev/reference/react/useContext) triggers a rerender every time data updates. So, in reality, the perception of context "being slow" is actually commentary on the speed of the reconciliation algorithm.
 
 This performance critique is based on the most common design pattern, which is calling `useContext` directly inside the UI component that needs the data. The key phrase is "UI component". Of course, `useContext` must be called in a component; but nothing is stopping us from using it in a component that has no HTML.
 
 Here is a basic state management library that can be used to suppress rerenders. It is a scalable implementation that works in applications of any size. It leverages the following concepts:
 
-- [`Context`](https://react.dev/reference/react/createContext) to store data
-- [`useReducer`](https://react.dev/reference/react/useReducer) to dispatch and transform state data
+- [`Context`](https://react.dev/reference/react/createContext) to store data.
+- [`useReducer`](https://react.dev/reference/react/useReducer) to dispatch and transform state data.
 - Higher order component to access context data and process data before it is passed to a component.
 
 ```jsx
@@ -314,6 +314,9 @@ Make no mistake: passing data down from parent to child is oftentimes required. 
 In a majority of cases, only `id` needs to be passed down from parent to child. As long as `state` is well-structured (normalized), this should be the only thing necessary to get the necessary information. This concept will be leveraged heavily. For sake of example simplicity, the code snippet doesn't include the search/filtering algorithm.
 
 ```jsx
+import React from "react";
+import TableRow from "./TableRow";
+
 const TableRows = (props) => {
   const { rowIds } = props;
   return (
@@ -337,7 +340,7 @@ export default applyState(mappedState)(TableRows);
 The easiest way to maximize strict equality is to only pass primitives. This can be seen with the implementation of `RowCheckbox`. The resulting `checked` `boolean` changes far less often than the array of selected checkboxes. By reducing this data into a `boolean` in the function resolver of `applyState`, it is an easy win.
 
 ```jsx
-import { applyState, State } from "./StateManager";
+import { applyState } from "./StateManager";
 
 const RowCheckbox = (props) => {
   const { checked } = props;
@@ -361,7 +364,7 @@ The rows to render is dynamic because of search and filtering. `rowIds`, always 
 
 ```jsx
 import React from "react";
-import { applyState, State } from "./StateManager";
+import { applyState } from "./StateManager";
 import TableRow from "./TableRow";
 
 const TableRows = (props) => {
@@ -440,7 +443,7 @@ export default React.memo(Table);
 In most cases, it is better to have data close to the UI that use it. `RowCell` is a good case study for how this can be done. In most cases, it is better to create event handlers in the locations where they are used. It is also better to extract data from state where it is used. In most cases, only the `id` should be necessary for this. But in the case of individual cells, the name of the column is also required. The `TableRow` needs to pass down the column name. In order to do this, `TableRow` needs to know what `columns` to render.
 
 ```jsx
-import { applyState, State } from "./StateManager";
+import { applyState } from "./StateManager";
 import React from "react";
 import RowCheckbox from "./RowCheckbox";
 import RowCell from "./RowCell";
@@ -458,7 +461,7 @@ const TableRow = (props) => {
   );
 };
 
-const mappedState = () => (state: State) => {
+const mappedState = () => (state) => {
   return {
     columns: state.columns,
   };
@@ -470,7 +473,7 @@ export default applyState<TableRowProps>(mappedState)(TableRow);
 With the necessary identifiers to get the current data value, the data to render can now be computed inside `applyState`'s function resolver. In this use case, the value is a string, which will suppress useless rerenders.
 
 ```jsx
-import { applyState, useDispatch, State, Row } from "./StateManager";
+import { applyState, useDispatch, Row } from "./StateManager";
 import React from "react";
 import EditableCell from "../resources/EditableCell";
 
@@ -510,9 +513,9 @@ export default applyState(mappedState)(RowCell);
 
 ## Performance scaling
 
-The rerender overhead of typical architectures scale linearly. If rerenders are not suppressed, twice the amount of HTML means twice the number of nodes that the reconciliation algorithm needs to diff. This problem is compounded when algorithms are constantly recomputed on rerenders. But this is a non-issue when useless rerender suppression strategies are utilized. When done correctly, apps become very resistant to scaling issues. In many cases, complexity increases have no impact on responsiveness.
+The rerender overhead of typical architectures scale linearly. If rerenders are not suppressed, twice the amount of HTML means twice the number of nodes that the reconciliation algorithm needs to diff. This problem is compounded when algorithms are constantly recomputed on rerenders. But this is a non-issue when useless rerender suppression strategies are utilized. In many cases, complexity increases have no impact on responsiveness.
 
-This can be seen by comparing the performance as the table grows algorithmic complexity. As the resource requirements grows, the god component's responsiveness scales into the stratosphere. The optimized app, on the other hand, has no issues.
+This can be seen by comparing the performance as the table grows algorithmic complexity. As the resource requirements grows, the god component's responsiveness scales into the stratosphere. The optimized app, on the other hand, is resistant to scaling issues.
 
 Here is a comparison for ticking the table's "All" checkbox. With the unoptimized app, render time is 28ms.
 ![performance of click all checkbox using unoptimized app](../images/local-state-all-checkbox.png)
@@ -530,19 +533,20 @@ const heavy = () => {
 };
 ```
 
-Here are how the render cycle speed changes, as the number of iterations increases.
+Here are how the render cycle speed changes, as the number of iterations increases. Any responsiveness slower than 50 ms is typically considered to be intrusive to the user experience.
 
-|Iterations | Unoptimized (ms) | Optimized (ms) |
-|-----------|------------------|----------------|
-|100        |28                |8.7             |
-|200        |41.4              |12              |
-|300        |55.9              |11.4            |
-|400        |66.9              |11.7            |
-|500        |81.3              |13.6            |
-|1000       |149.2             |11.1            |
-|1250       |182.5             |11.2            |
-|1500       |215.1             |12.5            |
-|1750       |240.4             |10.8            |
+|Iterations | Optimized (ms)   | Unoptimized (ms) |
+|-----------|------------------|------------------|
+|100        |18.7              |31.6              |
+|200        |21.7              |46.2              |
+|300        |26.6              |58.2              |
+|400        |31.5              |78.2              |
+|500        |35.3              |85.7              |
+|1000       |61.1              |165               |
+|1250       |74.1              |198.7             |
+|1500       |85.1              |231.8             |
+|1750       |94.6              |258.7             |
+|2000       |106               |303.7             |
 
 ![scaling of clicking all checkbox using unoptimized app](../images/select-all-checkbox-scaling.png)
 
@@ -553,7 +557,7 @@ Front-loading the computation in `applyState`, which recomputes on every render 
 For example, if the algorithm in `getFilteredRows` existed inside `TableRows`, strict equality would be met more often (as opposed to never met).
 
 ```jsx
-import { applyState, State } from "./StateManager";
+import { applyState } from "./StateManager";
 import React from "react";
 import TableRow from "./TableRow";
 

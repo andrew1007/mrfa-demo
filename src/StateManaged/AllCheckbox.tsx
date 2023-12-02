@@ -1,5 +1,6 @@
 import React from "react";
 import { useDispatch, applyState, State } from "./StateManager";
+import { heavy } from "../resources/utils";
 
 type StateProps = ReturnType<ReturnType<typeof mappedState>>;
 type Component = React.FC<StateProps>;
@@ -7,7 +8,7 @@ type ToggleCheck = React.InputHTMLAttributes<HTMLInputElement>["onChange"];
 
 const AllCheckbox: Component = (props) => {
   const { allSelected } = props;
-
+  heavy();
   const dispatch = useDispatch();
 
   const toggleCheck: ToggleCheck = () => {
