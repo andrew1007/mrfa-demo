@@ -12,22 +12,20 @@ type TableRowComponent = React.FC<
 >;
 
 const TableRow: TableRowComponent = (props) => {
-  const { row, columns, id } = props;
+  const { columns, id } = props;
 
   return (
     <tr>
       <td>
         <RowCheckbox id={id} />
       </td>
-      {columns.map(({ key }) => <RowCell key={key} field={key} id={row.id} />)}
+      {columns.map(({ key }) => <RowCell key={key} field={key} id={id} />)}
     </tr>
   );
 };
 
-const mappedState = () => (state: State, ownProps: TableRowProps) => {
-  const { rows } = state;
+const mappedState = () => (state: State) => {
   return {
-    row: rows[ownProps.id],
     columns: state.columns,
   };
 };

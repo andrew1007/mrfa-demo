@@ -105,9 +105,13 @@ The flame graph has changed. There are now gray cells. These represent component
 
 It would be naive to think that we're done. Any professional developer knows that this example looks nothing like enterprise software. We need to develop a full-scale architecture in order to leverage the power of `React.memo` in apps that render thousands of DOM nodes and trigger hundreds of heavy render cycles (possibly thousands) per minute.
 
+## Check out the demo
+
+Seeing is believing. The rest of the article will refer to an basic app. It can be run in your own personal environment, which can be cloned from this [repo](https://github.com/andrew1007/mrfa-demo/tree/main) (type definitions included).
+
 ## God components are slow
 
-In order to see what a fast implementation looks like, first we need to look at one that is slow. The full app (with type definitions) can be found in this [repo.](https://github.com/andrew1007/mrfa-demo/tree/main)
+In order to see what a fast implementation looks like, first we need to look at one that is slow.
 
 Here is the god component of a searchable, filterable, and selectable table using local state. Because data is required in many locations, this god component needs to manage data and event handlers. Data needs to be passed down from the top of the component hierarchy.
 
@@ -291,7 +295,7 @@ function makeProvider(initialState) {
 export default makeProvider;
 ```
 
-The high orderer component `applyState` is the secret sauce. `applyState` acts as a proxy for context access. Components never have direct access to context. `applyState` accepts a function resolver, allowing data processing before it is passed down to the component. `useContext` is still called in `applyState`. The higher order component always gets rerendered. But the computational overhead of each `applyState` is miniscule compared to a rerender of a component with DOM nodes.
+The high order component `applyState` is the secret sauce. `applyState` acts as a proxy for context access. Components never have direct access to context. `applyState` accepts a function resolver, allowing data processing before it is passed down to the component. `useContext` is still called in `applyState`. The higher order component always gets rerendered. But the computational overhead of each `applyState` is miniscule compared to a rerender of a component with DOM nodes.
 
 By strategically parsing, extracting, and computing data inside `applyState`, `React.memo` (which is embedded in `applyState`) can properly detect and suppress useless rerenders. The interface of `applyState` is akin to [`connect`](https://react-redux.js.org/api/connect) in `redux`. The function resolver is essentially `mapStateToProps`.
 
@@ -360,7 +364,7 @@ import React from "react";
 import { applyState, State } from "./StateManager";
 import TableRow from "./TableRow";
 
-export const TableRows = (props) => {
+const TableRows = (props) => {
   const { rowIds } = props;
   return (
     <>
@@ -410,7 +414,7 @@ import TableColumns from "./TableColumns";
 import AllCheckbox from "./AllCheckbox";
 import TableRows from "./TableRows";
 
-export const Table = () => {
+const Table = () => {
   return (
     <table>
       <thead>
@@ -442,27 +446,25 @@ import RowCheckbox from "./RowCheckbox";
 import RowCell from "./RowCell";
 
 const TableRow = (props) => {
-  const { row, columns, id } = props;
+  const { columns, id } = props;
 
   return (
     <tr>
       <td>
         <RowCheckbox id={id} />
       </td>
-      {columns.map(({ key }) => <RowCell key={key} field={key} id={row.id} />)}
+      {columns.map(({ key }) => <RowCell key={key} field={key} id={id} />)}
     </tr>
   );
 };
 
-const mappedState = () => (state, ownProps) => {
-  const { rows } = state;
+const mappedState = () => (state: State) => {
   return {
-    row: rows[ownProps.id],
     columns: state.columns,
   };
 };
 
-export default applyState(mappedState)(TableRow);
+export default applyState<TableRowProps>(mappedState)(TableRow);
 ```
 
 With the necessary identifiers to get the current data value, the data to render can now be computed inside `applyState`'s function resolver. In this use case, the value is a string, which will suppress useless rerenders.
@@ -528,19 +530,19 @@ const heavy = () => {
 };
 ```
 
-Here is how the render cycle speed changes, as the number of iterations increases
+Here are how the render cycle speed changes, as the number of iterations increases.
 
-iterations | Unoptimized (ms) | Optimized (ms)
---|----|----
-|100|28|8.7|
-200|41.4|12
-300|55.9|11.4
-400|66.9|11.7
-500|81.3|13.6
-1000|149.2|11.1
-1250|182.5|11.2
-1500|215.1|12.5
-1750|240.4|10.8
+|Iterations | Unoptimized (ms) | Optimized (ms) |
+|-----------|------------------|----------------|
+|100        |28                |8.7             |
+|200        |41.4              |12              |
+|300        |55.9              |11.4            |
+|400        |66.9              |11.7            |
+|500        |81.3              |13.6            |
+|1000       |149.2             |11.1            |
+|1250       |182.5             |11.2            |
+|1500       |215.1             |12.5            |
+|1750       |240.4             |10.8            |
 
 ![scaling of clicking all checkbox using unoptimized app](../images/select-all-checkbox-scaling.png)
 
