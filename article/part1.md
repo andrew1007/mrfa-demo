@@ -537,7 +537,7 @@ Here are how the render cycle speed changes, as the number of iterations increas
 
 |Iterations | Optimized (ms)   | Unoptimized (ms) |
 |-----------|------------------|------------------|
-|100        |18.7              |31.6              |
+|100        |16.7              |32.6              |
 |200        |21.7              |46.2              |
 |300        |26.6              |58.2              |
 |400        |31.5              |78.2              |
