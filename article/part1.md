@@ -517,10 +517,10 @@ The rerender overhead of typical architectures scale linearly. If rerenders are 
 
 This can be seen by comparing the performance as the table grows algorithmic complexity. As the resource requirements grows, the god component's responsiveness scales into the stratosphere. The optimized app, on the other hand, is resistant to scaling issues.
 
-Here is a comparison for ticking the table's "All" checkbox. With the unoptimized app, render time is 28ms.
+Here is a comparison for ticking the table's "All" checkbox. With the unoptimized app, render time is 32.6 ms.
 ![performance of click all checkbox using unoptimized app](../images/local-state-all-checkbox.png)
 
-In the optimized app, it is a render speed of 8.7ms. A substantial improvement.
+In the optimized app, it is a render speed of 16.7 ms. A substantial improvement.
 ![performance of click all checkbox using optimized app](../images/optimized-all-checkbox.png)
 
 To see how it truly scales, we can insert an algorithm to artificially slow down the app. The following function will be run in every cell on each render cycle.
