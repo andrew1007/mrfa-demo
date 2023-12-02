@@ -396,7 +396,7 @@ const mappedState = () => (state) => {
 export default applyState(mappedState)(TableRows);
 ```
 
-Inspection of the flame graph shows the result. Completely isolating this data computation, from the rest of the UI, provides the luxury to always fail strict equality with virtually no consequence. A 0.7 ms rerender speed is miniscule. On top of that, the rerender overhead of this component stays constant, regardless of the number of `TableRow` elements that are rendered. A UI render cycle occurs on *any* state update, but it does not meaningfully affect performance.
+Inspection of the flame graph shows the result. Completely isolating this data computation allows guaranteed strict equality failure with virtually no consequence. A 0.7 ms rerender speed is miniscule. On top of that, the rerender overhead of this component stays constant, regardless of the number of `TableRow` elements that are rendered (within reason). A UI render cycle occurs on *any* state update, but it does not meaningfully affect performance.
 
 ![performance of click all checkbox using unoptimized app](../images/table-rows-rerender-overhead.png)
 
