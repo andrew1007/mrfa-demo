@@ -1,4 +1,4 @@
-# Make React Fast Again Part 1: Reconciliation
+# Make React Fast Again Part 1: Reconciliation and Component Design
 
 ## React can be fast
 
