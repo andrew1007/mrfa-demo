@@ -4,9 +4,7 @@
 
 It really is a shame that there is no style guide. The freedom to do whatever you want is the freedom to create poor experiences for users of your application. One of the biggest mistakes that is made, almost without fail, is poor performance. The core architecture of many apps inevitably out-scale itself. React apps start fine, but slowly accumulate performance problems. But make no mistake: React is not inherently slow. But it is easy to make architectural decisions that make it slow.
 
-I want to set the record straight and show you the true potential of React. I would not be arrogant enough to say that my way is the definitive approach. I am only here to show you one way that I have developed through personal experience. It has been proven itself in my personal and professional projects that I develop at TikTok.
-
-But this is not easy to teach. It requires a deep understanding of React, data structure mutations, and established design patterns. The first step is to learn what the [virtual DOM](https://legacy.reactjs.org/docs/faq-internals.html) is and the [reconciliation algorithm](https://legacy.reactjs.org/docs/reconciliation.html).
+But this is not easy to teach. It requires a deep understanding of React, data structure mutations, and applying tried-and-true design patterns to component design. The first step is to learn what the [virtual DOM](https://legacy.reactjs.org/docs/faq-internals.html) is and the [reconciliation algorithm](https://legacy.reactjs.org/docs/reconciliation.html).
 
 ## The Virtual DOM
 
@@ -107,7 +105,7 @@ It would be naive to think that we're done. Any professional developer knows tha
 
 ## Check out the demo
 
-Seeing is believing. The rest of the article will refer to an basic app. It can be run in your own personal environment, which can be cloned from this [repo](https://github.com/andrew1007/mrfa-demo/tree/main) (type definitions included).
+Seeing is believing. The rest of the article will refer to an basic app. It can be run in a local environment, which can be cloned from this [repo](https://github.com/andrew1007/mrfa-demo/tree/main) (type definitions included).
 
 ## God components are slow
 
@@ -209,21 +207,19 @@ const App = () => {
 };
 ```
 
-It is telling about useless rerenders when inspecting the flame graph, On checkbox select and selecting new filter conditions, a complete rerender of the entire table occurs. When inspecting the props that are passed down from `App` to `Table`, you can see that it is fundamentally impossible to ever suppress rerenders; even if `Table` is wrapped in a `React.memo`. `getFilteredRows()`, `handleCellEdit`, `toggleCheckChange`, and `toggleCheckAll` fail reference equality on every render cycle.
+It is telling about useless rerenders when inspecting the flame graph, On checkbox select and selecting new filter conditions, a rerender of the entire table occurs. When inspecting the props that are passed from `App` down to `Table`, it is fundamentally impossible to ever suppress rerenders; even if `Table` is wrapped in a `React.memo`. `getFilteredRows()`, `handleCellEdit`, `toggleCheckChange`, and `toggleCheckAll` fail reference equality on every render cycle.
 
 ![performance of click all checkbox using unoptimized app](../images/local-state-dev-tool.png)
 
-Technically, this could be solved with `useCallback` and `useMemo`. But these should be avoided as often as possible. They are brittle to use and must be vigilantly maintained. These hooks rely on a dependency array, which is susceptible to ineffective memoization and returning stale values.
-
-Traditional performance techniques, like `useCallback` and `useMemo`, inevitably become liabilities in large applications. All of these issues and considerations are a non-issue if a different data management design pattern is used. It starts with managing data outside of the component hierarchy: the Context API.
+Technically, this could be solved with `useCallback` and `useMemo`. But these should be avoided as often as possible. They are brittle to use and must be vigilantly maintained. These hooks rely on a dependency array, which is susceptible to ineffective memoization and/or retaining stale values. Liberal use of them inevitably become liabilities in large applications. All of these issues and considerations are a non-issue if a different data management design pattern is used. It starts by managing data outside of the component hierarchy: the Context API.
 
 ## Performant Context
 
 The guiding principle of fast components is the minimization of UI relying on other UI for data. The more data is passed from parent to child, the harder it is to optimize. In order to directly pass data to the components that need it, the context API is needed.
 
-Context is widely regarded as slow; with claims that it does not scale. This is a half-truth. Context is not intrinsically slow. What is slow is the downstream consequence of its usage in a React component. [`useContext`](https://react.dev/reference/react/useContext) triggers a rerender every time data updates. So, in reality, the perception of context "being slow" is actually commentary on the speed of the reconciliation algorithm.
+Context is widely regarded as slow; with claims that it does not scale. This is a half-truth. Context is not intrinsically slow. What is slow is the downstream consequence of its usage in a React component. [`useContext`](https://react.dev/reference/react/useContext) triggers a rerender every context data updates. In reality, the perception of context "being slow" is a commentary on the slowness of the reconciliation algorithm.
 
-This performance critique is based on the most common design pattern, which is calling `useContext` directly inside the UI component that needs the data. The key phrase is "UI component". Of course, `useContext` must be called in a component; but nothing is stopping us from using it in a component that has no HTML.
+This performance critique is based on the most common design pattern, which is calling `useContext` directly inside the UI component that needs the data. The key phrase is "UI component". Of course, `useContext` must be called in a component; but `useContext` can be called in a component that has no HTML in it.
 
 Here is a basic state management library that can be used to suppress rerenders. It is a scalable implementation that works in applications of any size. It leverages the following concepts:
 
@@ -240,7 +236,7 @@ import React, {
 
 const noop = () => null;
 
-function makeProvider(initialState) {
+const makeProvider = (initialState) => {
 
   const StateContext = createContext(initialState);
   const DispatchContext = createContext(noop);
@@ -264,7 +260,7 @@ function makeProvider(initialState) {
   };
 
   // HOC to connect state to components
-  function applyState(mappedState) {
+  const applyState = (mappedState) =>{
     return (Component) => {
       const MemoComponent = memo(Component);
       const ApplyStateComponent = (props) => {
@@ -276,7 +272,7 @@ function makeProvider(initialState) {
           ...mappedStateInstance?.(state, props),
         };
 
-        return <MemoComponent {...combinedProps} />;
+        return <MemoComponent {...combinedProps} />;cases
       };
       ApplyStateComponent.displayName = `applyState{${Component.name}}`;
       return ApplyStateComponent;
@@ -295,7 +291,7 @@ function makeProvider(initialState) {
 export default makeProvider;
 ```
 
-The high order component `applyState` is the secret sauce. `applyState` acts as a proxy for context access. Components never have direct access to context. `applyState` accepts a function resolver, allowing data processing before it is passed down to the component. `useContext` is still called in `applyState`. The higher order component always gets rerendered. But the computational overhead of each `applyState` is miniscule compared to a rerender of a component with DOM nodes.
+The high order component `applyState` is the secret sauce. `applyState` acts as a proxy for context access. Components never have direct access to context. `applyState` accepts a function resolver, allowing data processing before it is passed down to the component. `useContext` is called in `applyState`. The higher order component always gets rerendered. But the computational overhead of algorithms in `applyState` is miniscule compared to a rerenders of a component with DOM nodes.
 
 By strategically parsing, extracting, and computing data inside `applyState`, `React.memo` (which is embedded in `applyState`) can properly detect and suppress useless rerenders. The interface of `applyState` is akin to [`connect`](https://react-redux.js.org/api/connect) in `redux`. The function resolver is essentially `mapStateToProps`.
 
@@ -311,7 +307,7 @@ With the prerequisite knowledge out of the way, we can finally get started with 
 
 Make no mistake: passing data down from parent to child is oftentimes required. However, making strategic decisions on what to pass down is the difference between the optimized and naive approach.
 
-In a majority of cases, only `id` needs to be passed down from parent to child. As long as `state` is well-structured (normalized), this should be the only thing necessary to get the necessary information. This concept will be leveraged heavily. For sake of example simplicity, the code snippet doesn't include the search/filtering algorithm.
+In a majority of cases, only `id` needs to be passed down from parent to child. As long as `state` is well-structured (normalized), this should be the only thing necessary to get the necessary information. This concept will be leveraged heavily. For sake of an example's simplicity, the code snippet doesn't include the search/filtering algorithm.
 
 ```jsx
 import React from "react";
@@ -403,7 +399,7 @@ const mappedState = () => (state) => {
 export default applyState(mappedState)(TableRows);
 ```
 
-Inspection of the flame graph shows the result. Completely isolating this data computation allows guaranteed strict equality failure with virtually no consequence. A 0.7 ms rerender speed is miniscule. On top of that, the rerender overhead of this component stays constant, regardless of the number of `TableRow` elements that are rendered (within reason). A UI render cycle occurs on *any* state update, but it does not meaningfully affect performance.
+Inspection of the flame graph shows the result. Completely isolating this data computation allows guaranteed strict equality failure with virtually no consequence. A 0.7 ms rerender speed is miniscule. On top of that, the rerender overhead of this component stays constant, regardless of the number of `TableRow` elements that are rendered (within reason). A UI render cycle occurs on any state update, but it does not meaningfully affect performance.
 
 ![performance of click all checkbox using unoptimized app](../images/table-rows-rerender-overhead.png)
 
@@ -550,7 +546,7 @@ Here are how the render cycle speed changes, as the number of iterations increas
 
 ![scaling of clicking all checkbox using unoptimized app](../images/select-all-checkbox-scaling.png)
 
-## Algorithms Outside of UI
+## Algorithms Outside of UIexample
 
 Front-loading the computation in `applyState`, which recomputes on every render cycle, may seem like an unnecessary use of client resources. It may seem alluring to pass the pass the entire subtree to the component and compute inside the component. This way, useless computations would be circumvented.
 
@@ -589,7 +585,7 @@ const mappedState = () => (state) => {
 export default applyState(mappedState)(TableRows);
 ```
 
-This true, but impractical. Maintainability, in an overwhelming number of cases, comes first for enterprise software. Algorithms in components violate separation of concerns and they cannot be reused in other locations. On top of that, there is already a solution for this. Functional (pure) memoization strategies enable patterns that are robust, extremely effective (when used correctly), and reusable. There is no denying that memoization has performance penalties. But the impact is normally small and provides massive increases in scalability. It is almost always worth it.
+This true, but impractical. Maintainability (almost always) comes first for enterprise software. Algorithms in components violate separation of concerns and they cannot be reused in other locations. On top of that, there is already a solution for this. Functional (pure) memoization strategies enable patterns that are robust, extremely effective (when used correctly), and reusable. There is no denying that memoization has performance penalties. But the impact is normally small and provides massive increases in scalability. It is almost always worth it.
 
 ## To be continued
 
