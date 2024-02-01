@@ -529,7 +529,7 @@ const heavy = () => {
 };
 ```
 
-Here are how the render cycle speed changes, as the number of iterations increases. Any responsiveness slower than 50 ms is typically considered to be intrusive to the user experience.
+Here are how the render cycle speed changes, as the number of iterations increases. Any responsiveness slower than 50 ms is typically considered to be intrusive to the user experience. The unoptimized app almost immediately hurts the user experience.
 
 |Iterations | Optimized (ms)   | Unoptimized (ms) |
 |-----------|------------------|------------------|
