@@ -337,7 +337,7 @@ export default applyState(mappedState)(RowCell);
 
 ### Compute to primitives outside of UI
 
-Primitive data types are easy to optimize because strict equality checks by value. When possible, reduce data down to primitives outside of UI. In `RowCheckbox`, computing the `checked` status in `applyState` is an easy win. The `boolean` value only changes when that specific checkbox changes state. The data structure that tracks all checkboxes updates on state changes of any checkbox.
+Primitive data types are easy to optimize because JavaScript's strict equality checks them by value. When possible, reduce data down to primitives outside of UI. In `RowCheckbox`, computing the `checked` status in `applyState` is an easy win. The `boolean` value only changes when that specific checkbox changes state. The array of selected checkboxes updates on state changes of any checkbox. If the array were passed to the component, every checkbox would rerender, regardless of whether or not its `checked` state has changed.
 
 ```jsx
 const RowCheckbox = (props) => {
@@ -358,36 +358,22 @@ export default applyState(mappedState)(RowCheckbox);
 
 ### Isolate un-optimizable UI
 
-The rows to render is dynamic because of search and filtering. `rowIds`, always fails strict equality, which triggers a rerender on every state update. This useless rerender is virtually unavoidable, based on our (currently) limited knowledge set. But there is a way around this. Isolate this difficult-to-suppress operation from the rest of the system. Make sure that the children of this component are designed in a way to minimize propagating render cycles. In this common situation, it is easily done by only passing down `id`.
+The rendered rows is dynamic because of searching and filtering. This requires the `rowIds` to be recomputed every render cycle, which guarantees strict equality failure. Based on our limited knowledge, this useless rerender is virtually unavoidable. In this situation, where optimization is not possible, isolate this algorithm from the rest of the system. Be mindful of this component's children `props` to minimize propagating render cycles.
 
 ```jsx
-import React from "react";
-import { applyState } from "./StateManager";
-import TableRow from "./TableRow";
-
-const TableRows = (props) => {
-  const { rowIds } = props;
-  return (
-    <>
-      {rowIds.map((id) => {
-        return <TableRow id={id} key={id} />;
-      })}
-    </>
-  );
-};
+const TableRows = ({ rowIds }) => (
+  <>
+    {rowIds.map((id) => <TableRow id={id} key={id} />)}
+  </>
+);
 
 const getFilteredRowIds = (state) => {
   const { filters, focusedFilter, rows } = state
-  const currentFilter = filters.find(({ id }) => id === focusedFilter);
-  if (!currentFilter) {
-    return rows;
-  }
+  const { conditions } = filters.find(({ id }) => id === focusedFilter);
 
   return rows
-    .filter((row) =>
-      currentFilter?.conditions.every(
-        (cond) => row[cond.key] === cond.value
-      ) ?? true
+    .filter(
+      (row) =>conditions.every((cond) => row[cond.key] === cond.value)
     )
     .map(({ id }) => id)
 };
@@ -401,13 +387,13 @@ const mappedState = () => (state) => {
 export default applyState(mappedState)(TableRows);
 ```
 
-Inspection of the flame graph shows the result. Completely isolating this data computation allows guaranteed strict equality failure with virtually no consequence. A 0.7 ms rerender speed is miniscule. On top of that, the rerender overhead of this component stays constant, regardless of the number of `TableRow` elements that are rendered (within reason). A UI render cycle occurs on any state update, but it does not meaningfully affect performance.
+This design allows unoptimized operations to have virtually no performance-related consequences. The flame graph shows a miniscule 0.7ms render speed.
 
 ![performance of click all checkbox using unoptimized app](../images/table-rows-rerender-overhead.png)
 
 ### Isolate zero-dependency and static UI
 
-It is ideal to group zero-dependency UI into a separate component; they will never have a reason to rerender itself, nor propagate rerenders down to its children. In this use case, `table`, `tbody` and `tr` for the column headers never change, so it makes sense to group them into a component that do not accept nor provide any data. The DOM nodes in this component will never have a reason to be checked for differences. Remember to wrap these types of components in `React.memo`.
+UI that do not accept nor provide `props` never have a reason to rerender after initial mount. In this case a subset of the `table` HTML are static and never need to be diffed for changes. The components rendered have no parent `props`. `Table` will never be a source of rerenders for them. All these can be grouped together into one component. Remember to wrap these types of components in `React.memo`.
 
 ```jsx
 import React from "react";
@@ -446,18 +432,12 @@ import React from "react";
 import RowCheckbox from "./RowCheckbox";
 import RowCell from "./RowCell";
 
-const TableRow = (props) => {
-  const { columns, id } = props;
-
-  return (
-    <tr>
-      <td>
-        <RowCheckbox id={id} />
-      </td>
-      {columns.map(({ key }) => <RowCell key={key} field={key} id={id} />)}
-    </tr>
-  );
-};
+const TableRow = ({ columns, id } ) => (
+  <tr>
+    <td><RowCheckbox id={id} /></td>
+    {columns.map(({ key }) => <RowCell key={key} field={key} id={id} />)}
+  </tr>
+);
 
 const mappedState = () => (state) => {
   return {
