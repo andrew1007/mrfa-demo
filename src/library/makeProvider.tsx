@@ -11,7 +11,7 @@ import {
 
 const noop = () => null;
 
-function makeProvider<T>(initialState: T) {
+const makeProvider = <T,>(initialState: T) => {
   type DispatchCb = (prevState: T) => Partial<T>;
 
   const StateContext = createContext(initialState);
@@ -41,7 +41,8 @@ function makeProvider<T>(initialState: T) {
 
   // HOC to connect state to components
   type MappedState<T, P, V = any> = () => (state: T, ownProps: P) => V;
-  function applyState<P>(mappedState: MappedState<T, P>) {
+
+  const applyState = <P,>(mappedState: MappedState<T, P>) => {
     return (Component: FC<any>) => {
       const MemoedComponent = memo(Component)
       const ApplyStateComponent = (props: P) => {
