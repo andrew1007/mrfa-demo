@@ -393,7 +393,7 @@ This design allows unoptimized operations to have virtually no performance-relat
 
 ### Isolate zero-dependency and static UI
 
-UI that do not accept nor provide `props` never have a reason to rerender after initial mount. In this case a subset of the `table` HTML are static and never need to be diffed for changes. The components rendered have no parent `props`. `Table` will never be a source of rerenders for them. All these can be grouped together into one component. Remember to wrap these types of components in `React.memo`.
+UI that do not accept nor provide `props` never have a reason to rerender after initial mount. In this case a subset of the `table` HTML are static and never need to be diffed for changes. The React components (`AllCheckbox`, `TableColumns`, `TableRows`) have no parent `props`. `Table` will never be a source of rerenders for them. All these can be grouped together into one component. Remember to wrap these types of components in `React.memo`.
 
 ```jsx
 import React from "react";
