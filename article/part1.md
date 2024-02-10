@@ -241,13 +241,13 @@ const makeProvider = (initialState) => {
   const StateContext = createContext(initialState);
   const DispatchContext = createContext(noop);
 
+  const reducer = (state, action) => ({
+    ...state,
+    ...action(state),
+  });
+
   // Provider component with state management hook
   const Provider = ({ children }) => {
-    const reducer = (state, action) => ({
-      ...state,
-      ...action(state),
-    });
-
     const [state, dispatch] = useReducer(reducer, initialState);
 
     return (
@@ -528,11 +528,9 @@ Here are how the render cycle speed changes, as the number of iterations increas
 
 ![scaling of clicking all checkbox using unoptimized app](../images/select-all-checkbox-scaling.png)
 
-## Algorithms Outside of UIexample
+## Avoid Algorithms Inside UI
 
-Front-loading the computation in `applyState`, which recomputes on every render cycle, may seem like an unnecessary use of client resources. It may seem alluring to pass the pass the entire subtree to the component and compute inside the component. This way, useless computations would be circumvented.
-
-For example, if the algorithm in `getFilteredRows` existed inside `TableRows`, strict equality would be met more often (as opposed to never met).
+Front-loading algorithms in `applyState`, which always recomputes, may seem like an unnecessary use of client resources. If individual subtrees of `state` were passed into the component and then computed inside, useless computations would be circumvented. For example, if the algorithm in `getFilteredRows` existed inside `TableRows`, strict equality would be met more often (as opposed to never met).
 
 ```jsx
 import { applyState } from "./StateManager";
