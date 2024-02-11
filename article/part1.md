@@ -2,7 +2,7 @@
 
 ## React can be fast
 
-It's a shame that there is no style guide for React. Unrestricted freedom is the freedom to make critical mistakes in codebase design and, in one form or another, hurt the user experience. One of the biggest mistakes that is made, almost without fail, is poor performance. The core architecture of many apps inevitably out-scale themselves. React apps start fine, but slowly accumulate performance problems. That being said, React is not inherently slow. Poor architectural decisions that make React slow.
+It's a shame that there is no style guide for React. One of the biggest mistakes that is made, almost without fail, is poor performance. The core architecture of many apps inevitably out-scale themselves. React apps start fine, but slowly accumulate performance problems. But there is nothing inherently wrong with React. Poor architectural decisions that make React slow.
 
 Good architecture can be learned. But it requires a deep understanding of React, data structure mutations, and applying tried-and-true design patterns to component design. The first step is to learn what the [virtual DOM](https://legacy.reactjs.org/docs/faq-internals.html) is and the [reconciliation algorithm](https://legacy.reactjs.org/docs/reconciliation.html).
 
@@ -78,9 +78,9 @@ There is a de facto solution exists for useless rerender suppression: `React.mem
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
 
-const App = React.memo(() => {
+const App = () => {
   // ...
-});
+};
 
 const Table = React.memo(() => (
   // ...
@@ -378,11 +378,9 @@ const getFilteredRowIds = (state) => {
     .map(({ id }) => id)
 };
 
-const mappedState = () => (state) => {
-  return {
-    rowIds: getFilteredRowIds(state),
-  }
-};
+const mappedState = () => (state) => ({
+  rowIds: getFilteredRowIds(state),
+});
 
 export default applyState(mappedState)(TableRows);
 ```
@@ -396,11 +394,6 @@ This design allows unoptimized operations to have virtually no performance-relat
 UI that do not accept nor provide `props` never have a reason to rerender after initial mount. In this case a subset of the `table` HTML are static and never need to be diffed for changes. The React components (`AllCheckbox`, `TableColumns`, `TableRows`) have no parent `props`. `Table` will never be a source of rerenders for them. All these can be grouped together into one component. Remember to wrap these types of components in `React.memo`.
 
 ```jsx
-import React from "react";
-import TableColumns from "./TableColumns";
-import AllCheckbox from "./AllCheckbox";
-import TableRows from "./TableRows";
-
 const Table = () => {
   return (
     <table>
@@ -427,11 +420,6 @@ export default React.memo(Table);
 In most cases, it is better to have data close to the UI that use it. `RowCell` is a good case study for how this can be done. In most cases, it is better to create event handlers in the locations where they are used. It is also better to extract data from state where it is used. In most cases, only the `id` should be necessary for this. But in the case of individual cells, the name of the column is also required. The `TableRow` needs to pass down the column name. In order to do this, `TableRow` needs to know what `columns` to render.
 
 ```jsx
-import { applyState } from "./StateManager";
-import React from "react";
-import RowCheckbox from "./RowCheckbox";
-import RowCell from "./RowCell";
-
 const TableRow = ({ columns, id } ) => (
   <tr>
     <td><RowCheckbox id={id} /></td>
@@ -439,22 +427,16 @@ const TableRow = ({ columns, id } ) => (
   </tr>
 );
 
-const mappedState = () => (state) => {
-  return {
-    columns: state.columns,
-  };
-};
+const mappedState = () => (state) => ({
+  columns: state.columns,
+});
 
-export default applyState<TableRowProps>(mappedState)(TableRow);
+export default applyState(mappedState)(TableRow);
 ```
 
 With the necessary identifiers to get the current data value, the data to render can now be computed inside `applyState`'s function resolver. In this use case, the value is a string, which will suppress useless rerenders.
 
 ```jsx
-import { applyState, useDispatch, Row } from "./StateManager";
-import React from "react";
-import EditableCell from "../resources/EditableCell";
-
 const RowCell = (props) => {
   const { value, id, field } = props;
   const dispatch = useDispatch();
@@ -533,10 +515,6 @@ Here are how the render cycle speed changes, as the number of iterations increas
 Front-loading algorithms in `applyState`, which always recomputes, may seem like an unnecessary use of client resources. If individual subtrees of `state` were passed into the component and then computed inside, useless computations would be circumvented. For example, if the algorithm in `getFilteredRows` existed inside `TableRows`, strict equality would be met more often (as opposed to never met).
 
 ```jsx
-import { applyState } from "./StateManager";
-import React from "react";
-import TableRow from "./TableRow";
-
 const TableRows = (props) => {
     const { filters, focusedFilter, searchText, rows, rowIds } = props
     const currentFilter = filters.find(({ id }) => id === focusedFilter);
@@ -565,12 +543,12 @@ const mappedState = () => (state) => {
 export default applyState(mappedState)(TableRows);
 ```
 
-This true, but impractical. Maintainability (almost always) comes first for enterprise software. Algorithms in components violate separation of concerns and they cannot be reused in other locations. On top of that, there is already a solution for this. Functional (pure) memoization strategies enable patterns that are robust, extremely effective (when used correctly), and reusable. There is no denying that memoization has performance penalties. But the impact is normally small and provides massive increases in scalability. It is almost always worth it.
+This true, but impractical. Maintainability comes first for enterprise software. Algorithms in UI violate separation of concerns and are not reusable. On top of that, there is already a solution for this. Functional (pure) memoization strategies enable patterns that are robust, extremely effective (when used correctly), and reusable. There is no denying that memoization has performance penalties. But the impact is normally small and provides massive increases in scalability. It is almost always worth it.
 
 ## To be continued
 
-With these concepts, typical web apps gain huge performance wins. This is only scratching the surface of the knowledge to write a fully optimized React app. To get the full picture, these topics need to be covered.
+With these concepts, typical web apps gain huge performance wins. But this is only scratching the surface of the knowledge for fully optimized React apps. To get the full picture, these topics need to be covered.
 
-- Robust memoization strategies for computed data
 - Structuring normalized state trees
+- Robust memoization strategies for computed data
 - Dispatching optimal state transformations
