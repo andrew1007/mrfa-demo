@@ -2,7 +2,7 @@
 
 ## React can be fast
 
-It's a shame that there is no style guide for React. One of the biggest mistakes that is made, almost without fail, is poor performance. The core architecture of many apps inevitably out-scale themselves. React apps start fine, but slowly accumulate performance problems. But there is nothing inherently wrong with React. Poor architectural decisions that make React slow.
+It's a shame that there is no style guide for React. One of the biggest mistakes that is made, almost without fail, is poor performance. The core architecture of many apps inevitably out-scale themselves. React apps start fine, but slowly accumulate performance problems. Poor architectural decisions make it slow. There is nothing inherently wrong with React. 
 
 Good architecture can be learned. But it requires a deep understanding of React, data structure mutations, and applying tried-and-true design patterns to component design. The first step is to learn what the [virtual DOM](https://legacy.reactjs.org/docs/faq-internals.html) is and the [reconciliation algorithm](https://legacy.reactjs.org/docs/reconciliation.html).
 
@@ -219,7 +219,7 @@ The guiding principle of fast components is the minimization of UI relying on ot
 
 Context is widely regarded as slow; with claims that it does not scale. This is a half-truth. The downstream consequence Context's usage is the real origin of degraded performance. [`useContext`](https://react.dev/reference/react/useContext) triggers rerenders on every context update. In reality, criticisms of context's performance should actually be pointed at computational overhead of reconciliation.
 
-Calling `useContext` inside UI components is its standard usage. But this design pattern is how rerenders and Context updates appear to be immutably linked. Of course, `useContext` is called in a component. But `useContext` is usable in components with no HTML.
+Calling `useContext` inside UI components is its standard usage. But this design pattern is how expensive rerenders and Context updates appear to be immutably linked. Of course, `useContext` is called in a component. But `useContext` is usable in components with no HTML.
 
 Here is a basic state management library that can be used to suppress rerenders. It is a scalable implementation that works in applications of any size. It leverages the following concepts:
 
