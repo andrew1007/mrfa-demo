@@ -219,7 +219,7 @@ The guiding principle of fast components is the minimization of UI relying on ot
 
 Context is widely regarded as slow; with claims that it does not scale. This is a half-truth. The downstream consequence Context's usage is the real origin of degraded performance. [`useContext`](https://react.dev/reference/react/useContext) triggers rerenders on every context update. In reality, criticisms of context's performance should actually be pointed at computational overhead of reconciliation.
 
-This performance critique is based on the most common design pattern, which is calling `useContext` directly inside the UI component. The key phrase is "UI component". Of course, `useContext` is called in a component. But `useContext` is usable in components with no HTML.
+Calling `useContext` inside UI components is its standard usage. But this design pattern is how rerenders and Context updates appear to be immutably linked. Of course, `useContext` is called in a component. But `useContext` is usable in components with no HTML.
 
 Here is a basic state management library that can be used to suppress rerenders. It is a scalable implementation that works in applications of any size. It leverages the following concepts:
 
@@ -295,9 +295,9 @@ The high order component `applyState` is the secret sauce. `applyState` acts as 
 
 By strategically parsing and computing data inside `applyState`, `React.memo` (embedded in `applyState`) can properly detect and suppress useless rerenders. The interface of `applyState` is akin to [`connect`](https://react-redux.js.org/api/connect) in `redux`. The function resolver of `applyState` is essentially `mapStateToProps`.
 
-The `dispatch` function (from `useReducer`) is in its own context and directly exposed (via `useDispatch`). `dispatch` is a stable dependency (retains reference equality), making it safe to use directly in components. The full state tree is available in the callback argument. This `dispatch` pattern is essentially a (less powerful) thunk that can be directly called in a component.
+The `dispatch` function (from `useReducer`) is in its own context and directly exposed (via `useDispatch`). `dispatch` is a stable dependency (retains reference equality), making it safe to use directly in components. The full state tree is available in the callback argument. This `dispatch` pattern can be thought of as a (less powerful) thunk that can be directly called in a component.
 
-This is one step closer to applying this to enterprise software. But there is an art to maximizing strict equality for components that receive data from context.
+This is one step closer to application in enterprise software. But there is an art to maximizing strict equality for components that receive data from context.
 
 ## Optimized Component Design
 
@@ -307,7 +307,7 @@ With the prerequisite knowledge out of the way, component design can be explored
 
 Make no mistake: passing data down from parent to child is oftentimes required. However, making strategic decisions on what to pass down is the difference between the optimized and naive approach.
 
-In a majority of cases, only `id` needs to be passed down from parent to child. The `id` can be used inside `applyState`'s function resolver to find the necessary data. This concept will be leveraged heavily. For simplicity's sake, the code snippet doesn't include the search/filtering algorithm.
+In a majority of cases, only `id` needs to be passed down from parent to child. The `id` can be used inside `applyState`'s function resolver to find the necessary data. This concept will be leveraged heavily. For simplicity, the code snippet doesn't include the search/filtering algorithm.
 
 ```jsx
 const TableRows = ({ rowIds }) => (
@@ -323,7 +323,7 @@ const mappedState = () => (state) => ({
 export default applyState(mappedState)(TableRows);
 ```
 
-In the components that only receive `id`, `state` is accessed to get the relevant data.
+In the components that only receive `id` from the parent, `state` is accessed in `applyState`'s function resolver to get the specific `row`'s data.
 
 ```jsx
 const TableRow = props => <div />
@@ -337,7 +337,7 @@ export default applyState(mappedState)(RowCell);
 
 ### Compute to primitives outside of UI
 
-Primitive data types are easy to optimize because JavaScript's strict equality checks them by value. When possible, reduce data down to primitives outside of UI. In `RowCheckbox`, computing the `checked` status in `applyState` is an easy win. The `boolean` value only changes when that specific checkbox changes state. The array of selected checkboxes updates on state changes of any checkbox. If the array were passed to the component, every checkbox would rerender, regardless of whether or not its `checked` state has changed.
+Primitive data types are easy to optimize because JavaScript's strict equality checks them by value. When possible, reduce data down to primitives outside of UI. In `RowCheckbox`, computing the `checked` status in `applyState` is an easy win. The `boolean` value only changes when that specific checkbox changes state. The array of selected checkboxes updates on state change of any checkbox. If the array were passed to the component, every checkbox would rerender, regardless of whether or not its `checked` state has changed.
 
 ```jsx
 const RowCheckbox = (props) => {
@@ -358,7 +358,7 @@ export default applyState(mappedState)(RowCheckbox);
 
 ### Isolate un-optimizable UI
 
-The rendered rows is dynamic because of searching and filtering. This requires the `rowIds` to be recomputed every render cycle, which guarantees strict equality failure. Based on our limited knowledge, this useless rerender is virtually unavoidable. In this situation, where optimization is not possible, isolate this algorithm from the rest of the system. Be mindful of this component's children `props` to minimize propagating render cycles.
+The rendered rows is dynamic because of searching and filtering. This requires the `rowIds` to recompute on every render cycle, which guarantees strict equality failure. This useless rerender is virtually unavoidable (at least for now). In this situation, where optimization is not possible, isolate this algorithm from the rest of the system. Be mindful of this component's children `props` to minimize propagating render cycles.
 
 ```jsx
 const TableRows = ({ rowIds }) => (
@@ -385,13 +385,13 @@ const mappedState = () => (state) => ({
 export default applyState(mappedState)(TableRows);
 ```
 
-This design allows unoptimized operations to have virtually no performance-related consequences. The flame graph shows a miniscule 0.7ms render speed.
+This design allows rerenders to constantly fire with no performance penalties. The flame graph shows a miniscule 0.7 ms render speed.
 
 ![performance of click all checkbox using unoptimized app](../images/table-rows-rerender-overhead.png)
 
 ### Isolate zero-dependency and static UI
 
-UI that do not accept nor provide `props` never have a reason to rerender after initial mount. In this case a subset of the `table` HTML are static and never need to be diffed for changes. The React components (`AllCheckbox`, `TableColumns`, `TableRows`) have no parent `props`. `Table` will never be a source of rerenders for them. All these can be grouped together into one component. Remember to wrap these types of components in `React.memo`.
+UI that do not accept nor provide `props` never have a reason to rerender after initial mount. In this case, a subset of the `table` HTML are static and never need to be diffed for changes. The React components (`AllCheckbox`, `TableColumns`, `TableRows`) have no parent `props`. `Table` will never be a source of rerenders for them. All these can be grouped together into one component. Remember to wrap these types of components in `React.memo`.
 
 ```jsx
 const Table = () => {
@@ -417,7 +417,7 @@ export default React.memo(Table);
 
 ### Tightly scope event handlers and data
 
-In most cases, it is better to have data close to the UI that use it. `RowCell` is a good case study for how this can be done. In most cases, it is better to create event handlers in the locations where they are used. It is also better to extract data from state where it is used. In most cases, only the `id` should be necessary for this. But in the case of individual cells, the name of the column is also required. The `TableRow` needs to pass down the column name. In order to do this, `TableRow` needs to know what `columns` to render.
+In most cases, it is better to have data close to the UI that use it. `RowCell` is a good case study for how this can be done. Create event handlers and extract `state` data in the locations where they are used. Oftentimes, only `id` is necessary. But in the case of individual cells, the name of the column is also required. The `TableRow` needs to pass down the column name, which requires `TableRow` to know what `columns` to render.
 
 ```jsx
 const TableRow = ({ columns, id } ) => (
@@ -434,7 +434,7 @@ const mappedState = () => (state) => ({
 export default applyState(mappedState)(TableRow);
 ```
 
-With the necessary identifiers to get the current data value, the data to render can now be computed inside `applyState`'s function resolver. In this use case, the value is a string, which will suppress useless rerenders.
+With all necessary identifiers provided, the data to render can be parsed inside `applyState`'s function resolver. The value is a string, which suppresses useless rerenders.
 
 ```jsx
 const RowCell = (props) => {
@@ -473,9 +473,11 @@ export default applyState(mappedState)(RowCell);
 
 ## Performance scaling
 
-The rerender overhead of typical architectures scale linearly. If rerenders are not suppressed, twice the amount of HTML means twice the number of nodes that the reconciliation algorithm needs to diff. This problem is compounded when algorithms are constantly recomputed on rerenders. But this is a non-issue when useless rerender suppression strategies are utilized. In many cases, complexity increases have no impact on responsiveness.
+Rerender overhead of typical architectures scale linearly. If rerenders are not suppressed, twice the HTML means reconciliation diffs twice the number of DOM nodes. This is compounded by algorithms in the code. But these are non-issues with rerender suppression strategies. In many cases, complexity increases have negligible impact on an application's responsiveness.
 
-This can be seen by comparing the performance as the table grows algorithmic complexity. As the resource requirements grows, the god component's responsiveness scales into the stratosphere. The optimized app, on the other hand, is resistant to scaling issues.
+This is observable by analyzing the table when its complexity grows.
+
+As resource requirements increase, the god component component's responsiveness scales into the stratosphere. The optimized app, on the other hand, is resistant to scaling increases.
 
 Here is a comparison for ticking the table's "All" checkbox. With the unoptimized app, render time is 32.6 ms.
 ![performance of click all checkbox using unoptimized app](../images/local-state-all-checkbox.png)
