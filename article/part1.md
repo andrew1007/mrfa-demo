@@ -105,13 +105,13 @@ It would be naive to think that we're done. Any professional developer knows tha
 
 ## Check out the demo
 
-Seeing is believing. The rest of the article will refer to an basic app. It can be run in a local environment, which can be cloned from this [repo](https://github.com/andrew1007/mrfa-demo/tree/main) (type definitions included).
+Seeing is believing. The rest of the article will refer to an basic app. It can be run in a local environment, which is available in this [repo](https://github.com/andrew1007/mrfa-demo/tree/main) (type definitions included).
 
 ## God components are slow
 
 In order to see what a fast implementation looks like, first we need to look at one that is slow.
 
-Here is the god component of a searchable, filterable, and selectable table using local state. The current data management system forces the god component to manage all data and event handlers. Data needs to be repeatedly passed down from the top of the component hierarchy.
+Here is the god component of a searchable, filterable, and selectable table using local state. The local state data management system forces the creation of a god component. The topmost component must manage all data and event handlers. Data needs to be repeatedly passed down from the top of the component hierarchy.
 
 ```jsx
 import { useEffect, useState } from "react";
@@ -217,9 +217,9 @@ Technically, `useCallback` and `useMemo` could be used to retain reference equal
 
 The guiding principle of fast components is the minimization of UI relying on other UI for data. Optimizing becomes harder when more data is passed from parent to child. Circumventing data-passing from parent to child requires the context API.
 
-Context is widely regarded as slow; with claims that it does not scale. This is a half-truth. Context is not intrinsically slow. What is slow is the downstream consequence of its usage in a React component. [`useContext`](https://react.dev/reference/react/useContext) triggers a rerender every context data updates. In reality, the perception of context "being slow" is a commentary on the slowness of the reconciliation algorithm.
+Context is widely regarded as slow; with claims that it does not scale. This is a half-truth. The downstream consequence Context's usage is the real origin of degraded performance. [`useContext`](https://react.dev/reference/react/useContext) triggers rerenders on every context update. In reality, criticisms of context's performance should actually be pointed at computational overhead of reconciliation.
 
-This performance critique is based on the most common design pattern, which is calling `useContext` directly inside the UI component that needs the data. The key phrase is "UI component". Of course, `useContext` must be called in a component. But `useContext` can be called in a component that has no HTML in it.
+This performance critique is based on the most common design pattern, which is calling `useContext` directly inside the UI component. The key phrase is "UI component". Of course, `useContext` is called in a component. But `useContext` is usable in components with no HTML.
 
 Here is a basic state management library that can be used to suppress rerenders. It is a scalable implementation that works in applications of any size. It leverages the following concepts:
 

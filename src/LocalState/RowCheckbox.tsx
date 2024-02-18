@@ -1,4 +1,5 @@
 import React from "react";
+import { heavy } from "../resources/utils";
 
 type RowCheckboxProps = {
   onChange: React.InputHTMLAttributes<HTMLInputElement>["onChange"]
@@ -7,7 +8,7 @@ type RowCheckboxProps = {
 
 const RowCheckbox: React.FC<RowCheckboxProps> = (props) => {
   const { onChange, checked } = props;
-
+  heavy()
   return (
     <input
       checked={checked}
