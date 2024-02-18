@@ -1,4 +1,4 @@
-import { Provider } from "../library/StateManager";
+import { Provider } from "./StateManager";
 import App from "./App";
 
 const StateManaged = () => (
