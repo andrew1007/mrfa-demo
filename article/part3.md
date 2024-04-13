@@ -1,0 +1,1 @@
+# Make React Fast Again Part 3: State tree mutations and algorithm memoization
