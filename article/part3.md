@@ -24,18 +24,6 @@ const reducer = (state, action) => ({
 
 The spread operator performs a shallow merge. Think of this operation as the creation of a new root node for the state tree.
 
-## Optimizing State Tree Mutations
-
-Fast systems minimize node updates. Useless node updates are a fatal performance mistake. Copying unchanged nodes is a common issue.
-
-```typescript
-// BAD DISPATCH ALGORITHM UPDATE HERE
-```
-
-Here, every data record node has changed. If the table has 100 rows, then 100 components will fail strict equality and uselessly trigger DOM node reconciliation checks.
-
-Instead of modifying every node, via spread operator, transforming the single node of interest is ideal. The algorithm has a negligible performance difference, but the important part is modifying as few nodes as possible. This has massive implications for memoization.
-
 ## Custom `createSelector`
 
 Under normal circumstances, reinventing the wheel is bad. But for learning purposes, here is a custom implementation of a powerful memoization function. It is functionally equivalent to `createSelector`, from the package `reselect`.
@@ -72,23 +60,125 @@ If all resolvers computed to a value that meets strict equality, the cached valu
 
 The hardest part about effective memoization is writing the correct resolver functions. It's helpful to think of a resolver as a function that "crawls" down a state tree to target required nodes. The nodes that are targeted should be the exact nodes that are required to compute the data.
 
+Let's take a look at a sample state tree that is normalized
+
+```typescript
+export const normalizedState = {
+  docs: {
+    1: {
+      title: "Performant React",
+      id: 1,
+      updatedAt: 1668117919710, // 11-10-2022
+    },
+    2: {
+      title: "React Presentation",
+      id: 2,
+      updatedAt: 1636582015583, // 11-10-2021
+    },
+  },
+  docIds: [1, 2],
+  app: {
+    mounting: false,
+  },
+};
+```
+
+Let's say a component needs an array of titles. We can memoize this operation by having the resolver functions "target" the relevant nodes: `docs` and `docIds`
+
+```typescript
+// resolvers
+const getDocs = (state) => state.docs;
+const getDocIds = (state) => state.docIds;
+
+// pure selector
+const getDocTitles = createSelector([getDocs, docIds], (docs, docIds) => {
+  return docIds.map((id) => docs[id].title);
+});
+
+// selector hook
+const useGetDocTitles = useSelector(getDocTitles);
+```
+
+Now, this selector hook will only recompute (and thus trigger a rerender) when `docs` and/or `docIds` updates.
+
 ## Resolvers are Selectors
 
 One of the incredible powers of the selector model is that computed selectors can be used as resolver functions. Selectors are infinitely composable and can be reused with virtually no performance penalties (because they are memoized).
 
+```typescript
+const capitalize = (str: string) => `${str[0].toUpperCase()}${str.slice(1)}`;
+const getParsedTitles = createSelector([getDocTitles], (titles) =>
+  capitalize(titles)
+);
+
+const useGetParsedTitles = useSelector(getParsedTitles);
+```
+
 ## Factory Selectors for Multi-cache situations
 
-`createSelector` has a cache size of one. This meets most use cases, but some situations may require a larger cache. For example, when an algorithm needs to operate on something by id.
+`createSelector` has a cache size of one. This meets most use cases, but some situations may require a larger cache. For example, when an algorithm needs to operate on something by id. This situation is common when many instances of a component are rendered, such as a table.
 
 A selector like this will miss its cache because `id` is constantly changing. In this situation, a factory is required.
 
-```typescript
-const makeGetDocById = (id) => createSelector((state) => state.docs[id]);
+```tsx
+const makeGetDocById = (id) => (state) => state.docs[id];
 
-const useGetDocById = (id) => {
-  const getDocById = useMemo(() => makeGetDocById(id), [id]);
-  return useSelector(getDocById);
+const makeGetParsedDocById = (id) =>
+  createSelector([makeGetDocById(id)], (doc) => {
+    return {
+      ...doc,
+      date: dayjs(doc.updatedAt).format("YYYY-MM-DD"),
+    };
+  });
+
+const useGetParsedDocById = (id) => {
+  const getParsedDocById = useMemo(() => makeGetParsedDocById(id), [id]);
+  return useSelector(getParsedDocById);
+};
+
+const DocEntry = (props) => {
+  const parsedDoc = useGetParsedDocById(props.id);
+
+  return <>{JSON.stringify(parsedDoc)}</>;
 };
 ```
 
 Now, each instance of `useGetDocById` has its own selector instance, which allows maximal strict equality matching.
+
+## Optimizing State Tree Mutations
+
+Algorithms are rerenders are now contingent on the effectiveness of a system's memoization implementation. Naturally, the fewer changes in nodes, the better the system performs. Minimizing node updates during state transformations is an art that becomes manageable with an intuitive understanding of how state changes. Useless node updates are a fatal performance mistake. Copying unchanged nodes is a common issue.
+
+```typescript
+const updateDate = (newDate, currId) => {
+  dispatch((state) => {
+    return {
+      docs: Object.fromEntries(
+        Object.entries(state.docs).map(([id, doc]) => ({
+          ...doc,
+          date: currId === id ? newDate : doc.date,
+        }))
+      ),
+    };
+  });
+};
+```
+
+Here, every data record node has changed. If the table has 100 rows, then 100 components will fail strict equality and uselessly trigger DOM node reconciliation checks. Instead of modifying every node, via spread operator, transforming the single node of interest is ideal.
+
+```typescript
+const updateDate = (newDate, currId) => {
+  dispatch((state) => {
+    const nextDocs = { ...docs };
+
+    nextDocs[currId] = {
+      ...nextDocs[currId],
+      date: newDate,
+    };
+
+    return {
+      docs: nextDocs,
+    };
+  });
+};
+```
