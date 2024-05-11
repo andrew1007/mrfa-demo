@@ -1,4 +1,4 @@
-# Make React Fast Again Part 2: Normalized State Trees and the Selector Model
+# Make React Fast Again Part 2: Normalized State Trees, the Selector Model, and `useSelector`
 
 ## Introduction
 
@@ -12,7 +12,7 @@ Normalization is imperative for a maintainable SSOT (single source of truth) dat
 
 Duplication becomes less alluring when data is easily accessible. This is commonly done by storing data as records in key-value pairs. This also provides the benefit of O(1) key access. An array of records can be converted using a simple one-liner.
 
-If order matters in a part of an application, retain an array of `ids`. This is the minimum information required to track order.
+If order matters in a part of an application (that cannot computed), retain an array of `ids`.
 
 ```typescript
 const normalizedState = {
@@ -79,6 +79,78 @@ Selectors with multiple parameters are a little trickier to write. The extra dat
 const makeGetDocById = (id) => (state) => state.docs[id]
 ```
 
+## `useSelector`
+
+For the sake of learning, the higher order component model for rerender suppression was discussed. But practically speaking, it is easier to use a hook. But hooks will naturally rerender on every update, so a few sneaky tricks need to be performed in order to suppress rerenders on every render cycle. Integrating `useSelector` into `makeProvider` requires a few small changes. There needs to be a data structure to hold data listeners and they need to be recomputed for every render cycle.
+
+```tsx
+const makeProvider = (initialState) => {
+  // ...
+  let subscribers = []
+
+  // Provider component with state management hook
+  const Provider = ({ children }) => {
+    const reducer = (state, action) => ({
+      ...state,
+      ...action(state),
+    });
+
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    subscribers.forEach((fn) => {
+      fn(state)
+    })
+
+    return (
+      <DispatchContext.Provider value={dispatch}>
+        <StateContext.Provider value={state}>
+          {children}
+        </StateContext.Provider>
+      </DispatchContext.Provider>
+    );
+  };
+
+  // ...
+
+  const NotComputed = Symbol('NotComputed')
+
+  const useSelector = (selector) => {
+    const [, forceRender] = useReducer(s => s + 1, 0);
+    const selectorRef = useRef(selector);
+    const currValRef = useRef(NotComputed as V)
+
+    useEffect(() => {
+      const fn = (state) => {
+        const computed = selectorRef.current(state)
+        if (currValRef.current !== computed) {
+          currValRef.current = computed
+          forceRender()
+        }
+      }
+      subscribers.push(fn)
+      return () => {
+        subscribers = subscribers.filter(currFn => currFn !== fn)
+      }
+    }, []);
+
+    return currValRef.current;
+  };
+
+  return {
+    applyState,
+    Provider,
+    useDispatch,
+    createSelector,
+    useSelector,
+  };
+}
+```
+
+## `useSelector` Explained
+
+Each hook retains computed data in a `useRef` hook, because assigning data to it does not trigger a rerender.
+
+
 ## Selectors used in `useSelector`
 
 It is no coincidence that the interface of the selector matches the interface of `useSelector`. By invoking the selectors in `useSelector`, algorithms and UI are neatly separated, along with optimal rerender suppression.
@@ -96,3 +168,4 @@ const Component = (props) => {
   return null
 }
 ```
+

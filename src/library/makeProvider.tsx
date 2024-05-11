@@ -7,6 +7,8 @@ import {
   FC,
   useMemo,
   memo,
+  useRef,
+  useEffect,
 } from "react";
 
 const noop = () => null;
@@ -19,6 +21,10 @@ const makeProvider = <T,>(initialState: T) => {
     noop as unknown as Dispatch<DispatchCb>
   );
 
+  type StateSubscriber<V> = (state: T) => V
+
+  let subscribers: StateSubscriber<any>[] = []
+
   // Provider component with state management hook
   const Provider: FC<{ children: ReactNode }> = ({
     children,
@@ -29,6 +35,10 @@ const makeProvider = <T,>(initialState: T) => {
     });
 
     const [state, dispatch] = useReducer(reducer, initialState);
+
+    subscribers.forEach((fn) => {
+      fn(state)
+    })
 
     return (
       <DispatchContext.Provider value={dispatch}>
@@ -80,6 +90,30 @@ const makeProvider = <T,>(initialState: T) => {
     };
   }
 
+  const NotComputed = Symbol('NotComputed')
+
+  const useSelector = <V, >(selector: StateSubscriber<V>) => {
+    const [, forceRender] = useReducer(s => s + 1, 0);
+    const selectorRef = useRef(selector);
+    const currValRef = useRef(NotComputed as V)
+
+    useEffect(() => {
+      const fn = (state: T) => {
+        const computed = selectorRef.current(state)
+        if (currValRef.current !== computed) {
+          currValRef.current = computed
+          forceRender()
+        }
+      }
+      subscribers.push(fn)
+      return () => {
+        subscribers = subscribers.filter(currFn => currFn !== fn)
+      }
+    }, []);
+
+    return currValRef.current;
+  };
+
   const useDispatch = () => useContext(DispatchContext);
 
   return {
@@ -87,6 +121,7 @@ const makeProvider = <T,>(initialState: T) => {
     Provider,
     useDispatch,
     createSelector,
+    useSelector,
   };
 }
 
