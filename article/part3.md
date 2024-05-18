@@ -238,7 +238,6 @@ const updateDate = (newDate, currId) => {
 ```
 
 ## Commenting on the React Compiler
-There is plenty of talk about a new feature: The [React Compiler](https://react.dev/learn/react-compiler). It markets itself as the answer to useless rerenders for free. I have no doubt in my mind that it will help, but no compiler can save code that is fundamentally slow. For apps with severe performance problems, this is akin to putting lipstick on a pig. If turning on a simple flag gives you a few percentage increase in performance, a free win is a free win.
+There is plenty of talk about a new feature: The [React Compiler](https://react.dev/learn/react-compiler). It markets itself as the answer to useless rerenders for free. But learning about effective memoization and normalized state tree design is still a worthy endeavor. These concepts are platform-agnostic. Any technology, library, or framework will benefit from this knowledge.
 
-1. Effective memoization is platform-agnostic. Any technology, library, or framework will benefit from this knowledge.
-2. The scale is so large that they cannot even be compared. The React Compiler may give boosts in the teens of percentage (being generous here), but this strategy gives percentage increases on the scale of thousands upon thousands.
+Also, a technology like this is not a free pass to be undisciplined. Poorly-designed apps have useless rerenders embedded within their DNA. No novel technology (short of AI code refactoring) will ever fix foundational performance issues.
