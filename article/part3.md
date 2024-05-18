@@ -116,7 +116,7 @@ const useGetParsedTitles = useSelector(getParsedTitles);
 
 ## Factory Selectors for Multi-cache situations
 
-`createSelector` has a cache size of one. This meets most use cases, but some situations may require a larger cache. For example, when an algorithm needs to operate on something by id. This situation is common when many instances of a component are rendered, such as a table.
+`createSelector` has a cache size of one. This meets most use cases. But some situations may require a larger cache. For example, when an algorithm needs to operate on something by id. This situation is common when many instances of a component are rendered, such as a table.
 
 A selector like this will miss its cache because `id` is constantly changing. In this situation, a factory is required.
 
@@ -125,8 +125,9 @@ const makeGetDocById = (id) => (state) => state.docs[id];
 
 const makeGetParsedDocById = (id) =>
   createSelector([makeGetDocById(id)], (doc) => {
+    const { updatedAt, ...rest } = doc;
     return {
-      ...doc,
+      ...rest,
       date: dayjs(doc.updatedAt).format("YYYY-MM-DD"),
     };
   });
@@ -143,11 +144,64 @@ const DocEntry = (props) => {
 };
 ```
 
-Now, each instance of `useGetDocById` has its own selector instance, which allows maximal strict equality matching.
+Now, each `useGetDocById` has its own selector instance, which allows maximal strict equality matching.
+
+
+## `createSelector` Resolver Design
+
+The hardest part about effective memoization is writing optimal resolver functions. They can be the difference between an app that slows to a crawl and another that is lightning fast.
+
+We can start by talking about a useless selector. One that targets the root node of the state tree, `getState`. The root node is guaranteed to be a new node during any state update. This "selector" will always miss its cache and recompute.
+
+```typescript
+const getState = (state) => state;
+
+const makeGetParsedDocById = (id) =>
+  createSelector([getState], (state) => {
+    const { updatedAt, ...rest } = state.docs[id];
+    return {
+      ...rest,
+      date: dayjs(doc.updatedAt).format("YYYY-MM-DD"),
+    };
+  });
+```
+
+Targeting the `docs` node is much better, because state updates that don't modify `docs` won't affect the caching strategy.
+
+```typescript
+const getDocs = (state) => state.docs;
+
+const makeGetParsedDocById = (id) =>
+  createSelector([getDocs], (docs) => {
+    const { updatedAt, ...rest } = docs[id];
+    return {
+      ...rest,
+      date: dayjs(doc.updatedAt).format("YYYY-MM-DD"),
+    };
+  });
+```
+
+But best of all, our resolver function can reach deep into the state tree and target the exact node. This resolver has minimal performance penalties, because key access within an object is an O(1) operation.
+
+```typescript
+const makeGetDocById = (id) => (state) => state.docs[id];
+const makeGetParsedDocById = (id) =>
+  createSelector([makeGetDocById(id)], (doc) => {
+    const { updatedAt, ...rest } = doc;
+    return {
+      ...rest,
+      date: dayjs(doc.updatedAt).format("YYYY-MM-DD"),
+    };
+  });
+```
+
+Granular resolvers are almost always better. Accessing the exact nodes that are required for computation maximizes the effectivess of this caching strategy.
 
 ## Optimizing State Tree Mutations
 
-Algorithms are rerenders are now contingent on the effectiveness of a system's memoization implementation. Naturally, the fewer changes in nodes, the better the system performs. Minimizing node updates during state transformations is an art that becomes manageable with an intuitive understanding of how state changes. Useless node updates are a fatal performance mistake. Copying unchanged nodes is a common issue.
+Rerenders from algorithms are now contingent memoization effectiveness. Naturally, the fewer changes in nodes, the better the system performs. Minimizing node updates during state transformations is an art that becomes manageable with an intuitive understanding of how state changes. Useless node updates are a fatal performance mistake.
+
+Copying unchanged nodes is a common issue. In the following code snippet, the state transformation algorithm creates a new node for every single object in the `docs` key. This triggers a rerender in every single instance of `useGetDocById`, regardless of the number of nodes that have actually changed. The react dev tools performance profile confirms this.
 
 ```typescript
 const updateDate = (newDate, currId) => {
@@ -164,7 +218,7 @@ const updateDate = (newDate, currId) => {
 };
 ```
 
-Here, every data record node has changed. If the table has 100 rows, then 100 components will fail strict equality and uselessly trigger DOM node reconciliation checks. Instead of modifying every node, via spread operator, transforming the single node of interest is ideal.
+Here, every data record node has changed. If the table has 100 rows, then 100 components will fail strict equality and uselessly trigger DOM node reconciliation checks. Instead of modifying every node, via spread operator, transforming the single node of interest is ideal. Here, the dev tools profiler only updates the necessary component.
 
 ```typescript
 const updateDate = (newDate, currId) => {
@@ -182,3 +236,9 @@ const updateDate = (newDate, currId) => {
   });
 };
 ```
+
+## Commenting on the React Compiler
+There is plenty of talk about a new feature: The [React Compiler](https://react.dev/learn/react-compiler). It markets itself as the answer to useless rerenders for free. I have no doubt in my mind that it will help, but no compiler can save code that is fundamentally slow. For apps with severe performance problems, this is akin to putting lipstick on a pig. If turning on a simple flag gives you a few percentage increase in performance, a free win is a free win.
+
+1. Effective memoization is platform-agnostic. Any technology, library, or framework will benefit from this knowledge.
+2. The scale is so large that they cannot even be compared. The React Compiler may give boosts in the teens of percentage (being generous here), but this strategy gives percentage increases on the scale of thousands upon thousands.
