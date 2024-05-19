@@ -33,5 +33,5 @@ const initialState: State = {
 
 export type { State };
 
-export const { Provider, applyState, createSelector, useDispatch } =
+export const { Provider, applyState, createSelector, useDispatch, useSelector } =
   makeProvider(initialState);

@@ -1,4 +1,5 @@
-import { createSelector } from ".";
+import { useMemo } from "react";
+import { createSelector, useSelector } from ".";
 import { PlayState, State, SubState } from "./types";
 
 const defaultSong: SubState["Song"] = {
@@ -22,26 +23,18 @@ const EMPTY_ARR: any[] = [];
 const getPlaylistText = (state: State) => state.search.playlist;
 type PlaylistText = ReturnType<typeof getPlaylistText>;
 
-const getRecentPlaylistText = (state: State) => state.search.recentPlaylists;
-type RecentPlaylistText = ReturnType<typeof getRecentPlaylistText>;
-
 const getSongText = (state: State) => state.search.song;
 type SongText = ReturnType<typeof getSongText>;
-
 const getPlaylists = (state: State) => state.playlists;
 type Playlists = ReturnType<typeof getPlaylists>;
 
 const getPlaylistIds = (state: State) => state.playlistIds;
 type PlaylistIds = ReturnType<typeof getPlaylistIds>;
 
-const getRecentPlaylistIds = (state: State) => state.recentPlaylistIds;
-type RecentPlaylistIds = ReturnType<typeof getRecentPlaylistIds>;
-
-const getSongs = (state: State) => state.songs;
-type Songs = ReturnType<typeof getSongs>;
-
 const getFocusedId = (state: State) => state.focusedId;
 type FocusedPlaylist = ReturnType<typeof getFocusedId>;
+const getSongs = (state: State) => state.songs;
+type Songs = ReturnType<typeof getSongs>;
 
 const getPlayState = (state: State) => state.dashboard.playState;
 type CurrentPlayState = ReturnType<typeof getPlayState>;
@@ -79,23 +72,9 @@ export const getSearchedPlaylistIds = createSelector(
   }
 );
 
-export const getSearchedRecentPlaylistIds = createSelector(
-  [getRecentPlaylistText, getPlaylists, getRecentPlaylistIds],
-  (
-    searchText: RecentPlaylistText,
-    playlists: Playlists,
-    ids: RecentPlaylistIds
-  ) => {
-    if (!searchText) return ids;
-
-    const filtered = ids.filter((id) =>
-      playlists[id]?.title.includes(searchText)
-    );
-
-    return filtered.length > 0 ? filtered : EMPTY_ARR;
-  }
-);
-
+export const useGetSearchedPlaylistIds = () => {
+  return useSelector(getSearchedPlaylistIds)
+}
 export const getSearchedSongIds = createSelector(
   [getSongText, getSongs, getPlaylistSongIds],
   (searchText: SongText, songs: Songs, songIds: PlaylistSongIds) => {
@@ -109,8 +88,13 @@ export const getSearchedSongIds = createSelector(
   }
 );
 
-export const makeGetSong = () =>
-  createSelector([getStateSong], (song: StateSong) => {
+export const useGetSearchedSongIds = () => useSelector(getSearchedSongIds)
+
+const makeGetStateSong = (id: number) => (state: State) =>
+  state.songs[id] ?? defaultSong;
+
+const makeGetSong = (id: number) =>
+  createSelector([makeGetStateSong(id)], (song: StateSong) => {
     const { duration } = song;
     const minutes = Math.floor(duration / 60);
     const seconds = `0${duration - minutes * 60}`.slice(-2);
@@ -120,7 +104,12 @@ export const makeGetSong = () =>
     };
   });
 
-export const getSearchSongQueueIds = createSelector(
+export const useGetSong = (id: number) => {
+  const getSong = useMemo(() => makeGetSong(id), [id])
+  return useSelector(getSong)
+};
+
+const getSearchSongQueueIds = createSelector(
   [getQueueText, getSongs, getSongQueueIds],
   (searchText: QueueText, songs: Songs, songQueueIds: SongQueueIds) => {
     if (!searchText) return songQueueIds;
@@ -133,6 +122,8 @@ export const getSearchSongQueueIds = createSelector(
   }
 );
 
+export const useGetSearchSongQueueIds = () => useSelector(getSearchSongQueueIds)
+
 export const getCurrentSong = (state: State) => {
   const { queue, songs } = state;
   const { position, songIds } = queue;
@@ -140,17 +131,16 @@ export const getCurrentSong = (state: State) => {
   return songs[songIds[position]] ?? defaultSong;
 };
 
-type playingOwnProps = {
-  id: number;
-};
-
-const getId = (_: State, ownProps: playingOwnProps) => ownProps.id;
-
-export const makeGetIsPlaying = () =>
+const makeGetIsPlaying = (id: number) =>
   createSelector(
-    [getCurrentSong, getPlayState, getId],
-    (song: SubState["Song"], playState: CurrentPlayState, id: number) => {
+    [getCurrentSong, getPlayState],
+    (song: SubState["Song"], playState: CurrentPlayState) => {
       const isCurrentSong = song.id === id;
       return playState === PlayState.playing && isCurrentSong;
     }
   );
+
+export const useGetIsPlaying = (id: number) => {
+  const getIsPlaying = useMemo(() => makeGetIsPlaying(id), [id])
+  return useSelector(getIsPlaying)
+}

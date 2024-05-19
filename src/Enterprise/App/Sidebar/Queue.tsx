@@ -1,16 +1,15 @@
 import React from "react";
-import { getSearchSongQueueIds } from "src/Enterprise/state/selectors";
+import { useGetSearchSongQueueIds } from "src/Enterprise/state/selectors";
 import { applyState, State } from "../../state";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 import SearchBar from "../Shared/SearchBar";
 import QueueEntry from "./QueueEntry";
 
 type NoParentProps = Record<string, never>;
-type StateProps = ReturnType<ReturnType<typeof mappedState>>;
-type Component = React.FunctionComponent<NoParentProps & StateProps>;
+type Component = React.FunctionComponent<NoParentProps>;
 
-const Queue: Component = (props) => {
-  const { ids } = props;
+const Queue: Component = () => {
+  const ids = useGetSearchSongQueueIds()
   return (
     <>
       <SearchBar field="queue" placeholder="search queues" />
@@ -24,8 +23,4 @@ const Queue: Component = (props) => {
   );
 };
 
-const mappedState = () => (state: State) => ({
-  ids: getSearchSongQueueIds(state),
-});
-
-export default applyState(mappedState)(Queue);
+export default Queue;

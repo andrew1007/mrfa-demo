@@ -1,21 +1,20 @@
-import React from "react";
-import { Route, State, SubState } from "../../state/types";
-import { makeGetIsPlaying, makeGetSong } from "../../state/selectors";
+import { Route, SubState } from "../../state/types";
+import { useGetIsPlaying, useGetSong } from "../../state/selectors";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
-import { applyState, useDispatch } from "../../state";
+import { useDispatch, useSelector } from "../../state";
 import usePlayerActions from "src/Enterprise/state/usePlayerActions";
 
-type ParentProps = {
+type SongProps = {
   id: SubState["Playlist"]["songs"][0];
 };
-type StateProps = ReturnType<ReturnType<typeof mappedState>>;
-type Component = React.FunctionComponent<ParentProps & StateProps>;
 
-const Song: Component = (props) => {
+const Song = (props: SongProps) => {
   const dispatch = useDispatch();
   const { togglePlayState, setCurrentSong } = usePlayerActions();
+  const song = useGetSong(props.id)
+  const isPlaying = useGetIsPlaying(props.id);
+  const playlistId = useSelector(state => state.focusedId);
 
-  const { song, playlistId, isPlaying } = props;
   const { title, durationLabel, artist, artistId, id } = song;
 
   const routeToArtist = () =>
@@ -50,16 +49,4 @@ const Song: Component = (props) => {
   );
 };
 
-const mappedState = () => {
-  const getSong = makeGetSong();
-  const getIsPlaying = makeGetIsPlaying();
-  return (state: State, ownProps: ParentProps) => {
-    return {
-      song: getSong(state, ownProps),
-      playlistId: state.focusedId,
-      isPlaying: getIsPlaying(state, ownProps),
-    };
-  };
-};
-
-export default applyState(mappedState)(Song);
+export default Song

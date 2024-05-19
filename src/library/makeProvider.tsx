@@ -39,7 +39,7 @@ const makeProvider = <T,>(initialState: T) => {
     subscribers.forEach((fn) => {
       fn(state)
     })
-
+    console.log(state)
     return (
       <DispatchContext.Provider value={dispatch}>
         <StateContext.Provider value={state}>
@@ -95,16 +95,14 @@ const makeProvider = <T,>(initialState: T) => {
     };
   }
 
-  const NotComputed = Symbol('NotComputed')
-
   const useSelector = <V, >(selector: StateSubscriber<V>) => {
     const [, forceRender] = useReducer(s => s + 1, 0);
     const selectorRef = useRef(selector);
-    const currValRef = useRef(NotComputed as V)
-
+    const currValRef = useRef(selectorRef.current(initialState))
     useEffect(() => {
       const fn = (state: T) => {
         const computed = selectorRef.current(state)
+
         if (currValRef.current !== computed) {
           currValRef.current = computed
           forceRender()

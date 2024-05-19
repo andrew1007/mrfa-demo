@@ -1,15 +1,10 @@
-import React from "react";
-import { getSearchedSongIds } from "src/Enterprise/state/selectors";
-import { applyState, State } from "../../state";
+import { useGetSearchedSongIds } from "src/Enterprise/state/selectors";
 import Song from "./Song";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 
-type NoParentProps = Record<string, never>;
-type StateProps = ReturnType<ReturnType<typeof mappedState>>;
-type Component = React.FunctionComponent<NoParentProps & StateProps>;
+const Songs = () => {
+  const ids = useGetSearchedSongIds()
 
-const Songs: Component = (props) => {
-  const { ids } = props;
   return (
     <div className="songs-root">
       <HeavyUselessUI />
@@ -20,8 +15,4 @@ const Songs: Component = (props) => {
   );
 };
 
-const mappedState = () => (state: State) => ({
-  ids: getSearchedSongIds(state),
-});
-
-export default applyState(mappedState)(Songs);
+export default Songs

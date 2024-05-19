@@ -1,20 +1,18 @@
-import React from "react";
-import { makeGetIsPlaying, makeGetSong } from "../../state/selectors";
-import { applyState, State, useDispatch } from "../../state";
+import { useGetIsPlaying, useGetSong } from "../../state/selectors";
+import { useDispatch } from "../../state";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 import usePlayerActions from "src/Enterprise/state/usePlayerActions";
 
-type ParentProps = {
+type QueueEntryProps = {
   id: number;
 };
-type StateProps = ReturnType<ReturnType<typeof mappedState>>;
-type Component = React.FunctionComponent<ParentProps & StateProps>;
 
-const QueueEntry: Component = (props) => {
+const QueueEntry = (props: QueueEntryProps) => {
+  const song = useGetSong(props.id)
   const dispatch = useDispatch();
   const { togglePlayState, setCurrentSong } = usePlayerActions();
 
-  const { song, isPlaying } = props;
+  const isPlaying = useGetIsPlaying(props.id);
   const { title, id, durationLabel } = song;
 
   const updateQueuePosition = () => {
@@ -49,14 +47,4 @@ const QueueEntry: Component = (props) => {
   );
 };
 
-const mappedState = () => {
-  const getSong = makeGetSong();
-  const getIsPlaying = makeGetIsPlaying();
-
-  return (state: State, ownProps: ParentProps) => ({
-    song: getSong(state, ownProps),
-    isPlaying: getIsPlaying(state, ownProps),
-  });
-};
-
-export default applyState<ParentProps>(mappedState)(QueueEntry);
+export default QueueEntry
