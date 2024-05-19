@@ -71,13 +71,18 @@ const makeProvider = <T,>(initialState: T) => {
     };
   }
 
-  type Selector<V> = (state: T) => V;
-  function createSelector<B, A>(selectors: Selector<B>[], computingFn: (...arg: any[]) => A) {
+  type Selector<OwnProps, V> = (state: T, ownProps: OwnProps) => V;
+  function createSelector<B, A>(
+    selectors: Selector<B, any>[],
+    computingFn: (...arg: any[]) => A
+  ) {
     let computedCache = [] as any[];
     let cache: A;
 
-    return (state: T) => {
-      const extracted = selectors.map((fn) => fn(state)) as any[];
+    return (state: T, ownProps?: B) => {
+      const extracted = selectors.map((fn) =>
+        fn(state, ownProps ?? ({} as B))
+      ) as any[];
       const hasChanges = extracted.some(
         (computed, idx) => computedCache[idx] !== computed
       );

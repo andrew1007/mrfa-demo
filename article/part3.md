@@ -9,6 +9,11 @@ In part 2, it may have seemed strange that selector functions, regardless of com
 
 Memoizing operations in data structures is the last piece of the puzzle for highly optimized applications that are fast and maintainable. But memoizing operations that are derived from (essentially) a mini database is difficult. It requires an intuitive understanding of how the state tree changes as data is mutated, added, and removed from it.
 
+## Commenting on the React Compiler
+There is plenty of talk about a new feature: The [React Compiler](https://react.dev/learn/react-compiler). It markets itself as the answer to suppressing useless rerenders "for free". But in reality, a technology like this is not a free pass to be undisciplined. Poorly-designed apps have useless rerenders embedded within their DNA. No novel technology (short of AI code refactoring) will ever fix foundational performance issues.
+
+But learning about effective memoization and normalized state tree design is still a worthy endeavor. These concepts are platform-agnostic. Any technology, library, or framework will benefit from this knowledge.
+
 ## Seeing State Tree as Nodes
 
 Mutations are easiest to understand when `state` is treated like nodes in a tree data structure. Moving forward, a colored node will denote a node that will fail strict equality; either a change in value, reference, or both.
@@ -218,7 +223,7 @@ const updateDate = (newDate, currId) => {
 };
 ```
 
-Here, every data record node has changed. If the table has 100 rows, then 100 components will fail strict equality and uselessly trigger DOM node reconciliation checks. Instead of modifying every node, via spread operator, transforming the single node of interest is ideal. Here, the dev tools profiler only updates the necessary component.
+Instead of modifying every node, via spread operator, transforming the single node (and its root) of interest is ideal. Here, the dev tools profiler only update necessary components.
 
 ```typescript
 const updateDate = (newDate, currId) => {
@@ -236,8 +241,3 @@ const updateDate = (newDate, currId) => {
   });
 };
 ```
-
-## Commenting on the React Compiler
-There is plenty of talk about a new feature: The [React Compiler](https://react.dev/learn/react-compiler). It markets itself as the answer to useless rerenders for free. But learning about effective memoization and normalized state tree design is still a worthy endeavor. These concepts are platform-agnostic. Any technology, library, or framework will benefit from this knowledge.
-
-Also, a technology like this is not a free pass to be undisciplined. Poorly-designed apps have useless rerenders embedded within their DNA. No novel technology (short of AI code refactoring) will ever fix foundational performance issues.
