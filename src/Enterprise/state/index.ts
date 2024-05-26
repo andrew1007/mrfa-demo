@@ -1,7 +1,7 @@
 import makeProvider from "src/library/makeProvider";
 import { Route, State } from "./types";
 
-const initialState: State = {
+export const initialState: State = {
   user: {
     userId: 0,
     userName: "",

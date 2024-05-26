@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { useGetSearchSongQueueIds } from "src/Enterprise/state/selectors";
 import { applyState, State } from "../../state";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
@@ -23,4 +23,4 @@ const Queue: Component = () => {
   );
 };
 
-export default Queue;
+export default memo(Queue);

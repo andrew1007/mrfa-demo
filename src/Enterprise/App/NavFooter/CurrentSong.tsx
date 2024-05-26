@@ -1,14 +1,9 @@
-import React from "react";
-import { getCurrentSong } from "src/Enterprise/state/selectors";
-import { applyState, State } from "../../state";
+import React, { memo } from "react";
+import { useGetCurrentSong } from "src/Enterprise/state/selectors";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 
-type NoParentProps = Record<string, never>;
-type StateProps = ReturnType<ReturnType<typeof mappedState>>;
-type Component = React.FunctionComponent<NoParentProps & StateProps>;
-
-const CurrentSong: Component = (props) => {
-  const { song } = props;
+const CurrentSong = () => {
+  const song = useGetCurrentSong()
   const { artist, title } = song;
   return (
     <div>
@@ -23,8 +18,4 @@ const CurrentSong: Component = (props) => {
   );
 };
 
-const mappedState = () => (state: State) => ({
-  song: getCurrentSong(state),
-});
-
-export default applyState(mappedState)(CurrentSong);
+export default memo(CurrentSong)

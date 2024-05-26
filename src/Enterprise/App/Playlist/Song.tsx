@@ -3,6 +3,7 @@ import { useGetIsPlaying, useGetSong } from "../../state/selectors";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 import { useDispatch, useSelector } from "../../state";
 import usePlayerActions from "src/Enterprise/state/usePlayerActions";
+import { memo } from "react";
 
 type SongProps = {
   id: SubState["Playlist"]["songs"][0];
@@ -49,4 +50,4 @@ const Song = (props: SongProps) => {
   );
 };
 
-export default Song
+export default memo(Song)

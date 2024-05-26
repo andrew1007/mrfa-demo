@@ -1,13 +1,6 @@
-import React from "react";
-import { applyState } from "../../state";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
-import Session from "./Session";
 
-type NoParentProps = Record<string, never>;
-type StateProps = ReturnType<ReturnType<typeof mappedState>>;
-type Component = React.FunctionComponent<NoParentProps & StateProps>;
-
-const NavBar: Component = (props) => {
+const NavBar = () => {
   return (
     <nav>
       <HeavyUselessUI />
@@ -16,6 +9,4 @@ const NavBar: Component = (props) => {
   );
 };
 
-const mappedState = () => () => ({});
-
-export default applyState(mappedState)(NavBar);
+export default NavBar

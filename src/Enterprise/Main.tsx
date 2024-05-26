@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import App from "./App";
 import useAudioPlayer from "./hooks/useAudioPlayer";
 import { applyState, State, useDispatch } from "./state";
-import { getCurrentSong } from "./state/selectors";
+import { useGetCurrentSong } from "./state/selectors";
 import { Route } from "./state/types";
 import useAppInitActions from "./state/useAppInitActions";
 
@@ -15,10 +15,12 @@ const MainHOC = (Component: React.FC<any>) => {
   const Main: MainComponent = (props) => {
     const dispatch = useDispatch();
 
+    const { source } = useGetCurrentSong()
+
     const { initDashboard, initPlaylistSongs, initUserPlaylists } =
       useAppInitActions();
 
-    const { userId, songIds, playState, volume, currentDuration, source } =
+    const { userId, songIds, playState, volume, currentDuration } =
       props;
 
     useAudioPlayer({
@@ -61,7 +63,6 @@ const EMPTY: any[] = [];
 const mappedState = () => (state: State) => ({
   userId: state.user.userId,
   songIds: state.playlists[state.focusedId]?.songs ?? EMPTY,
-  source: getCurrentSong(state)?.source,
   volume: state.dashboard.volume,
   playState: state.dashboard.playState,
   currentDuration: state.dashboard.currentDuration,

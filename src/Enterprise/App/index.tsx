@@ -1,5 +1,5 @@
 import React from "react";
-import { applyState } from "../state";
+import { useSelector } from "../state";
 import { State } from "../state/types";
 import Dashboard from "./Dashboard";
 import Login from "./Login";
@@ -16,12 +16,9 @@ const Routes: Record<State["currentRoute"], React.FC<any>> = {
   artist: () => null,
 };
 
-type NoParentProps = Record<string, never>;
-type StateProps = ReturnType<ReturnType<typeof mappedState>>;
-type Component = React.FunctionComponent<NoParentProps & StateProps>;
-
-const App: Component = (props) => {
-  const Route = Routes[props.currentRoute];
+const App = () => {
+  const currentRoute = useSelector(state => state.currentRoute)
+  const Route = Routes[currentRoute];
 
   return (
     <div>
@@ -42,8 +39,4 @@ const App: Component = (props) => {
   );
 };
 
-const mappedState = () => (state: State) => ({
-  currentRoute: state.currentRoute,
-});
-
-export default applyState(mappedState)(App);
+export default App

@@ -1,6 +1,7 @@
 import { useGetSearchedSongIds } from "src/Enterprise/state/selectors";
 import Song from "./Song";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
+import { memo } from "react";
 
 const Songs = () => {
   const ids = useGetSearchedSongIds()
@@ -15,4 +16,4 @@ const Songs = () => {
   );
 };
 
-export default Songs
+export default memo(Songs)

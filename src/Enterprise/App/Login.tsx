@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import useAuthActions from "../state/useAuthActions";
 import HeavyUselessUI from "./Shared/HeavyUselessUI";
 
 type FieldUpdate = React.ChangeEventHandler<HTMLInputElement>;
 
-const Login: React.FunctionComponent = () => {
+const Login = () => {
   const { loginUser } = useAuthActions();
   const [credentials, setCredentials] = useState({
     userName: "",
@@ -36,4 +36,4 @@ const Login: React.FunctionComponent = () => {
   );
 };
 
-export default React.memo(Login);
+export default memo(Login);

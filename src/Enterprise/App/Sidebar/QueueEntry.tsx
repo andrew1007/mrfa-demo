@@ -2,6 +2,7 @@ import { useGetIsPlaying, useGetSong } from "../../state/selectors";
 import { useDispatch } from "../../state";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 import usePlayerActions from "src/Enterprise/state/usePlayerActions";
+import { memo } from "react";
 
 type QueueEntryProps = {
   id: number;
@@ -47,4 +48,4 @@ const QueueEntry = (props: QueueEntryProps) => {
   );
 };
 
-export default QueueEntry
+export default memo(QueueEntry)
