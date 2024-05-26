@@ -1,18 +1,14 @@
-import React, { useState } from "react";
-import { applyState, State } from "../../state";
+import { memo, useState } from "react";
+import { useSelector } from "../../state";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 import Playlists from "./Playlists";
 import Queue from "./Queue";
 
-type NoParentProps = Record<string, never>;
-type StateProps = ReturnType<ReturnType<typeof mappedState>>;
-type Component = React.FunctionComponent<NoParentProps & StateProps>;
-
 type Tabs = "playlist" | "queue";
-const Sidebar: Component = (props) => {
-  const { userName, playlistCount } = props;
+const Sidebar = () => {
   const [tab, setTab] = useState<Tabs>("playlist");
-
+  const userName = useSelector(state => state.user.userName);
+  const playlistCount = useSelector(state => state.playlistIds.length);
   const updateTab = (tab: Tabs) => () => setTab(tab);
 
   return (
@@ -31,9 +27,4 @@ const Sidebar: Component = (props) => {
   );
 };
 
-const mappedState = () => (state: State) => ({
-  userName: state.user.userName,
-  playlistCount: state.playlistIds.length,
-});
-
-export default applyState(mappedState)(Sidebar);
+export default memo(Sidebar);

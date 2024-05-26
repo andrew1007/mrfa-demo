@@ -1,14 +1,9 @@
-import React from "react";
-import { applyState } from "../../state";
+import { memo } from "react";
 
-type NoParentProps = Record<string, never>;
-type StateProps = ReturnType<ReturnType<typeof mappedState>>;
-type Component = React.FunctionComponent<NoParentProps & StateProps>;
-
-const Dashboard: Component = (props) => {
+const Search = () => {
   return null;
 };
 
 const mappedState = () => () => ({});
 
-export default applyState<NoParentProps>(mappedState)(Dashboard);
+export default memo(Search);

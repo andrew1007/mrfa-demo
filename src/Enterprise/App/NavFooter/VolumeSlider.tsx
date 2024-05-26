@@ -1,12 +1,10 @@
 import { debounce } from "lodash";
-import React, { useCallback, useEffect, useState } from "react";
-import { applyState, State, useDispatch } from "../../state";
+import { memo, useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "../../state";
 
-type StateProps = ReturnType<ReturnType<typeof mappedState>>;
-type Component = React.FunctionComponent<StateProps>;
+const VolumeSlider = () => {
+  const volume = useSelector(state => state.dashboard.volume);
 
-const VolumeSlider: Component = (props) => {
-  const { volume } = props;
   const dispatch = useDispatch();
   const [value, setValue] = useState(100);
 
@@ -41,8 +39,4 @@ const VolumeSlider: Component = (props) => {
   );
 };
 
-const mappedState = () => (state: State) => ({
-  volume: state.dashboard.volume,
-});
-
-export default applyState(mappedState)(VolumeSlider);
+export default memo(VolumeSlider);

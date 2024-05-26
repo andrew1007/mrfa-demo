@@ -1,11 +1,8 @@
-import React from "react";
+import { memo } from "react";
 import { PlayState } from "../../state/types";
-import { applyState, State } from "../../state";
+import { useSelector } from "../../state";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 import usePlayerActions from "src/Enterprise/state/usePlayerActions";
-
-type NoParentProps = Record<string, never>;
-type StateProps = ReturnType<ReturnType<typeof mappedState>>;
 
 const { paused, playing, idle } = PlayState;
 
@@ -15,10 +12,8 @@ const playStateClassName = {
   [idle]: ""
 };
 
-type Component = React.FunctionComponent<NoParentProps & StateProps>;
-
-const PlayStatusChanger: Component = (props) => {
-  const { status } = props;
+const PlayStatusChanger = () => {
+  const status = useSelector((state) => state.dashboard.playState)
   const { togglePlayState } = usePlayerActions();
 
   const handleClick = () => {
@@ -33,8 +28,4 @@ const PlayStatusChanger: Component = (props) => {
   );
 };
 
-const mappedState = () => (state: State) => ({
-  status: state.dashboard.playState,
-});
-
-export default applyState(mappedState)(PlayStatusChanger);
+export default memo(PlayStatusChanger);

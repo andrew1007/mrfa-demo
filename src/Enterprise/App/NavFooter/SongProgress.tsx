@@ -1,19 +1,16 @@
 import { debounce } from "lodash";
 import React, {
   ChangeEventHandler,
+  memo,
   useCallback,
   useEffect,
   useRef,
 } from "react";
-import { applyState, State, useDispatch } from "../../state";
+import { useDispatch, useSelector } from "../../state";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 
-type NoParentProps = Record<string, never>;
-type StateProps = ReturnType<ReturnType<typeof mappedState>>;
-type Component = React.FunctionComponent<NoParentProps & StateProps>;
-
-const SongProgress: Component = (props) => {
-  const { total, current, currentDuration, totalDuration } = props;
+const SongProgress = () => {
+  const { total, current, currentDuration, totalDuration } = useSongProgressSelector();
   const progressRef = useRef() as React.MutableRefObject<HTMLInputElement>
   const dispatch = useDispatch();
 
@@ -57,16 +54,15 @@ const secondsToSongDuration = (time: number) => {
   return `${minutes}:${seconds}`;
 };
 
-const mappedState = () => (state: State) => {
-  const { dashboard } = state;
-  const { currentDuration, totalDuration } = dashboard;
-
+const useSongProgressSelector = () => {
+  const currentDuration = useSelector(state => state.dashboard.currentDuration)
+  const totalDuration = useSelector(state => state.dashboard.totalDuration)
   return {
     current: secondsToSongDuration(currentDuration),
     total: secondsToSongDuration(totalDuration),
     currentDuration,
     totalDuration,
-  };
-};
+  }
+}
 
-export default applyState(mappedState)(SongProgress);
+export default memo(SongProgress);

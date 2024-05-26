@@ -1,18 +1,14 @@
-import React from "react";
-import { applyState, State } from "../../state";
+import { memo } from "react";
+import { useSelector } from "../../state";
 import Songs from "./Songs";
 import SearchBar from "../Shared/SearchBar";
 import { defaultPlaylist } from "src/Enterprise/state/selectors";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 
-type ParentProps = {
-  id: State["playlistIds"][0];
-};
-type StateProps = ReturnType<ReturnType<typeof mappedState>>;
-type Component = React.FunctionComponent<ParentProps & StateProps>;
+const Playlist = () => {
+  const playlist = useSelector(state => state.playlists[state.focusedId] ?? defaultPlaylist);
+  const { title, userName } = playlist;
 
-const Playlist: Component = (props) => {
-  const { title, userName } = props.playlist;
   return (
     <div className="playlist-root">
       <div>{title}</div>
@@ -24,8 +20,4 @@ const Playlist: Component = (props) => {
   );
 };
 
-const mappedState = () => (state: State) => ({
-  playlist: state.playlists[state.focusedId] ?? defaultPlaylist,
-});
-
-export default applyState<ParentProps>(mappedState)(Playlist);
+export default memo(Playlist);

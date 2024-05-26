@@ -1,19 +1,17 @@
-import React from "react";
 import { Route, State } from "../../state/types";
-import { applyState, useDispatch } from "../../state";
+import { useDispatch, useSelector } from "../../state";
 import { defaultPlaylist } from "src/Enterprise/state/selectors";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
+import { memo } from "react";
 
-type ParentProps = {
+type PlaylistEntryProps = {
   id: State["playlistIds"][0];
 };
-type StateProps = ReturnType<ReturnType<typeof mappedState>>;
-type Component = React.FunctionComponent<ParentProps & StateProps>;
 
-const PlaylistEntry: Component = (props) => {
+const PlaylistEntry = (props: PlaylistEntryProps) => {
   const dispatch = useDispatch();
+  const playlist = useSelector(state => state.playlists[props.id] ?? defaultPlaylist);
 
-  const { playlist } = props;
   const { title, songs, id } = playlist;
 
   const routeToPlaylist = () => {
@@ -31,8 +29,4 @@ const PlaylistEntry: Component = (props) => {
   );
 };
 
-const mappedState = () => (state: State, ownProps: ParentProps) => ({
-  playlist: state.playlists[ownProps.id] ?? defaultPlaylist,
-});
-
-export default applyState<ParentProps>(mappedState)(PlaylistEntry);
+export default memo(PlaylistEntry);

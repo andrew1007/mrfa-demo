@@ -1,18 +1,7 @@
-import React from "react";
-import { applyState } from "../../state";
+import { memo } from "react";
 
-type NoParentProps = Record<string, never>;
-type StateProps = ReturnType<ReturnType<typeof mappedState>>;
-type Component = React.FunctionComponent<NoParentProps & StateProps>;
-
-const Session: Component = (props) => {
+const Session = () => {
   return null;
 };
 
-const mappedState = () => () => ({});
-
-export default applyState<NoParentProps>(mappedState)(Session);
-
-const NewComponent: React.FC<Record<string, never>> = (props) => {
-  return <div>hello my name is Andrew</div>;
-};
+export default memo(Session);
