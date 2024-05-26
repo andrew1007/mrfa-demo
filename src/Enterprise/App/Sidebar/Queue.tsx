@@ -1,6 +1,5 @@
 import React, { memo } from "react";
 import { useGetSearchSongQueueIds } from "src/Enterprise/state/selectors";
-import { applyState, State } from "../../state";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 import SearchBar from "../Shared/SearchBar";
 import QueueEntry from "./QueueEntry";
