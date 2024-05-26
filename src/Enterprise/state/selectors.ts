@@ -52,6 +52,9 @@ type QueueText = ReturnType<typeof getQueueText>;
 const getSongQueueIds = (state: State) => state.queue.songIds;
 type SongQueueIds = ReturnType<typeof getSongQueueIds>;
 
+const getQueue = (state: State) => state.queue;
+type Queue = ReturnType<typeof getQueue>;
+
 const getPlaylistSongIds = createSelector(
   [getPlaylists, getFocusedId],
   (playlists: Playlists, focusedId: FocusedPlaylist) => {
@@ -73,8 +76,8 @@ export const getSearchedPlaylistIds = createSelector(
 );
 
 export const useGetSearchedPlaylistIds = () => {
-  return useSelector(getSearchedPlaylistIds)
-}
+  return useSelector(getSearchedPlaylistIds);
+};
 export const getSearchedSongIds = createSelector(
   [getSongText, getSongs, getPlaylistSongIds],
   (searchText: SongText, songs: Songs, songIds: PlaylistSongIds) => {
@@ -88,7 +91,7 @@ export const getSearchedSongIds = createSelector(
   }
 );
 
-export const useGetSearchedSongIds = () => useSelector(getSearchedSongIds)
+export const useGetSearchedSongIds = () => useSelector(getSearchedSongIds);
 
 const makeGetStateSong = (id: number) => (state: State) =>
   state.songs[id] ?? defaultSong;
@@ -105,8 +108,8 @@ const makeGetSong = (id: number) =>
   });
 
 export const useGetSong = (id: number) => {
-  const getSong = useMemo(() => makeGetSong(id), [id])
-  return useSelector(getSong)
+  const getSong = useMemo(() => makeGetSong(id), [id]);
+  return useSelector(getSong);
 };
 
 const getSearchSongQueueIds = createSelector(
@@ -122,14 +125,18 @@ const getSearchSongQueueIds = createSelector(
   }
 );
 
-export const useGetSearchSongQueueIds = () => useSelector(getSearchSongQueueIds)
+export const useGetSearchSongQueueIds = () =>
+  useSelector(getSearchSongQueueIds);
 
-export const getCurrentSong = (state: State) => {
-  const { queue, songs } = state;
-  const { position, songIds } = queue;
+export const getCurrentSong = createSelector(
+  [getQueue, getSongs],
+  (queue: Queue, songs: Songs) => {
+    const { position, songIds } = queue;
+    return songs[songIds[position]] ?? defaultSong;
+  }
+);
 
-  return songs[songIds[position]] ?? defaultSong;
-};
+export const useGetCurrentSong = () => useSelector(getCurrentSong);
 
 const makeGetIsPlaying = (id: number) =>
   createSelector(
@@ -141,6 +148,6 @@ const makeGetIsPlaying = (id: number) =>
   );
 
 export const useGetIsPlaying = (id: number) => {
-  const getIsPlaying = useMemo(() => makeGetIsPlaying(id), [id])
-  return useSelector(getIsPlaying)
-}
+  const getIsPlaying = useMemo(() => makeGetIsPlaying(id), [id]);
+  return useSelector(getIsPlaying);
+};
