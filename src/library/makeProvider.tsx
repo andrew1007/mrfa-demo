@@ -15,7 +15,7 @@ const noop = () => null;
 
 const makeProvider = <T,>(initialState: T) => {
   type DispatchCb = (prevState: T) => Partial<T>;
-
+  let currentState = initialState
   const StateContext = createContext(initialState);
   const DispatchContext = createContext(
     noop as unknown as Dispatch<DispatchCb>
@@ -35,11 +35,11 @@ const makeProvider = <T,>(initialState: T) => {
     });
 
     const [state, dispatch] = useReducer(reducer, initialState);
-
+    currentState = state
     subscribers.forEach((fn) => {
       fn(state)
     })
-    console.log(state)
+
     return (
       <DispatchContext.Provider value={dispatch}>
         <StateContext.Provider value={state}>
@@ -86,6 +86,7 @@ const makeProvider = <T,>(initialState: T) => {
       const hasChanges = extracted.some(
         (computed, idx) => computedCache[idx] !== computed
       );
+
       if (!cache || hasChanges) {
         cache = computingFn(...extracted);
         computedCache = extracted;
@@ -95,20 +96,24 @@ const makeProvider = <T,>(initialState: T) => {
     };
   }
 
-  const useSelector = <V, >(selector: StateSubscriber<V>) => {
+  const useSelector = <V,>(selector: StateSubscriber<V>) => {
     const [, forceRender] = useReducer(s => s + 1, 0);
     const selectorRef = useRef(selector);
-    const currValRef = useRef(selectorRef.current(initialState))
+    const currValRef = useRef(selector(currentState))
     useEffect(() => {
+      currValRef.current = selectorRef.current(currentState)
+      forceRender()
+
       const fn = (state: T) => {
         const computed = selectorRef.current(state)
 
-        if (currValRef.current !== computed) {
+        if (currValRef.current !== computed || state === initialState) {
           currValRef.current = computed
           forceRender()
         }
       }
       subscribers.push(fn)
+
       return () => {
         subscribers = subscribers.filter(currFn => currFn !== fn)
       }
