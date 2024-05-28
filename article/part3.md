@@ -65,7 +65,7 @@ If all resolvers computed to a value that meets strict equality, the cached valu
 
 The hardest part about effective memoization is writing the correct resolver functions. It's helpful to think of a resolver as a function that "crawls" down a state tree to target required nodes. The nodes that are targeted should be the exact nodes that are required to compute the data.
 
-Let's take a look at a sample state tree that is normalized
+Take a look at a sample state tree that is normalized
 
 ```typescript
 export const normalizedState = {
@@ -88,7 +88,7 @@ export const normalizedState = {
 };
 ```
 
-Let's say a component needs an array of titles. We can memoize this operation by having the resolver functions "target" the relevant nodes: `docs` and `docIds`
+If an array of titles is needed, the resolver functions should individually "target" the relevant nodes: `docs` and `docIds`.
 
 ```typescript
 // resolvers
@@ -121,7 +121,7 @@ const useGetParsedTitles = useSelector(getParsedTitles);
 
 ## Factory Selectors for Multi-cache situations
 
-`createSelector` has a cache size of one. This meets most use cases. But some situations may require a larger cache. For example, when an algorithm needs to operate on something by id. This situation is common when many instances of a component are rendered, such as a table.
+`createSelector` has a cache size of one. This meets most use cases. But some situations may require a larger cache. For example, when an algorithm needs to operate on something by id. This situation is common when many instances of a component are rendered, such as a table or list of UI elements.
 
 A selector like this will miss its cache because `id` is constantly changing. In this situation, a factory is required.
 
@@ -149,7 +149,7 @@ const DocEntry = (props) => {
 };
 ```
 
-Now, each `useGetDocById` has its own selector instance, which allows maximal strict equality matching.
+Now, each `useGetDocById` has its own cache, via individual instance of `makeGetParsedDocById`. This allows maximal strict equality matching.
 
 
 ## `createSelector` Resolver Design

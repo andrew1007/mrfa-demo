@@ -55,7 +55,7 @@ The benefits are immense:
 - Easy to refactor
 - Uniform arguments make code easier to reason about
 - Algorithms are decoupled from UI
-- Memoization is easy (discussed later)
+- Enables structured and predictable memoization patterns (discussed later)
 - Infinitely reusable with virtually no performance penalties (with memoization).
 
 ## Selectors with only state data
@@ -73,10 +73,10 @@ const getDocLabels = (state) => {
 
 ## Selectors with extra parameters
 
-Selectors with multiple parameters are a little trickier to write. The extra data can technically be added as a second parameter. But for the time being, write them as curried functions. The reason will become apparent when memoization is covered.
+Selectors with multiple parameters are trickier to write. They need to be written as curried functions. The reason will become apparent when memoization is covered.
 
 ```typescript
-const makeGetDocById = (id) => (state) => state.docs[id]
+const makeGetDocById = (id) => (state) => state.docs[id];
 ```
 
 ## `useSelector`
@@ -86,7 +86,8 @@ For the sake of learning, the higher order component model for rerender suppress
 ```tsx
 const makeProvider = (initialState) => {
   // ...
-  let subscribers = []
+  let subscribers = [];
+  let currentState = initialState;
 
   // Provider component with state management hook
   const Provider = ({ children }) => {
@@ -96,41 +97,40 @@ const makeProvider = (initialState) => {
     });
 
     const [state, dispatch] = useReducer(reducer, initialState);
-
+    currentState = state;
     subscribers.forEach((fn) => {
-      fn(state)
-    })
+      fn(state);
+    });
 
     return (
       <DispatchContext.Provider value={dispatch}>
-        <StateContext.Provider value={state}>
-          {children}
-        </StateContext.Provider>
+        <StateContext.Provider value={state}>{children}</StateContext.Provider>
       </DispatchContext.Provider>
     );
   };
 
   // ...
 
-  const NotComputed = Symbol('NotComputed')
+  const NotComputed = Symbol("NotComputed");
 
   const useSelector = (selector) => {
-    const [, forceRender] = useReducer(s => s + 1, 0);
+    const [, forceRender] = useReducer((s) => s + 1, 0);
     const selectorRef = useRef(selector);
-    const currValRef = useRef(NotComputed as V)
-
+    const currValRef = useRef(selector(currentState));
     useEffect(() => {
-      const fn = (state) => {
-        const computed = selectorRef.current(state)
-        if (currValRef.current !== computed) {
-          currValRef.current = computed
-          forceRender()
+      const fn = (state: T) => {
+        const computed = selectorRef.current(state);
+
+        if (currValRef.current !== computed || state === initialState) {
+          currValRef.current = computed;
+          forceRender();
         }
-      }
-      subscribers.push(fn)
+      };
+      subscribers.push(fn);
+
       return () => {
-        subscribers = subscribers.filter(currFn => currFn !== fn)
-      }
+        subscribers = subscribers.filter((currFn) => currFn !== fn);
+      };
     }, []);
 
     return currValRef.current;
@@ -143,13 +143,12 @@ const makeProvider = (initialState) => {
     createSelector,
     useSelector,
   };
-}
+};
 ```
 
 ## `useSelector` Explained
 
 Each hook retains computed data in a `useRef` hook, because assigning data to it does not trigger a rerender.
-
 
 ## Selectors used in `useSelector`
 
@@ -157,15 +156,14 @@ It is no coincidence that the interface of the selector matches the interface of
 
 ```typescript
 const getDocList = (state) => state.docIds.map((id) => state.docs[id]);
-const useGetDocList = useSelector(getDocList)
+const useGetDocList = useSelector(getDocList);
 
-const makeGetDocById = (id) => (state) => state.docs[id]
-const useGetDocById = (id) => useSelector(makeGetDocById(id))
+const makeGetDocById = (id) => (state) => state.docs[id];
+const useGetDocById = (id) => useSelector(makeGetDocById(id));
 
 const Component = (props) => {
-  const docList = useGetDocList()
-  const doc = useGetDocById(props.id)
-  return null
-}
+  const docList = useGetDocList();
+  const doc = useGetDocById(props.id);
+  return null;
+};
 ```
-

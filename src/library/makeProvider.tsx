@@ -15,7 +15,6 @@ const noop = () => null;
 
 const makeProvider = <T,>(initialState: T) => {
   type DispatchCb = (prevState: T) => Partial<T>;
-  let currentState = initialState
   const StateContext = createContext(initialState);
   const DispatchContext = createContext(
     noop as unknown as Dispatch<DispatchCb>
@@ -23,7 +22,16 @@ const makeProvider = <T,>(initialState: T) => {
 
   type StateSubscriber<V> = (state: T) => V
 
+  /**
+   * Holds all useSelector callback fns
+   */
   let subscribers: StateSubscriber<any>[] = []
+
+  /**
+   * Retain current state outside of useReducer. Used
+   * in initialization of `useSelector`, current value
+   */
+  let currentState = initialState
 
   // Provider component with state management hook
   const Provider: FC<{ children: ReactNode }> = ({
@@ -35,7 +43,16 @@ const makeProvider = <T,>(initialState: T) => {
     });
 
     const [state, dispatch] = useReducer(reducer, initialState);
+
+    /**
+     * Keep currentState in sync with `state` at all times
+     */
     currentState = state
+
+    /**
+     * Recompute all useSelector callbacks on each update of
+     * state
+     */
     subscribers.forEach((fn) => {
       fn(state)
     })
@@ -71,17 +88,17 @@ const makeProvider = <T,>(initialState: T) => {
     };
   }
 
-  type Selector<OwnProps, V> = (state: T, ownProps: OwnProps) => V;
+  type Selector<V> = (state: T) => V;
   function createSelector<B, A>(
-    selectors: Selector<B, any>[],
+    selectors: Selector<B>[],
     computingFn: (...arg: any[]) => A
   ) {
     let computedCache = [] as any[];
     let cache: A;
 
-    return (state: T, ownProps?: B) => {
+    return (state: T) => {
       const extracted = selectors.map((fn) =>
-        fn(state, ownProps ?? ({} as B))
+        fn(state)
       ) as any[];
       const hasChanges = extracted.some(
         (computed, idx) => computedCache[idx] !== computed
@@ -100,6 +117,7 @@ const makeProvider = <T,>(initialState: T) => {
     const [, forceRender] = useReducer(s => s + 1, 0);
     const selectorRef = useRef(selector);
     const currValRef = useRef(selector(currentState))
+
     useEffect(() => {
       const fn = (state: T) => {
         const computed = selectorRef.current(state)

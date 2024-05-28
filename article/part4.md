@@ -1,1 +1,3 @@
-# Make React Fast Again Part 4: State tree mutations and algorithm memoization
+# Make React Fast Again Part 4: Full Scale Application Analysis
+
+## Introduction
