@@ -87,7 +87,7 @@ export const getSearchedSongIds = createSelector(
       songs[id]?.title.includes(searchText)
     );
 
-    return filtered.length > 0 ? filtered : EMPTY_ARR;
+    return filtered.length > 0 ? filtered : EMPTY_ARR as typeof filtered;
   }
 );
 
@@ -141,7 +141,7 @@ const getSearchSongQueueIds = createSelector(
       songs[id]?.title.includes(searchText)
     );
 
-    return filtered.length > 0 ? filtered : EMPTY_ARR;
+    return filtered.length > 0 ? filtered : EMPTY_ARR as typeof filtered;
   }
 );
 
