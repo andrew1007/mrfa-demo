@@ -2,7 +2,7 @@ import React from "react";
 
 const HeavyUselessUI = () => (
   <>
-    {Array(50)
+    {Array(100)
       .fill(null)
       .map((_, idx) => (
         <div key={idx} />

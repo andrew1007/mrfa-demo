@@ -101,9 +101,6 @@ const makeProvider = <T,>(initialState: T) => {
     const selectorRef = useRef(selector);
     const currValRef = useRef(selector(currentState))
     useEffect(() => {
-      currValRef.current = selectorRef.current(currentState)
-      forceRender()
-
       const fn = (state: T) => {
         const computed = selectorRef.current(state)
 

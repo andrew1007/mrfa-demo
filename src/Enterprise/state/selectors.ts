@@ -112,6 +112,26 @@ export const useGetSong = (id: number) => {
   return useSelector(getSong);
 };
 
+const FORCE_MISS_CACHE = () => () => Math.random();
+const makeMissedCacheGetSong = (id: number) =>
+  createSelector(
+    [makeGetStateSong(id), FORCE_MISS_CACHE],
+    (song: StateSong) => {
+      const { duration } = song;
+      const minutes = Math.floor(duration / 60);
+      const seconds = `0${duration - minutes * 60}`.slice(-2);
+      return {
+        ...song,
+        durationLabel: `${minutes}:${seconds}`,
+      };
+    }
+  );
+
+export const useMissedCacheGetSong = (id: number) => {
+  const missedCacheGetSong = useMemo(() => makeMissedCacheGetSong(id), [id]);
+  return useSelector(missedCacheGetSong);
+};
+
 const getSearchSongQueueIds = createSelector(
   [getQueueText, getSongs, getSongQueueIds],
   (searchText: QueueText, songs: Songs, songQueueIds: SongQueueIds) => {
