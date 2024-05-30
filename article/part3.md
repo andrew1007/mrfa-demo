@@ -31,7 +31,7 @@ The spread operator performs a shallow merge. Think of this operation as the cre
 
 ## Custom `createSelector`
 
-Under normal circumstances, reinventing the wheel is bad. But for learning purposes, here is a custom implementation of a powerful memoization function. It is functionally equivalent to `createSelector`, from the package `reselect`.
+For learning purposes, here is a custom implementation of a powerful memoization function. It is functionally equivalent to `createSelector`, from the package `reselect`.
 
 ```typescript
 function createSelector(selectors, computingFn) {

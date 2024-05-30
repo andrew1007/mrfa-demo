@@ -8,7 +8,9 @@ The way data is structured, managed, transformed, and computed will be the centr
 
 ## Normalized State Data
 
-Normalization is imperative for a maintainable SSOT (single source of truth) data model. Do not duplicate stored data. It may be helpful to think of a state tree as a server-side database. In the same way data (and its normalization) is respected on the backend, similar attitudes should apply to how the frontend manages data.
+Normalization is imperative for a maintainable SSOT (single source of truth) data model. Do not duplicate stored data. It may be helpful to think of a state tree as a server-side database. 
+
+In the same way data (and its normalization) is respected on the backend, similar attitudes should apply to how the frontend manages data.
 
 Duplication becomes less alluring when data is easily accessible. This is commonly done by storing data as records in key-value pairs. This also provides the benefit of O(1) key access. An array of records can be converted using a simple one-liner.
 
@@ -42,7 +44,7 @@ const getDocList = (state) => state.docIds.map((id) => state.docs[id]);
 
 Saving computed values is duplication in disguise. Storing computed values requires permanent maintenance for the lifespan of the app. When the data origin changes, the computed value needs to be updated in conjunction.
 
-Assume an algorithm is fast until proven otherwise. Never denormalize a state tree for speculative optimization. Powerful, functional, and robust memoization (covered in part 3) solves virtually all performance issues.
+Never denormalize a state tree for speculative optimization. Assume an algorithm is fast until proven otherwise. On top of this, algorithms become a vanishing concern when computed values are cached. Powerful, functional, and robust memoization strategies will be covered (in part 3).
 
 ## Selectors: consistent and predictable data computation
 
@@ -73,7 +75,7 @@ const getDocLabels = (state) => {
 
 ## Selectors with extra parameters
 
-Selectors with multiple parameters are trickier to write. They need to be written as curried functions. The reason will become apparent when memoization is covered.
+Selectors other parameters are trickier to write. The function needs to be curried. The reason will become apparent when memoization is covered.
 
 ```typescript
 const makeGetDocById = (id) => (state) => state.docs[id];
@@ -81,7 +83,12 @@ const makeGetDocById = (id) => (state) => state.docs[id];
 
 ## `useSelector`
 
-For the sake of learning, the higher order component model for rerender suppression was discussed. But practically speaking, it is easier to use a hook. But hooks will naturally rerender on every update, so a few sneaky tricks need to be performed in order to suppress rerenders on every render cycle. Integrating `useSelector` into `makeProvider` requires a few small changes. There needs to be a data structure to hold data listeners and they need to be recomputed for every render cycle.
+The higher order component approach was taken for learning purposes. It is the more "formal" way, because data management stays within React's data flow paradigm. A hook would be more practical, but they naturally rerender on every update, so a few sneaky tricks are required to suppress rerenders. Integrating `useSelector` into `makeProvider` requires some changes.
+
+1. There needs to be a data structure to hold data listeners and they need to be recomputed for every render cycle (`subscribers`).
+2. The current state needs to persist outside of the component (`currentState`).
+
+Each hook retains computed data in a `useRef` hook, to avoid a rerender.
 
 ```tsx
 const makeProvider = (initialState) => {
@@ -117,6 +124,7 @@ const makeProvider = (initialState) => {
     const [, forceRender] = useReducer((s) => s + 1, 0);
     const selectorRef = useRef(selector);
     const currValRef = useRef(selector(currentState));
+
     useEffect(() => {
       const fn = (state: T) => {
         const computed = selectorRef.current(state);
@@ -146,17 +154,13 @@ const makeProvider = (initialState) => {
 };
 ```
 
-## `useSelector` Explained
-
-Each hook retains computed data in a `useRef` hook, because assigning data to it does not trigger a rerender.
-
 ## Selectors used in `useSelector`
 
 It is no coincidence that the interface of the selector matches the interface of `useSelector`. By invoking the selectors in `useSelector`, algorithms and UI are neatly separated, along with optimal rerender suppression.
 
 ```typescript
 const getDocList = (state) => state.docIds.map((id) => state.docs[id]);
-const useGetDocList = useSelector(getDocList);
+const useGetDocList = () => useSelector(getDocList);
 
 const makeGetDocById = (id) => (state) => state.docs[id];
 const useGetDocById = (id) => useSelector(makeGetDocById(id));
@@ -167,3 +171,23 @@ const Component = (props) => {
   return null;
 };
 ```
+
+## Computed Data Will Rerender
+
+This current strategy works because the selectors are returning nodes in the state tree. But if the operation inside the selector turns into algorithm that returns an object (which happens all the time), the selector will *always* trigger a rerender. Memoization makes this a solvable problem.
+
+```typescript
+const makeGetDocById = (id) => (state) => {
+  const doc = state.docs[id]
+  return {
+    ...doc,
+    timestamp: moment(doc.updatedAt).format('YYYY-MM-DD')
+  }
+};
+
+const useGetDocById = (id) => useSelector(makeGetDocById(id));
+```
+
+
+## Conclusion
+
