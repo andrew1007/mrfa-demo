@@ -18,6 +18,7 @@ const SongProgress = () => {
     progressRef.current.value = `${currentDuration}`;
   }, [currentDuration]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateProgress = useCallback(
     debounce<ChangeEventHandler<HTMLInputElement>>((e) => {
       const newProgress = Number(e.target.value);
@@ -33,6 +34,7 @@ const SongProgress = () => {
 
   return (
     <div>
+      {total ? `${current}` : "--"}
       <input
         ref={progressRef}
         min={0}
@@ -41,7 +43,7 @@ const SongProgress = () => {
         onChange={updateProgress}
         type="range"
       />
-      {total ? `${current} / ${total}` : "-- / --"}
+      {total ? `${total}` : "--"}
       <HeavyUselessUI />
     </div>
   );

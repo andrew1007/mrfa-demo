@@ -187,7 +187,3 @@ const makeGetDocById = (id) => (state) => {
 
 const useGetDocById = (id) => useSelector(makeGetDocById(id));
 ```
-
-
-## Conclusion
-

@@ -17,12 +17,12 @@ export const initialState: State = {
     song: "",
     queue: "",
   },
-  currentRoute: Route.login,
+  currentRoute: Route.playlist,
   dashboard: {
     currentDuration: 0,
     totalDuration: 0,
     playState: "idle",
-    volume: 100,
+    volume: 5,
   },
   queue: {
     playlistId: 0,

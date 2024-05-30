@@ -1,7 +1,6 @@
 export enum Route {
   dashboard = "dashboard",
   playlist = "playlist",
-  login = "login",
   artist = "artist",
 }
 

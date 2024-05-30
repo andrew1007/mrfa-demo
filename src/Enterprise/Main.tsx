@@ -32,25 +32,22 @@ const MainHOC = (Component: React.FC<any>) => {
 
     const init = () => {
       dispatch(() => ({
-        currentRoute: Route.login,
+        currentRoute: Route.dashboard,
       }));
+      initDashboard(userId);
+      initUserPlaylists(userId);
     };
 
     useEffect(() => {
       init();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    useEffect(() => {
-      if (userId) {
-        initDashboard(userId);
-        initUserPlaylists(userId);
-      }
-    }, [userId]);
 
     useEffect(() => {
       if (songIds.length > 0) {
         initPlaylistSongs(songIds);
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [songIds]);
 
     return <MemoedComponent />;
