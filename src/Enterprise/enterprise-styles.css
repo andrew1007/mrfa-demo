@@ -114,10 +114,8 @@
 
 .song-root {
   display: grid;
-  grid-template-areas:
-    "sa sb sb sd"
-    "sa sc sc sd";
-  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "sa sb sc sd";
+  grid-template-columns: 30px auto 1fr auto;
   border-radius: 5px;
   padding: 0px 5px;
 }
@@ -201,6 +199,11 @@ button {
 
 button:hover {
   cursor: pointer;
+  background: grey;
+  color: white;
+}
+
+.focused-playlist-entry {
   background: grey;
   color: white;
 }

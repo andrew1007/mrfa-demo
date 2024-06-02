@@ -69,7 +69,7 @@ export const getSearchedPlaylistIds = createSelector(
     if (!searchText) return ids;
 
     const filtered = ids.filter((id) =>
-      playlists[id]?.title.includes(searchText)
+      playlists[id]?.title.toLowerCase().includes(searchText.toLowerCase())
     );
     return filtered.length > 0 ? filtered : EMPTY_ARR;
   }
@@ -84,7 +84,7 @@ export const getSearchedSongIds = createSelector(
     if (!searchText) return songIds;
 
     const filtered = songIds.filter((id) =>
-      songs[id]?.title.includes(searchText)
+      songs[id]?.title.toLowerCase().includes(searchText.toLowerCase())
     );
 
     return filtered.length > 0 ? filtered : EMPTY_ARR as typeof filtered;

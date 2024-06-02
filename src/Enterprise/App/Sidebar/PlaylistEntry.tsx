@@ -11,7 +11,7 @@ type PlaylistEntryProps = {
 const PlaylistEntry = (props: PlaylistEntryProps) => {
   const dispatch = useDispatch();
   const playlist = useSelector(state => state.playlists[props.id] ?? defaultPlaylist);
-
+  const isFocused = useSelector(state => state.focusedId === props.id)
   const { title, songs, id } = playlist;
 
   const routeToPlaylist = () => {
@@ -22,7 +22,7 @@ const PlaylistEntry = (props: PlaylistEntryProps) => {
   };
 
   return (
-    <button onClick={routeToPlaylist}>
+    <button onClick={routeToPlaylist} className={isFocused ? 'focused-playlist-entry' : ''}>
       <HeavyUselessUI />
       {title} ({songs.length})
     </button>
