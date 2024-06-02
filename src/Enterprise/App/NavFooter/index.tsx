@@ -10,13 +10,17 @@ type Component = React.FunctionComponent<NoParentProps>;
 
 const NavFooter: Component = () => {
   return (
-    <div>
+    <>
       <HeavyUselessUI />
-      <CurrentSong />
-      <SongProgress />
-      <PlayStatusChanger />
-      <VolumeSlider />
-    </div>
+      <div className="nav-footer-container" >
+        <CurrentSong />
+        <div>
+          <PlayStatusChanger />
+          <SongProgress />
+        </div>
+        <VolumeSlider />
+      </div>
+    </>
   );
 };
 

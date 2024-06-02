@@ -4,17 +4,17 @@ import { debounce } from "lodash";
 import { State } from "../../state/types";
 import HeavyUselessUI from "./HeavyUselessUI";
 
-type ParentProps = {
+type SearchBarProps = {
   field: keyof State["search"];
   placeholder: string;
 };
-type Component = React.FunctionComponent<ParentProps>;
 
-const SearchBar: Component = (props) => {
+const SearchBar = (props: SearchBarProps) => {
   const dispatch = useDispatch();
   const { field, placeholder } = props;
   const [value, setValue] = useState("");
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateStateValue = useCallback(
     debounce((value: string) => {
       dispatch(({ search }) => ({
@@ -29,6 +29,7 @@ const SearchBar: Component = (props) => {
 
   useEffect(() => {
     updateStateValue(value);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
   const handleChange: React.InputHTMLAttributes<HTMLInputElement>['onChange'] = (e) => {
