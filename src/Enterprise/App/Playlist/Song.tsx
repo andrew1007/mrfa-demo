@@ -25,10 +25,10 @@ const Song = (props: SongProps) => {
 
   return (
     <>
-      <div className="song-root">
+      <div className="song-root" onDoubleClick={play}>
         <PlayIcon songId={props.id} />
         <div className="song-title">{title}</div>
-        <div className="song-artist" onDoubleClick={play}>
+        <div className="song-artist">
           {artist}
         </div>
         <div className="song-duration">{durationLabel}</div>

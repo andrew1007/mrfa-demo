@@ -1,5 +1,5 @@
 import { useGetIsFocusedSong, useGetIsPlaying } from "../../store/selectors";
-import {  useSelector } from "../../store";
+import { useSelector } from "../../store";
 import usePlayerActions from "src/Enterprise/store/usePlayerActions";
 import { memo } from "react";
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -15,7 +15,8 @@ const PlayIcon = (props: PlayIconProps) => {
   const playlistId = useSelector(state => state.focusedId);
   const isCurrentSong = useGetIsFocusedSong(songId)
 
-  const updateSong = () => {
+  const updateSong: React.DOMAttributes<HTMLDivElement>['onClick'] = (e) => {
+    e.stopPropagation()
     if (isPlaying) {
       togglePlayState();
     } else {
