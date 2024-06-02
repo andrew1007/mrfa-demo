@@ -31,7 +31,7 @@ export const initialState: State = {
   },
   performance: {
     cacheMiss: false,
-    slowdown: 0,
+    slowdown: 1,
   }
 };
 

@@ -249,3 +249,10 @@ button:hover {
   flex-direction: column;
   gap: 30px;
 }
+
+.help-icon {
+  font-size: 16px !important;
+  fill: grey !important;
+  vertical-align: middle;
+  margin-left: 5px;
+}

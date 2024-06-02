@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from "src/Enterprise/store"
+import HelpToolTip from "../Shared/HelpTooltip"
 
 const CacheMiss = () => {
   const dispatch = useDispatch()
@@ -17,7 +18,7 @@ const CacheMiss = () => {
             }
           }))
         }} />
-        Force Rerenders
+      Force Rerenders <HelpToolTip desc="Forces some components to miss their cache, triggering a rerender on every store update" />
     </div>
   )
 }

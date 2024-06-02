@@ -1,6 +1,7 @@
 import { debounce } from "lodash";
 import React, { useCallback, useState } from "react";
-import { useDispatch } from "src/Enterprise/store";
+import { initialState, useDispatch } from "src/Enterprise/store";
+import HelpToolTip from "../Shared/HelpTooltip";
 
 const tiers = [0, 1, 2, 3];
 const labels = ['low', 'moderate', 'high', 'extreme']
@@ -15,7 +16,7 @@ function getClosest(arr: number[], val: number) {
 
 const SlowDown = () => {
   const dispatch = useDispatch()
-  const [value, setValue] = useState(0)
+  const [value, setValue] = useState(initialState.performance.slowdown)
 
   const updateStore = useCallback(debounce((next: number) => {
     dispatch(({ performance }) => ({
@@ -47,6 +48,7 @@ const SlowDown = () => {
       />
       <div>
         UI Complexity: {labels[value]}
+        <HelpToolTip desc="Increases algorithmic complexity and adds larges amounts of HTML (hidden) to components" />
       </div>
     </div>
 
