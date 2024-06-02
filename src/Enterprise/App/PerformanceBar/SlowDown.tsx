@@ -1,6 +1,6 @@
 import { debounce } from "lodash";
 import React, { useCallback, useState } from "react";
-import { useDispatch } from "src/Enterprise/store";
+import { initialState, useDispatch } from "src/Enterprise/store";
 
 const tiers = [0, 1, 2, 3];
 const labels = ['none', 'low', 'moderate', 'severe']
@@ -19,6 +19,7 @@ const SlowDown = () => {
 
   const updateStore = useCallback(debounce((next: number) => {
     dispatch(({ performance }) => ({
+      ...initialState,
       performance: {
         ...performance,
         slowdown: next

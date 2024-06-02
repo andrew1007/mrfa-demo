@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from "src/Enterprise/store"
+import { initialState, useDispatch, useSelector } from "src/Enterprise/store"
 
 const CacheMiss = () => {
   const dispatch = useDispatch()
@@ -10,6 +10,7 @@ const CacheMiss = () => {
       checked={miss}
       onChange={(e) => {
         dispatch(({ performance }) => ({
+          ...initialState,
           performance: {
             ...performance,
             cacheMiss: e.target.checked

@@ -1,6 +1,7 @@
 import { useSelector } from "src/Enterprise/store";
 
 const HeavyUselessUI = () => {
+  return null
   const slowdown = useSelector(state => state.performance.slowdown)
   const iterations = slowdown * 1000
 

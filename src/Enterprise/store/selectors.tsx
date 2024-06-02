@@ -185,4 +185,11 @@ export const useGetIsPlaying = (id: number) => {
 
 const getMissCache = (state: State) => state.performance.cacheMiss ? Math.random() : 0
 
-export const useGetRerenderForceIfFlagged = () => useSelector(getMissCache)
+export const useGetRerenderForceIfFlagged = () => {
+  const slowdown = useSelector((state) => state.performance.slowdown)
+  const iterations = slowdown * 10000
+  useSelector(getMissCache)
+  for (let i = 0; i < iterations; i++) {
+    <div />
+  }
+}

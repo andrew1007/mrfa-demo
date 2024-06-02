@@ -68,7 +68,7 @@ const useAudioPlayer = () => {
     const playHandlers = {
       [PlayState.paused]: () => audio.pause(),
       [PlayState.playing]: () => audio.play(),
-      [PlayState.idle]: () => null,
+      [PlayState.idle]: () => audio.pause(),
     };
     playHandlers[playState]?.();
   }, [playState]);

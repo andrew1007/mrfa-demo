@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import App from "./App";
 import useAudioPlayer from "./hooks/useAudioPlayer";
-import { applyState, State, useDispatch } from "./store";
+import { applyState, initialState, State, useDispatch, useSelector } from "./store";
 import { Route } from "./store/types";
 import useAppInitActions from "./store/useAppInitActions";
 import useAuthActions from "./store/useAuthActions";
@@ -14,7 +14,7 @@ const MainHOC = (Component: React.FC<any>) => {
   const MemoedComponent = React.memo(Component);
   const Main: MainComponent = (props) => {
     const dispatch = useDispatch();
-
+    const noUser = useSelector(state => state.user.userId === initialState.user.userId)
     const { initDashboard, initPlaylistSongs, initUserPlaylists } =
       useAppInitActions();
     const { loginUser } = useAuthActions()
@@ -36,9 +36,11 @@ const MainHOC = (Component: React.FC<any>) => {
     };
 
     useEffect(() => {
-      init();
+      if (noUser) {
+        init();
+      }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [noUser]);
 
     useEffect(() => {
       if (songIds.length > 0) {

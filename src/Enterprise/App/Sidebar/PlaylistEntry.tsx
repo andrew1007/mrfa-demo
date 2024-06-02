@@ -1,6 +1,6 @@
 import { Route, State } from "../../store/types";
 import { useDispatch, useSelector } from "../../store";
-import { defaultPlaylist } from "src/Enterprise/store/selectors";
+import { defaultPlaylist, useGetRerenderForceIfFlagged } from "src/Enterprise/store/selectors";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 import { memo } from "react";
 
@@ -10,6 +10,7 @@ type PlaylistEntryProps = {
 
 const PlaylistEntry = (props: PlaylistEntryProps) => {
   const dispatch = useDispatch();
+  useGetRerenderForceIfFlagged()
   const playlist = useSelector(state => state.playlists[props.id] ?? defaultPlaylist);
   const isFocused = useSelector(state => state.focusedId === props.id)
   const { title, songs, id } = playlist;

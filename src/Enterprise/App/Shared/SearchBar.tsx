@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "../../store";
-import { debounce } from "lodash";
 import { State } from "../../store/types";
 import HeavyUselessUI from "./HeavyUselessUI";
 
@@ -15,21 +14,18 @@ const SearchBar = (props: SearchBarProps) => {
   const [value, setValue] = useState("");
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const updateStateValue = useCallback(
-    debounce((value: string) => {
+  const updateStateValue = (value: string) => {
       dispatch(({ search }) => ({
         search: {
           ...search,
           [field]: value,
         },
       }));
-    }, 200),
-    []
-  );
+    }
 
   useEffect(() => {
     updateStateValue(value);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
   const handleChange: React.InputHTMLAttributes<HTMLInputElement>['onChange'] = (e) => {
