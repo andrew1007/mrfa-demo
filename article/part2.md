@@ -154,6 +154,43 @@ const makeProvider = (initialState) => {
 };
 ```
 
+## `useSelector` Explained
+
+React's data management update system is inextricably tied to rerenders, so computation needs to exist outside of it. This is accomplished by storing the selector functions inside a data structure that React does not manage. 
+
+```typescript
+let subscribers = [];
+```
+
+Each selector
+
+On every state update, the subscribed functions need to be computed.
+
+```typescript
+// provider HOC
+const [state, dispatch] = useReducer(reducer, initialState);
+subscribers.forEach((fn) => {
+  fn(state);
+});
+```
+
+The most recent state value needs to be available in order to correctly compute the initial value in `useSelector`.
+
+```typescript
+// initialization
+let currentState = initialState;
+
+// provider HOC
+const [state, dispatch] = useReducer(reducer, initialState);
+currentState = state;
+
+// useSelector
+const currValRef = useRef(selector(currentState));
+```
+
+
+Each hook retains computed data in a `useRef` hook, because assigning data to it does not trigger a rerender.
+
 ## Selectors used in `useSelector`
 
 It is no coincidence that the interface of the selector matches the interface of `useSelector`. By invoking the selectors in `useSelector`, algorithms and UI are neatly separated, along with optimal rerender suppression.
