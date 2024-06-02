@@ -35,7 +35,10 @@ const SlowDown = () => {
 
   return (
     <div>
-
+      <div>
+        UI Complexity: {labels[value]}
+        <HelpToolTip desc="Increases algorithmic complexity and adds larges amounts of HTML (hidden) to components" />
+      </div>
       <input
         id="yearslider"
         onChange={update}
@@ -46,10 +49,6 @@ const SlowDown = () => {
         step="1"
         list="ticks"
       />
-      <div>
-        UI Complexity: {labels[value]}
-        <HelpToolTip desc="Increases algorithmic complexity and adds larges amounts of HTML (hidden) to components" />
-      </div>
     </div>
 
   )

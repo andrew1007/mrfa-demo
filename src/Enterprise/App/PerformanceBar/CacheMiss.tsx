@@ -18,7 +18,7 @@ const CacheMiss = () => {
             }
           }))
         }} />
-      Force Rerenders <HelpToolTip desc="Forces some components to miss their cache, triggering a rerender on every store update" />
+      Force Useless Rerenders <HelpToolTip desc="Forces some components to miss their cache, triggering a rerender on every store update" />
     </div>
   )
 }
