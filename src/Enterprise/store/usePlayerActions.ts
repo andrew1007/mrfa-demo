@@ -43,6 +43,7 @@ const usePlayerActions = () => {
         dashboard: {
           ...dashboard,
           playState: PlayState.playing,
+          currentDuration: 0,
         },
       };
     });
