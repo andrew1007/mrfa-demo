@@ -1,8 +1,8 @@
-import { Route, SubState } from "../../state/types";
-import { useGetIsPlaying, useGetSong } from "../../state/selectors";
+import { Route, SubState } from "../../store/types";
+import { useGetIsPlaying, useGetSong } from "../../store/selectors";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
-import { useDispatch, useSelector } from "../../state";
-import usePlayerActions from "src/Enterprise/state/usePlayerActions";
+import { useDispatch, useSelector } from "../../store";
+import usePlayerActions from "src/Enterprise/store/usePlayerActions";
 import { memo } from "react";
 
 type PlayIconProps = {

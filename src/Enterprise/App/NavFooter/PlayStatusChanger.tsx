@@ -1,8 +1,8 @@
 import { memo } from "react";
-import { PlayState } from "../../state/types";
-import { useSelector } from "../../state";
+import { PlayState } from "../../store/types";
+import { useSelector } from "../../store";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
-import usePlayerActions from "src/Enterprise/state/usePlayerActions";
+import usePlayerActions from "src/Enterprise/store/usePlayerActions";
 
 const { paused, playing, idle } = PlayState;
 

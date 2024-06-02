@@ -1,6 +1,6 @@
-import { Route, State } from "../../state/types";
-import { useDispatch, useSelector } from "../../state";
-import { defaultPlaylist } from "src/Enterprise/state/selectors";
+import { Route, State } from "../../store/types";
+import { useDispatch, useSelector } from "../../store";
+import { defaultPlaylist } from "src/Enterprise/store/selectors";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 import { memo } from "react";
 
@@ -22,10 +22,10 @@ const PlaylistEntry = (props: PlaylistEntryProps) => {
   };
 
   return (
-    <div onClick={routeToPlaylist}>
+    <button onClick={routeToPlaylist}>
       <HeavyUselessUI />
       {title} ({songs.length})
-    </div>
+    </button>
   );
 };
 

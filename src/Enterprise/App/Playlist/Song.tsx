@@ -1,7 +1,7 @@
-import { Route, SubState } from "../../state/types";
-import { useGetSong } from "../../state/selectors";
+import { Route, SubState } from "../../store/types";
+import { useGetSong } from "../../store/selectors";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
-import { useDispatch } from "../../state";
+import { useDispatch } from "../../store";
 import { memo } from "react";
 import PlayIcon from "./PlayIcon";
 

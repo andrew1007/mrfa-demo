@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useDispatch } from "../../state";
+import { useDispatch } from "../../store";
 import { debounce } from "lodash";
-import { State } from "../../state/types";
+import { State } from "../../store/types";
 import HeavyUselessUI from "./HeavyUselessUI";
 
 type SearchBarProps = {

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { PlayState } from "src/Enterprise/state/types";
-import { useDispatch } from "../state";
+import { PlayState } from "src/Enterprise/store/types";
+import { useDispatch } from "../store";
 import useHotkeys from "./useHotkeys";
 
 type params = {

@@ -176,3 +176,27 @@
   display: flex;
   justify-content: space-between;
 }
+
+button {
+  background: transparent;
+  border-radius: 5px;
+  border: 1px solid black;
+}
+
+button:hover {
+  cursor: pointer;
+  background: grey;
+  color: white;
+}
+
+.playlist-container {
+  display: flex;
+  gap: 5px;
+  flex-direction: column;
+  margin-top: 5px;
+}
+
+.volume-slider-container {
+  display: flex;
+  align-items: center;
+}

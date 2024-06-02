@@ -1,10 +1,11 @@
 import React, { useEffect } from "react";
 import App from "./App";
 import useAudioPlayer from "./hooks/useAudioPlayer";
-import { applyState, State, useDispatch } from "./state";
-import { useGetCurrentSong } from "./state/selectors";
-import { Route } from "./state/types";
-import useAppInitActions from "./state/useAppInitActions";
+import { applyState, State, useDispatch } from "./store";
+import { useGetCurrentSong } from "./store/selectors";
+import { Route } from "./store/types";
+import useAppInitActions from "./store/useAppInitActions";
+import useAuthActions from "./store/useAuthActions";
 
 type StateProps = ReturnType<ReturnType<typeof mappedState>>;
 type NoProps = Record<string, never>;
@@ -19,6 +20,7 @@ const MainHOC = (Component: React.FC<any>) => {
 
     const { initDashboard, initPlaylistSongs, initUserPlaylists } =
       useAppInitActions();
+    const { loginUser } = useAuthActions()
 
     const { userId, songIds, playState, volume, currentDuration } =
       props;
@@ -34,6 +36,10 @@ const MainHOC = (Component: React.FC<any>) => {
       dispatch(() => ({
         currentRoute: Route.dashboard,
       }));
+      loginUser({
+        password: '',
+        userName: 'Andrew'
+      })
       initDashboard(userId);
       initUserPlaylists(userId);
     };

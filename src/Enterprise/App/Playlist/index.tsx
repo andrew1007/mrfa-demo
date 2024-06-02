@@ -1,8 +1,8 @@
 import { memo } from "react";
-import { useSelector } from "../../state";
+import { useSelector } from "../../store";
 import Songs from "./Songs";
 import SearchBar from "../Shared/SearchBar";
-import { defaultPlaylist } from "src/Enterprise/state/selectors";
+import { defaultPlaylist } from "src/Enterprise/store/selectors";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 
 const Playlist = () => {

@@ -1,4 +1,4 @@
-import { SubState } from "../state/types";
+import { SubState } from "../store/types";
 import mockPlaylists, { mockRecentPlaylists } from "./mockPlaylists";
 import mockSongs from "./mockSongs";
 

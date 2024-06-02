@@ -1,5 +1,5 @@
 import React from "react";
-import { applyState, State, useDispatch } from "../state";
+import { applyState, State, useDispatch } from "../store";
 
 type NoParentProps = Record<string, never>;
 type StateProps = ReturnType<ReturnType<typeof mappedState>>;

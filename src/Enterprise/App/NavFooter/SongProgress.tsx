@@ -6,7 +6,7 @@ import React, {
   useEffect,
   useRef,
 } from "react";
-import { useDispatch, useSelector } from "../../state";
+import { useDispatch, useSelector } from "../../store";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 
 const SongProgress = () => {

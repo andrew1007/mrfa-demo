@@ -1,6 +1,6 @@
 import React from "react";
-import { useSelector } from "../state";
-import { State } from "../state/types";
+import { useSelector } from "../store";
+import { State } from "../store/types";
 import Dashboard from "./Dashboard";
 import NavBar from "./NavBar";
 import NavFooter from "./NavFooter";

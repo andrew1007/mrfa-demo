@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { useGetCurrentSong } from "src/Enterprise/state/selectors";
+import { useGetCurrentSong } from "src/Enterprise/store/selectors";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 
 const CurrentSong = () => {

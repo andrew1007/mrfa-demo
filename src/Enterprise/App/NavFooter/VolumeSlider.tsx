@@ -1,6 +1,8 @@
 import { debounce } from "lodash";
 import { memo, useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "../../state";
+import { useDispatch, useSelector } from "../../store";
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeMuteIcon from '@mui/icons-material/VolumeMute';
 
 const VolumeSlider = () => {
   const volume = useSelector(state => state.dashboard.volume);
@@ -29,13 +31,16 @@ const VolumeSlider = () => {
   }, [value]);
 
   return (
-    <input
-      type="range"
-      min="0"
-      max="100"
-      onChange={(e) => setValue(Number(e.target.value))}
-      value={value}
-    />
+    <div className="volume-slider-container">
+      {value === 0 ? <VolumeMuteIcon /> : <VolumeUpIcon />}
+      <input
+        type="range"
+        min="0"
+        max="100"
+        onChange={(e) => setValue(Number(e.target.value))}
+        value={value}
+      />
+    </div>
   );
 };
 

@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { useGetSearchedPlaylistIds } from "src/Enterprise/state/selectors";
+import { useGetSearchedPlaylistIds } from "src/Enterprise/store/selectors";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 import SearchBar from "../Shared/SearchBar";
 import PlaylistEntry from "./PlaylistEntry";
@@ -11,9 +11,11 @@ const Playlists = () => {
     <>
       <SearchBar field="playlist" placeholder="search playlists" />
       <HeavyUselessUI />
-      {playlistIds.map((id) => (
-        <PlaylistEntry id={id} key={id} />
-      ))}
+      <div className="playlist-container">
+        {playlistIds.map((id) => (
+          <PlaylistEntry id={id} key={id} />
+        ))}
+      </div>
     </>
   );
 };

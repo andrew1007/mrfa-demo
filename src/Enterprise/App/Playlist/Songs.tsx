@@ -1,4 +1,4 @@
-import { useGetSearchedSongIds } from "src/Enterprise/state/selectors";
+import { useGetSearchedSongIds } from "src/Enterprise/store/selectors";
 import Song from "./Song";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 import { memo, useState } from "react";

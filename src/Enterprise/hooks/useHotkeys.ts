@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useDispatch } from "../state";
-import usePlayerActions from "../state/usePlayerActions";
+import { useDispatch } from "../store";
+import usePlayerActions from "../store/usePlayerActions";
 
 const useHotkeys = (audio: HTMLAudioElement) => {
   const dispatch = useDispatch();
