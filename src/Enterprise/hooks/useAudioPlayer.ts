@@ -1,21 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { PlayState } from "src/Enterprise/store/types";
-import { useDispatch } from "../store";
+import { useDispatch, useSelector } from "../store";
 import useHotkeys from "./useHotkeys";
+import { useGetCurrentSong } from "../store/selectors";
 
-type params = {
-  volume: number;
-  playState: keyof typeof PlayState;
-  src: string;
-  currentDuration: number;
-};
+const useAudioPlayer = () => {
+  const { source: src } = useGetCurrentSong()
+  const volume = useSelector(state => state.dashboard.volume);
+  const playState = useSelector(state => state.dashboard.playState);
+  const currentDuration = useSelector(state => state.dashboard.currentDuration);
 
-const useAudioPlayer = ({
-  volume,
-  playState,
-  src,
-  currentDuration,
-}: params) => {
   const dispatch = useDispatch();
   const audio = useMemo(() => new Audio(), []);
   const [innerTime, setInnerTime] = useState(0);
