@@ -28,7 +28,7 @@ const PlayIcon = (props: PlayIconProps) => {
 
   return (
     <div className={`song-icon ${isCurrentSong ? 'song-icon-playing' : ''}`} onClick={updateSong}>
-      {isPlaying ? <PlayArrowIcon /> : <PauseIcon />}
+      {!isPlaying ? <PlayArrowIcon /> : <PauseIcon />}
     </div>
   );
 };
