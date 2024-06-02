@@ -13,7 +13,7 @@ Memoizing operations in data structures is the last piece of the puzzle for high
 There is plenty of talk about a new feature: The [React Compiler](https://react.dev/learn/react-compiler). It markets itself as the answer to suppressing useless rerenders "for free". But in reality, a technology like this is not a free pass to be undisciplined. Poorly-designed apps have useless rerenders embedded within their DNA. No novel technology (short of AI code refactoring) will ever fix foundational performance issues. That being said, learning effective memoization and designing normalized state trees are still a worthy endeavor, because of the following:
 
 - It is platform-agnostic. Any technology, library, or framework will benefit from this knowledge.
-- The performance gains are massive, which will be thoroughly proven in part 4.
+- The performance gains in React are massive, which will be thoroughly proven in part 4.
 
 ## Seeing State Tree as Nodes
 
@@ -36,7 +36,7 @@ The spread operator performs a shallow merge. Think of this operation as the cre
 
 ## Custom `createSelector`
 
-For learning purposes, here is a custom implementation of a powerful memoization function. It is functionally equivalent to `createSelector`, from the package [`reselect`](https://www.npmjs.com/package/reselect).
+For learning purposes, here is a custom implementation of a memoization function that is powerful, robust, and pure. It is functionally equivalent to `createSelector`, from the package [`reselect`](https://www.npmjs.com/package/reselect).
 
 ```typescript
 function createSelector(selectors, computingFn) {
@@ -194,9 +194,9 @@ Now, each `useGetDocById` has its own cache, via individual instance of `makeGet
 
 ## `createSelector` Resolver Design
 
-The hardest part about effective memoization is writing optimal resolver functions. They can be the difference between an app that slows to a crawl and another that is lightning fast.
+The hardest part about effective memoization is writing optimal resolver functions. They can be the difference between an app that slows to a crawl and another that is lightning fast. Remember that all of the performance savings when memoizing are from rerender suppression. It has little to do with the computation of the algorithm.
 
-We can start by talking about a useless selector. One that targets the root node of the state tree, `getState`. The root node is guaranteed to be a new node during any state update. This "selector" will always miss its cache and recompute.
+We can start by talking about a useless selector. One that targets the root node of the state tree, `getState`. The root node is guaranteed to be a new node during any state update. This selector will always miss its cache and recompute.
 
 ```typescript
 const getState = (state) => state;
