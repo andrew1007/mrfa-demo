@@ -3,13 +3,17 @@ import { PlayState } from "../../store/types";
 import { useSelector } from "../../store";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 import usePlayerActions from "src/Enterprise/store/usePlayerActions";
+import PauseCircleIcon from '@mui/icons-material/PauseCircle';
+import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 
 const { paused, playing, idle } = PlayState;
 
-const playStateClassName = {
-  [playing]: "pause",
-  [paused]: "play",
-  [idle]: ""
+const Hidden = () => <PlayCircleIcon style={{ visibility: 'hidden' }} />
+
+const PlayStateIcon = {
+  [playing]: PauseCircleIcon,
+  [paused]: PlayCircleIcon,
+  [idle]: Hidden
 };
 
 const PlayStatusChanger = () => {
@@ -19,11 +23,12 @@ const PlayStatusChanger = () => {
   const handleClick = () => {
     togglePlayState();
   };
+  const Icon = PlayStateIcon[status]
 
   return (
     <div onClick={handleClick}>
       <HeavyUselessUI />
-      <div className={playStateClassName[status]} />
+      <Icon />
     </div>
   );
 };

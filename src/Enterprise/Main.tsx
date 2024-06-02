@@ -59,6 +59,7 @@ const mappedState = () => (state: State) => ({
   songIds: state.playlists[state.focusedId]?.songs ?? EMPTY,
   volume: state.dashboard.volume,
   playState: state.dashboard.playState,
+  currentDuration: state.dashboard.currentDuration,
 });
 
 export default applyState(mappedState)(MainHOC(App));
