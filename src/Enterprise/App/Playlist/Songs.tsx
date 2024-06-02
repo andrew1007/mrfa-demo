@@ -11,10 +11,13 @@ const Songs = () => {
     <div className="songs-root">
       <HeavyUselessUI />
       {songIds.map((id) => (
-        <div style={{
-          display: searchedIds.has(id) ? 'block' : 'none'
-        }}>
-          <Song id={id} key={id} />
+        <div
+          key={id}
+          style={{
+            display: searchedIds.has(id) ? 'block' : 'none'
+          }}
+        >
+          <Song id={id} />
         </div>
       ))}
     </div>

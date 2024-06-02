@@ -37,57 +37,6 @@
   align-items: center;
 }
 
-.play:before {
-  content: "\25BA";
-  background: #00a6ed;
-  color: #ffffff;
-  font-size: 16px;
-  border-radius: 2px;
-}
-
-.pause:before {
-  content: "\23F8";
-}
-
-.back:before {
-  content: "\23EE";
-}
-
-.forward:before {
-  content: "\23ED";
-}
-
-.edit:before {
-  content: "\270E";
-  font-size: 8px;
-}
-
-.close:before {
-  content: "\2716";
-  font-size: 8px;
-}
-
-.confirm:before {
-  content: "\2713";
-  font-size: 8px;
-}
-
-.add:before {
-  content: "\002B";
-}
-
-.repeat:before {
-  content: "\2B6F";
-}
-
-.shuffle:before {
-  content: "\1f500";
-}
-
-.repeat:before {
-  content: "\1f501";
-}
-
 .login-root {
   display: flex;
   flex-direction: column;
