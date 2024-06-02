@@ -59,4 +59,8 @@ export type State = {
     songIds: number[];
     playlistId: number;
   };
+  performance: {
+    slowdown: number,
+    cacheMiss: boolean,
+  }
 };

@@ -6,6 +6,7 @@ import NavFooter from "./NavFooter";
 import Playlist from "./Playlist";
 import HeavyUselessUI from "./Shared/HeavyUselessUI";
 import Sidebar from "./Sidebar";
+import PerformanceBar from "./PerformanceBar";
 
 const Routes: Record<State["currentRoute"], React.FC<any>> = {
   dashboard: Dashboard,
@@ -26,6 +27,7 @@ const App = () => {
           <div className="route-container">
             <Route />
           </div>
+          <PerformanceBar />
         </div>
         <NavFooter />
       </div>

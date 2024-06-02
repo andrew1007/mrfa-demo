@@ -29,6 +29,10 @@ export const initialState: State = {
     position: 0,
     songIds: [],
   },
+  performance: {
+    cacheMiss: false,
+    slowdown: 0,
+  }
 };
 
 export type { State };

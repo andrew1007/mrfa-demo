@@ -241,3 +241,8 @@ button:hover {
 .playlist-search-container {
   text-align: start;
 }
+
+.performance-bar-container {
+  width: 200px;
+  border: 1px solid black;
+}

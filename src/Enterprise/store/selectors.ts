@@ -182,3 +182,7 @@ export const useGetIsPlaying = (id: number) => {
   const getIsPlaying = useMemo(() => makeGetIsPlaying(id), [id]);
   return useSelector(getIsPlaying);
 };
+
+const getMissCache = (state: State) => state.performance.cacheMiss ? Math.random() : 0
+
+export const useGetRerenderForceIfFlagged = () => useSelector(getMissCache)
