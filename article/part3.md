@@ -10,9 +10,10 @@ In part 2, it may have seemed strange that selector functions, regardless of com
 Memoizing operations in data structures is the last piece of the puzzle for highly optimized applications that are fast and maintainable. But memoizing operations that are derived from (essentially) a mini database is difficult. It requires an intuitive understanding of how the state tree changes as data is mutated, added, and removed from it.
 
 ## Commenting on the React Compiler
-There is plenty of talk about a new feature: The [React Compiler](https://react.dev/learn/react-compiler). It markets itself as the answer to suppressing useless rerenders "for free". But in reality, a technology like this is not a free pass to be undisciplined. Poorly-designed apps have useless rerenders embedded within their DNA. No novel technology (short of AI code refactoring) will ever fix foundational performance issues.
+There is plenty of talk about a new feature: The [React Compiler](https://react.dev/learn/react-compiler). It markets itself as the answer to suppressing useless rerenders "for free". But in reality, a technology like this is not a free pass to be undisciplined. Poorly-designed apps have useless rerenders embedded within their DNA. No novel technology (short of AI code refactoring) will ever fix foundational performance issues. That being said, learning effective memoization and designing normalized state trees are still a worthy endeavor, because of the following:
 
-But learning about effective memoization and normalized state tree design is still a worthy endeavor. These concepts are platform-agnostic. Any technology, library, or framework will benefit from this knowledge.
+- It is platform-agnostic. Any technology, library, or framework will benefit from this knowledge.
+- The performance gains are massive, which will be thoroughly proven in part 4.
 
 ## Seeing State Tree as Nodes
 
@@ -29,9 +30,13 @@ const reducer = (state, action) => ({
 
 The spread operator performs a shallow merge. Think of this operation as the creation of a new root node for the state tree.
 
+![localImage](./resources/pt2-fig-1.png)
+
+[fig 1] The root node of the state tree being mutated after `reducer` computation
+
 ## Custom `createSelector`
 
-For learning purposes, here is a custom implementation of a powerful memoization function. It is functionally equivalent to `createSelector`, from the package `reselect`.
+For learning purposes, here is a custom implementation of a powerful memoization function. It is functionally equivalent to `createSelector`, from the package [`reselect`](https://www.npmjs.com/package/reselect).
 
 ```typescript
 function createSelector(selectors, computingFn) {
@@ -88,7 +93,37 @@ export const normalizedState = {
 };
 ```
 
+A tree representation would look like this
+
+![localImage](./resources/pt2-fig-2.png)
+
 If an array of titles is needed, the resolver functions should individually "target" the relevant nodes: `docs` and `docIds`.
+
+## "Crawling" the State Tree with Selectors
+
+A selector function's argument is the `state` tree and the return value is a node in it. For example, to return the `docs` node, the selector would be as follows.
+
+```typescript
+const getDocs = (state) => state.docs;
+```
+
+`getDocs` crawls down the state tree to select the `docs` node
+
+![localImage](./resources/pt2-fig-3.png)
+
+A selector is any function where the only argument is `state`. Here is an example that targets a child node in `docs`. There can be many childen, so `id` needs to be accounted for. This requires currying.
+
+```typescript
+const makeGetDocById = (id) => state => state.docs[id]
+
+const getDoc = makeGetDocById(1)
+```
+
+![localImage](./resources/pt2-fig-4.png)
+
+
+## Composing Selectors
+The first argument of `createSelector` accepts an array of selectors. This is how multiple nodes can be used in a computation.
 
 ```typescript
 // resolvers
@@ -99,12 +134,15 @@ const getDocIds = (state) => state.docIds;
 const getDocTitles = createSelector([getDocs, docIds], (docs, docIds) => {
   return docIds.map((id) => docs[id].title);
 });
+```
+
+![localImage](./resources/pt2-fig-5.png)
+
+Now, this selector hook will only recompute (and thus trigger a rerender) when `docs` and/or `docIds` updates.
+
 
 // selector hook
 const useGetDocTitles = useSelector(getDocTitles);
-```
-
-Now, this selector hook will only recompute (and thus trigger a rerender) when `docs` and/or `docIds` updates.
 
 ## Resolvers are Selectors
 
