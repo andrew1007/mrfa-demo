@@ -118,11 +118,26 @@
     "sa sb sb sd"
     "sa sc sc sd";
   grid-template-columns: auto 1fr auto;
+  border-radius: 5px;
 }
 
 .song-icon {
   grid-area: sa;
   align-self: center;
+  visibility: hidden;
+}
+
+.song-icon-playing {
+  visibility: visible !important;
+}
+
+.song-root:hover {
+  background: #C5C4C4;
+  color: white;
+}
+
+.song-root:hover .song-icon {
+  visibility: visible;
 }
 
 .song-title {
@@ -199,4 +214,9 @@ button:hover {
 .volume-slider-container {
   display: flex;
   align-items: center;
+}
+
+.main-container {
+  display: flex;
+  gap: 30px;
 }

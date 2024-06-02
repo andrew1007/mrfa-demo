@@ -158,6 +158,17 @@ export const getCurrentSong = createSelector(
 
 export const useGetCurrentSong = () => useSelector(getCurrentSong);
 
+const makeGetIsCurrentSong = (id: number) => createSelector(
+  [getCurrentSong], (currentSong: ReturnType<typeof getCurrentSong>) => {
+    return currentSong.id === id
+  }
+)
+
+export const useGetIsFocusedSong = (id: number) => {
+  const getIsCurrentSong = useMemo(() => makeGetIsCurrentSong(id), [id])
+  return useSelector(getIsCurrentSong);
+}
+
 const makeGetIsPlaying = (id: number) =>
   createSelector(
     [getCurrentSong, getPlayState],

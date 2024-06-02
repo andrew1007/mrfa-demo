@@ -1,21 +1,19 @@
-import { Route, SubState } from "../../store/types";
-import { useGetIsPlaying, useGetSong } from "../../store/selectors";
-import HeavyUselessUI from "../Shared/HeavyUselessUI";
-import { useDispatch, useSelector } from "../../store";
+import { useGetIsFocusedSong, useGetIsPlaying } from "../../store/selectors";
+import {  useSelector } from "../../store";
 import usePlayerActions from "src/Enterprise/store/usePlayerActions";
 import { memo } from "react";
-
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
 type PlayIconProps = {
   songId: number;
 };
 
 const PlayIcon = (props: PlayIconProps) => {
+  const { songId } = props
   const { togglePlayState, setCurrentSong } = usePlayerActions();
-  const song = useGetSong(props.songId)
-  const isPlaying = useGetIsPlaying(props.songId);
+  const isPlaying = useGetIsPlaying(songId);
   const playlistId = useSelector(state => state.focusedId);
-
-  const { id } = song;
+  const isCurrentSong = useGetIsFocusedSong(songId)
 
   const updateSong = () => {
     if (isPlaying) {
@@ -23,14 +21,14 @@ const PlayIcon = (props: PlayIconProps) => {
     } else {
       setCurrentSong({
         playlistId,
-        songId: id,
+        songId,
       });
     }
   };
 
   return (
-    <div className="song-icon" onClick={updateSong}>
-      <div className={isPlaying ? "pause" : "play"} />
+    <div className={`song-icon ${isCurrentSong ? 'song-icon-playing' : ''}`} onClick={updateSong}>
+      {isPlaying ? <PlayArrowIcon /> : <PauseIcon />}
     </div>
   );
 };

@@ -2,7 +2,6 @@ import React from "react";
 import { useSelector } from "../store";
 import { State } from "../store/types";
 import Dashboard from "./Dashboard";
-import NavBar from "./NavBar";
 import NavFooter from "./NavFooter";
 import Playlist from "./Playlist";
 import HeavyUselessUI from "./Shared/HeavyUselessUI";
@@ -19,21 +18,18 @@ const App = () => {
   const Route = Routes[currentRoute];
 
   return (
-    <div className="app-container">
+    <>
       <HeavyUselessUI />
-      <NavBar />
-      <div
-        style={{
-          display: "flex",
-        }}
-      >
-        <Sidebar />
-        <div className="route-container">
-          <Route />
+      <div className="app-container">
+        <div className="main-container">
+          <Sidebar />
+          <div className="route-container">
+            <Route />
+          </div>
         </div>
+        <NavFooter />
       </div>
-      <NavFooter />
-    </div>
+    </>
   );
 };
 

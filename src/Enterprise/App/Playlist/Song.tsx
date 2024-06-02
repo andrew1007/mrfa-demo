@@ -1,36 +1,40 @@
-import { Route, SubState } from "../../store/types";
+import { SubState } from "../../store/types";
 import { useGetSong } from "../../store/selectors";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
-import { useDispatch } from "../../store";
+import { useSelector } from "../../store";
 import { memo } from "react";
 import PlayIcon from "./PlayIcon";
+import usePlayerActions from "src/Enterprise/store/usePlayerActions";
 
 type SongProps = {
   id: SubState["Playlist"]["songs"][0];
 };
 
 const Song = (props: SongProps) => {
-  const dispatch = useDispatch();
   const song = useGetSong(props.id)
+  const { setCurrentSong } = usePlayerActions();
+  const playlistId = useSelector(state => state.focusedId);
+  const { title, durationLabel, artist } = song;
 
-  const { title, durationLabel, artist, artistId } = song;
-
-  const routeToArtist = () =>
-    dispatch(() => ({
-      currentRoute: Route.artist,
-      focusedId: artistId,
-    }));
+  const play = () => {
+    setCurrentSong({
+      songId: song.id,
+      playlistId
+    })
+  }
 
   return (
-    <div className="song-root">
-      <HeavyUselessUI />
-      <PlayIcon songId={props.id} />
-      <div className="song-title">{title}</div>
-      <div className="song-artist" onClick={routeToArtist}>
-        {artist}
+    <>
+      <div className="song-root">
+        <PlayIcon songId={props.id} />
+        <div className="song-title">{title}</div>
+        <div className="song-artist" onDoubleClick={play}>
+          {artist}
+        </div>
+        <div className="song-duration">{durationLabel}</div>
       </div>
-      <div className="song-duration">{durationLabel}</div>
-    </div>
+      <HeavyUselessUI />
+    </>
   );
 };
 

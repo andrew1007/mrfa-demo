@@ -25,7 +25,7 @@ const songSrcs = Array(100)
   .fill(null)
   .map(
     (_, idx) =>
-      `https://files.freemusicarchive.org/storage-freemusicarchive-org/tracks/Y6sQMTaAYzZKKE43NRnV0l4b5iro7jd5kUweZTFZ.mp3?${idx}`
+      require("../resources/legacyAlli-RF-Sensitized.mp3")
   );
 
 const random = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
