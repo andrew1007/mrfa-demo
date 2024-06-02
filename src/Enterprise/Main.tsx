@@ -25,7 +25,7 @@ const MainHOC = (Component: React.FC<any>) => {
 
     const init = () => {
       dispatch(() => ({
-        currentRoute: Route.dashboard,
+        currentRoute: Route.playlist,
       }));
       loginUser({
         password: '',

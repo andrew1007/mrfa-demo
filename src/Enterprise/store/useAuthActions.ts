@@ -21,7 +21,7 @@ const useAuthActions = () => {
           userId: publicId,
           userName,
         },
-        currentRoute: Route.dashboard,
+        currentRoute: Route.playlist,
       };
     });
   };

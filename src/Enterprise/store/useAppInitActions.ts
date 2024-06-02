@@ -26,13 +26,16 @@ const useAppInitActions = () => {
     const nextPlaylists = Object.fromEntries(
       data.map((playlist) => [playlist.id, playlist])
     );
-    dispatch(({ playlists }) => ({
-      playlistIds: ids,
-      playlists: {
-        ...playlists,
-        ...nextPlaylists,
-      },
-    }));
+    dispatch(({ playlists, playlistIds, focusedId }) => {
+      return {
+        playlistIds: ids,
+        playlists: {
+          ...playlists,
+          ...nextPlaylists,
+        },
+        focusedId: playlistIds.length === 0 ? ids[0] : focusedId
+      }
+    });
   };
 
   const initPlaylistSongs = async (songIds: number[]) => {

@@ -1,7 +1,6 @@
 import React from "react";
 import { useSelector } from "../store";
 import { State } from "../store/types";
-import Dashboard from "./Dashboard";
 import NavFooter from "./NavFooter";
 import Playlist from "./Playlist";
 import HeavyUselessUI from "./Shared/HeavyUselessUI";
@@ -9,7 +8,6 @@ import Sidebar from "./Sidebar";
 import PerformanceBar from "./PerformanceBar";
 
 const Routes: Record<State["currentRoute"], React.FC<any>> = {
-  dashboard: Dashboard,
   playlist: Playlist,
   artist: () => null,
 };
