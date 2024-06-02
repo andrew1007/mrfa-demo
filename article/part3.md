@@ -123,7 +123,7 @@ const getDoc = makeGetDocById(1)
 
 
 ## Composing Selectors
-The first argument of `createSelector` accepts an array of selectors. This is how multiple nodes can be used in a computation.
+The first argument of `createSelector` accepts an array of selectors. This is how multiple nodes can be used in a computation. `getDocs` and `getDocIds` are used together to compute the necessary data. This memoized selector will only recompute when either node (`docs` and `docIds`) changes value.
 
 ```typescript
 // resolvers
@@ -137,6 +137,8 @@ const getDocTitles = createSelector([getDocs, docIds], (docs, docIds) => {
 ```
 
 ![localImage](./resources/pt2-fig-5.png)
+
+
 
 Now, this selector hook will only recompute (and thus trigger a rerender) when `docs` and/or `docIds` updates.
 

@@ -1,16 +1,21 @@
-import { useGetSearchedSongIds } from "src/Enterprise/store/selectors";
+import { useGetPlaylistSongs, useGetSearchedSongIds } from "src/Enterprise/store/selectors";
 import Song from "./Song";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 import { memo } from "react";
 
 const Songs = () => {
-  const ids = useGetSearchedSongIds()
+  const searchedIds = useGetSearchedSongIds()
+  const songIds = useGetPlaylistSongs()
 
   return (
     <div className="songs-root">
       <HeavyUselessUI />
-      {ids.map((id) => (
-        <Song id={id} key={id} />
+      {songIds.map((id) => (
+        <div style={{
+          display: searchedIds.has(id) ? 'block' : 'none'
+        }}>
+          <Song id={id} key={id} />
+        </div>
       ))}
     </div>
   );

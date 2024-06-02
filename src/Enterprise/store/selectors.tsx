@@ -65,6 +65,8 @@ const getPlaylistSongIds = createSelector(
 );
 type PlaylistSongIds = ReturnType<typeof getPlaylistSongIds>;
 
+export const useGetPlaylistSongs = () => useSelector(getPlaylistSongIds)
+
 export const getSearchedPlaylistIds = createSelector(
   [getPlaylistText, getPlaylists, getPlaylistIds, getShouldMissCache],
   (searchText: PlaylistText, playlists: Playlists, ids: PlaylistIds) => {
@@ -83,13 +85,13 @@ export const useGetSearchedPlaylistIds = () => {
 export const getSearchedSongIds = createSelector(
   [getSongText, getSongs, getPlaylistSongIds, getShouldMissCache],
   (searchText: SongText, songs: Songs, songIds: PlaylistSongIds) => {
-    if (!searchText) return songIds;
+    if (!searchText) return new Set(songIds);
     const text = searchText.toLowerCase()
     const filtered = songIds.filter((id) =>
       songs[id]?.title.toLowerCase().includes(text) || songs[id]?.artist.toLowerCase().includes(text)
     );
 
-    return filtered.length > 0 ? filtered : EMPTY_ARR as typeof filtered;
+    return filtered.length > 0 ? new Set(filtered) : new Set() as Set<number>;
   }
 );
 

@@ -41,7 +41,7 @@ const mockSongs = songSrcs.map((src, idx) => ({
   artistId: idx + 1,
 }));
 
-const twentyPercentChange = () => Math.random() < 0.2;
+const twentyPercentChange = () => Math.random() < 0.5;
 
 export const getRandomSongIds = () => {
   const songIds = mockSongs.map(({ id }) => id);
