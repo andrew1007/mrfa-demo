@@ -8,12 +8,12 @@ const CurrentSong = () => {
   return (
     <div>
       <HeavyUselessUI />
-      {title && (
-        <>
-          Now Playing:
-          {title}-{artist}
-        </>
-      )}
+      <div>
+        Now Playing:
+      </div>
+      <div>
+        {title ? `${title}-${artist}` : '--'}
+      </div>
     </div>
   );
 };

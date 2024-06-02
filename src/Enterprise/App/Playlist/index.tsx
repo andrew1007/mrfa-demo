@@ -1,19 +1,16 @@
 import { memo } from "react";
-import { useSelector } from "../../store";
 import Songs from "./Songs";
 import SearchBar from "../Shared/SearchBar";
-import { defaultPlaylist } from "src/Enterprise/store/selectors";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
+import PlaylistTitle from "./PlaylistTitle";
 
 const Playlist = () => {
-  const playlist = useSelector(state => state.playlists[state.focusedId] ?? defaultPlaylist);
-  const { title, userName } = playlist;
-
   return (
     <div className="playlist-root">
-      <div>{title}</div>
-      <div>by {userName}</div>
-      <SearchBar field="song" placeholder="search for a song" />
+      <PlaylistTitle />
+      <div className="playlist-search-container">
+        <SearchBar field="song" placeholder="search for a song" />
+      </div>
       <Songs />
       <HeavyUselessUI />
     </div>

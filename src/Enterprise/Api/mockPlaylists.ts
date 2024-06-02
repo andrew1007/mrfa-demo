@@ -1,9 +1,18 @@
 import { getRandomSongIds } from "./mockSongs";
 
-const mockPlaylists = Array(10)
-  .fill(null)
-  .map((_, idx) => ({
-    title: `playlist #${idx + 1}`,
+const titles = [
+  'Liked Songs',
+  'Rock!',
+  'Indie/Alt Rock',
+  'Sort of Metal',
+  'Hip Hop',
+  'Electronic',
+  'Everything Good'
+]
+
+const mockPlaylists = titles
+  .map((title, idx) => ({
+    title,
     userName: "Andrew",
     songs: getRandomSongIds(),
     id: idx + 1,

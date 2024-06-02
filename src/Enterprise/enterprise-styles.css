@@ -119,6 +119,7 @@
     "sa sc sc sd";
   grid-template-columns: auto 1fr auto;
   border-radius: 5px;
+  padding: 0px 5px;
 }
 
 .song-icon {
@@ -219,4 +220,21 @@ button:hover {
 .main-container {
   display: flex;
   gap: 30px;
+}
+
+.playlist-title-container {
+  text-align: start;
+}
+
+.playlist-title {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.playlist-owner {
+  font-size: 13px;
+}
+
+.playlist-search-container {
+  text-align: start;
 }
