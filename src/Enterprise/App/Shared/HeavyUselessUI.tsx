@@ -1,15 +1,16 @@
 import { useSelector } from "src/Enterprise/store";
 
 const HeavyUselessUI = () => {
-  return null
-  const slowdown = useSelector(state => state.performance.slowdown)
-  const iterations = slowdown * 1000
+  const slowdown = useSelector((state) => state.performance.slowdown)
+  const iterations = slowdown * 100
 
-  Array(iterations).fill(null).forEach(() => JSON.parse(JSON.stringify({})))
+  for (let i = 0; i < slowdown * 500; i++) {
+    JSON.parse(JSON.stringify({}))
+  }
 
   return (
     <>
-      {Array(slowdown * 100)
+      {Array(iterations)
         .fill(null)
         .map((_, idx) => (
           <div key={idx} />

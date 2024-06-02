@@ -1,12 +1,11 @@
 import { memo } from "react";
-import { useGetRerenderForceIfFlagged, useGetSearchedPlaylistIds } from "src/Enterprise/store/selectors";
+import { useGetSearchedPlaylistIds } from "src/Enterprise/store/selectors";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 import SearchBar from "../Shared/SearchBar";
 import PlaylistEntry from "./PlaylistEntry";
 
 const Playlists = () => {
   const playlistIds = useGetSearchedPlaylistIds();
-  useGetRerenderForceIfFlagged()
   return (
     <>
       <SearchBar field="playlist" placeholder="search playlists" />

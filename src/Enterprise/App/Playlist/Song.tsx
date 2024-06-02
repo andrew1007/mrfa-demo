@@ -1,5 +1,5 @@
 import { SubState } from "../../store/types";
-import { useGetRerenderForceIfFlagged, useGetSong } from "../../store/selectors";
+import { useGetSong } from "../../store/selectors";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 import { useSelector } from "../../store";
 import { memo } from "react";
@@ -12,7 +12,6 @@ type SongProps = {
 
 const Song = (props: SongProps) => {
   const song = useGetSong(props.id)
-  useGetRerenderForceIfFlagged()
   const { setCurrentSong } = usePlayerActions();
   const playlistId = useSelector(state => state.focusedId);
   const { title, durationLabel, artist } = song;

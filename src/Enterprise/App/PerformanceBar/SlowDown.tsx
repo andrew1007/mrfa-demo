@@ -1,9 +1,9 @@
 import { debounce } from "lodash";
 import React, { useCallback, useState } from "react";
-import { initialState, useDispatch } from "src/Enterprise/store";
+import { useDispatch } from "src/Enterprise/store";
 
 const tiers = [0, 1, 2, 3];
-const labels = ['none', 'low', 'moderate', 'severe']
+const labels = ['low', 'moderate', 'high', 'extreme']
 
 type OnChange = React.InputHTMLAttributes<HTMLInputElement>['onChange']
 
@@ -19,7 +19,6 @@ const SlowDown = () => {
 
   const updateStore = useCallback(debounce((next: number) => {
     dispatch(({ performance }) => ({
-      ...initialState,
       performance: {
         ...performance,
         slowdown: next
@@ -35,6 +34,7 @@ const SlowDown = () => {
 
   return (
     <div>
+
       <input
         id="yearslider"
         onChange={update}
@@ -46,7 +46,7 @@ const SlowDown = () => {
         list="ticks"
       />
       <div>
-        {labels[value]}
+        UI Complexity: {labels[value]}
       </div>
     </div>
 
