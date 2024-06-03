@@ -6,6 +6,7 @@ import Playlist from "./Playlist";
 import HeavyUselessUI from "./Shared/HeavyUselessUI";
 import Sidebar from "./Sidebar";
 import PerformanceBar from "./PerformanceBar";
+import Credit from "./Credit";
 
 const Routes: Record<State["currentRoute"], React.FC<any>> = {
   playlist: Playlist,
@@ -28,6 +29,7 @@ const App = () => {
           <PerformanceBar />
         </div>
         <NavFooter />
+        <Credit />
       </div>
     </>
   );
