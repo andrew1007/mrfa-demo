@@ -30,7 +30,7 @@ function App() {
           <label>Enterprise</label>
         </fieldset>
       </form>
-      <div>
+      <div className="main-app-container">
         {CurrentApp && <CurrentApp />}
       </div>
     </div>

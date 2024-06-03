@@ -18,7 +18,7 @@ const App = () => {
   const Route = Routes[currentRoute];
 
   return (
-    <>
+    <div>
       <HeavyUselessUI />
       <div className="app-container">
         <div className="main-container">
@@ -29,9 +29,9 @@ const App = () => {
           <PerformanceBar />
         </div>
         <NavFooter />
-        <Credit />
       </div>
-    </>
+      <Credit />
+    </div>
   );
 };
 
