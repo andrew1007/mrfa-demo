@@ -162,8 +162,6 @@ React's data management update system is inextricably tied to rerenders, so comp
 let subscribers = [];
 ```
 
-Each selector
-
 On every state update, the subscribed functions need to be computed.
 
 ```typescript

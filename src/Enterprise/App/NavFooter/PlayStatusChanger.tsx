@@ -28,7 +28,7 @@ const PlayStatusChanger = () => {
   return (
     <div onClick={handleClick}>
       <HeavyUselessUI />
-      <Icon />
+      <Icon className="play-state-change-icon" />
     </div>
   );
 };

@@ -101,15 +101,16 @@ const makeGetStateSong = (id: number) => (state: State) =>
   state.songs[id] ?? defaultSong;
 
 const makeGetSong = (id: number) =>
-  createSelector([makeGetStateSong(id), getShouldMissCache], (song: StateSong) => {
-    const { duration } = song;
-    const minutes = Math.floor(duration / 60);
-    const seconds = `0${duration - minutes * 60}`.slice(-2);
-    return {
-      ...song,
-      durationLabel: `${minutes}:${seconds}`,
-    };
-  });
+  createSelector([makeGetStateSong(id), getShouldMissCache],
+    (song: StateSong) => {
+      const { duration } = song;
+      const minutes = Math.floor(duration / 60);
+      const seconds = `0${duration - minutes * 60}`.slice(-2);
+      return {
+        ...song,
+        durationLabel: `${minutes}:${seconds}`,
+      };
+    });
 
 export const useGetSong = (id: number) => {
   const getSong = useMemo(() => makeGetSong(id), [id]);
@@ -143,7 +144,8 @@ export const getCurrentSong = createSelector(
 export const useGetCurrentSong = () => useSelector(getCurrentSong);
 
 const makeGetIsCurrentSong = (id: number) => createSelector(
-  [getCurrentSong, getShouldMissCache, getShouldMissCache], (currentSong: ReturnType<typeof getCurrentSong>) => {
+  [getCurrentSong, getShouldMissCache, getShouldMissCache],
+  (currentSong: ReturnType<typeof getCurrentSong>) => {
     return currentSong.id === id
   }
 )
@@ -166,12 +168,3 @@ export const useGetIsPlaying = (id: number) => {
   const getIsPlaying = useMemo(() => makeGetIsPlaying(id), [id]);
   return useSelector(getIsPlaying);
 };
-
-export const useGetRerenderForceIfFlagged = () => {
-  const slowdown = useSelector((state) => state.performance.slowdown)
-  const iterations = slowdown * 10000
-  useSelector(getShouldMissCache)
-  for (let i = 0; i < iterations; i++) {
-    <div />
-  }
-}
