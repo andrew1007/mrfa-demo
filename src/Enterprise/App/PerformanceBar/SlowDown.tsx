@@ -1,7 +1,7 @@
-import { debounce } from "lodash";
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { initialState, useDispatch } from "src/Enterprise/store";
 import HelpToolTip from "../Shared/HelpTooltip";
+import useDebounce from "src/Enterprise/hooks/useDebounce";
 
 const tiers = [0, 1, 2, 3];
 const labels = ['low', 'moderate', 'high', 'extreme']
@@ -18,14 +18,14 @@ const SlowDown = () => {
   const dispatch = useDispatch()
   const [value, setValue] = useState(initialState.performance.slowdown)
 
-  const updateStore = useCallback(debounce((next: number) => {
+  const updateStore = useDebounce((next: number) => {
     dispatch(({ performance }) => ({
       performance: {
         ...performance,
         slowdown: next
       }
     }))
-  }, 500), [])
+  }, 500)
 
   const update: OnChange = (value) => {
     const next = getClosest(tiers, Number(value.target.value))

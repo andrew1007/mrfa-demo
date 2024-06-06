@@ -1,8 +1,8 @@
-import { debounce } from "lodash";
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "../../store";
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeMuteIcon from '@mui/icons-material/VolumeMute';
+import useDebounce from "src/Enterprise/hooks/useDebounce";
 
 const VolumeSlider = () => {
   const volume = useSelector(state => state.dashboard.volume);
@@ -10,17 +10,14 @@ const VolumeSlider = () => {
   const dispatch = useDispatch();
   const [value, setValue] = useState(100);
 
-  const update = useCallback(
-    debounce((value: number) => {
-      dispatch(({ dashboard }) => ({
-        dashboard: {
-          ...dashboard,
-          volume: value,
-        },
-      }));
-    }, 200),
-    []
-  );
+  const update = useDebounce((value: number) => {
+    dispatch(({ dashboard }) => ({
+      dashboard: {
+        ...dashboard,
+        volume: value,
+      },
+    }));
+  }, 200)
 
   useEffect(() => {
     setValue(volume);
