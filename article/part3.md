@@ -249,9 +249,11 @@ Rerenders from algorithms are now contingent on memoization effectiveness and ar
 1. The granularity/mindfulness of what nodes to target in `createSelector`.
 2. Minimizing the number of nodes that change when updating state.
 
-Effectively targeting optimal nodes is meaningless if they are constantly changing for useless reasons. Minimizing node updates during state transformations is an art that becomes manageable with an intuitive understanding of how state changes.
+Effectively targeting nodes for memoization is meaningless if those nodes are uselessly changing. Minimizing node updates during state transformations is an art that becomes manageable with an intuitive understanding of how state changes.
 
-Copying unchanged nodes is a common issue. In the following code snippet, the state transformation algorithm creates a new node for every single object in the `docs` key. This triggers a rerender in every single instance of `useGetDocById`, regardless of the number of nodes that have actually changed. The react dev tools performance profile confirms this.
+### An Unoptimized Transformation Approach
+
+Copying unchanged nodes is a common issue. In the following code snippet, the state transformation algorithm creates a new node for every object in `docs`. A rerender is triggered in every instance of `useGetDocById`. It is irrespective of the nodes that have changed in value. The react dev tools performance profile confirms this.
 
 ```typescript
 const updateDate = (newDate, currId) => {
@@ -270,11 +272,13 @@ const updateDate = (newDate, currId) => {
 
 ![localImage](./resources/pt2-fig-6.png)
 
-Instead of modifying every node, via spread operator, transforming the single node (and its root) of interest is ideal. Here, the dev tools profiler only update necessary components.
+### An Optimal Transformation Approach
+
+Transforming the single node is optimal. This transformation strategy targets the single node that requires an update.
 
 ```typescript
 const updateDate = (newDate, currId) => {
-  dispatch((state) => {
+  dispatch(({ docs }) => {
     const nextDocs = { ...docs };
 
     nextDocs[currId] = {
