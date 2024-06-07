@@ -244,7 +244,12 @@ Granular resolvers are almost always better. Accessing the exact nodes that are 
 
 ## Optimizing State Tree Mutations
 
-Rerenders from algorithms are now contingent memoization effectiveness. Naturally, the fewer changes in nodes, the better the system performs. Minimizing node updates during state transformations is an art that becomes manageable with an intuitive understanding of how state changes. Useless node updates are a fatal performance mistake.
+Rerenders from algorithms are now contingent on memoization effectiveness and are based on the following:
+
+1. The granularity/mindfulness of what nodes to target in `createSelector`.
+2. Minimizing the number of nodes that change when updating state.
+
+Effectively targeting optimal nodes is meaningless if they are constantly changing for useless reasons. Minimizing node updates during state transformations is an art that becomes manageable with an intuitive understanding of how state changes.
 
 Copying unchanged nodes is a common issue. In the following code snippet, the state transformation algorithm creates a new node for every single object in the `docs` key. This triggers a rerender in every single instance of `useGetDocById`, regardless of the number of nodes that have actually changed. The react dev tools performance profile confirms this.
 
@@ -262,6 +267,8 @@ const updateDate = (newDate, currId) => {
   });
 };
 ```
+
+![localImage](./resources/pt2-fig-6.png)
 
 Instead of modifying every node, via spread operator, transforming the single node (and its root) of interest is ideal. Here, the dev tools profiler only update necessary components.
 
@@ -281,3 +288,5 @@ const updateDate = (newDate, currId) => {
   });
 };
 ```
+
+![localImage](./resources/pt2-fig-7.png)
