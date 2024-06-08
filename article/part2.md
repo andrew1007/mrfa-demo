@@ -2,13 +2,13 @@
 
 ## Introduction
 
-The complexity of modern frontend applications are immense. Design decisions are easier when the application is treated like a server with a thin UI layer on top of it. In a server, data is king and is always treated with respect.
+The complexity of modern frontend applications are immense. The way data is structured, managed, transformed, and computed will be the central point of interest. The better the data is designed, the simpler it is to maintain and optimize a React app.The principles of designing backend systems
 
-The way data is structured, managed, transformed, and computed will be the central point of interest. The better the data is designed, the simpler it is to maintain and optimize a React app.
+Design decisions are easier when the application is treated like a server with a thin UI layer on top of it. In a server, data is king and is always treated with respect.
 
 ## Normalized State Data
 
-Normalization is imperative for a maintainable SSOT (single source of truth) data model. Do not duplicate stored data. It may be helpful to think of a state tree as a server-side database. 
+Normalization is imperative for a maintainable SSOT (single source of truth) data model. Do not duplicate stored data. It may be helpful to think of a state tree as a server-side database.
 
 In the same way data (and its normalization) is respected on the backend, similar attitudes should apply to how the frontend manages data.
 
@@ -52,7 +52,7 @@ The selector pattern is an algorithm design philosophy. It places emphasis on co
 
 The benefits are immense:
 
-- They are pure functions
+- They are [pure functions](https://en.wikipedia.org/wiki/Pure_function)
 - Easy to test
 - Easy to refactor
 - Uniform arguments make code easier to reason about
@@ -65,8 +65,10 @@ The benefits are immense:
 Algorithms that only require state data are easy to write and are composable.
 
 ```typescript
+// returns an array of `doc` objects, in the correct order
 const getDocList = (state) => state.docIds.map((id) => state.docs[id]);
 
+// parses all doc objects (correct order) for their titles
 const getDocLabels = (state) => {
   const docList = getDocList(state);
   return docList.map(({ title }) => title);
@@ -83,17 +85,18 @@ const makeGetDocById = (id) => (state) => state.docs[id];
 
 ## `useSelector`
 
-The higher order component approach was taken for learning purposes. It is the more "formal" way, because data management stays within React's data flow paradigm. A hook would be more practical, but they naturally rerender on every update, so a few sneaky tricks are required to suppress rerenders. Integrating `useSelector` into `makeProvider` requires some changes.
+The higher order component, via `applyState` approach was taken for learning purposes. It is the more "formal" way, because data management stays within React's data flow paradigm. A hook would be more practical, but they naturally rerender on every update. In order to use use hooks that suppress rerenders, sneaky tricks are required. Integrating a hook that does this, `useSelector`, requires some changes to `makeProvider`. The following exist outside of React's traditional data management system:
 
-1. There needs to be a data structure to hold data listeners and they need to be recomputed for every render cycle (`subscribers`).
-2. The current state needs to persist outside of the component (`currentState`).
+1. A data structure to hold data listeners and recomputed during render cycles (`subscribers`).
+2. `state` needs to be tracked outside of the component (`currentState`).
 
 Each hook retains computed data in a `useRef` hook, to avoid a rerender.
 
 ```tsx
 const makeProvider = (initialState) => {
-  // ...
+  // hold `useSelector` callbacks
   let subscribers = [];
+  // keep a current copy of the current state for computing `useSelector`'s initial value
   let currentState = initialState;
 
   // Provider component with state management hook
@@ -104,7 +107,11 @@ const makeProvider = (initialState) => {
     });
 
     const [state, dispatch] = useReducer(reducer, initialState);
+
+    // Update the current state on every render cycle
     currentState = state;
+
+    // Recompute all selectors on every render cycle
     subscribers.forEach((fn) => {
       fn(state);
     });
@@ -118,19 +125,19 @@ const makeProvider = (initialState) => {
 
   // ...
 
-  const NotComputed = Symbol("NotComputed");
-
   const useSelector = (selector) => {
     const [, forceRender] = useReducer((s) => s + 1, 0);
     const selectorRef = useRef(selector);
     const currValRef = useRef(selector(currentState));
 
     useEffect(() => {
-      const fn = (state: T) => {
+      // listener for `useSelector` to determine if a rerender is required.
+      const fn = (state) => {
         const computed = selectorRef.current(state);
 
-        if (currValRef.current !== computed || state === initialState) {
+        if (currValRef.current !== computed) {
           currValRef.current = computed;
+          // force a rerender if the computed value fails strict equality
           forceRender();
         }
       };
@@ -154,44 +161,93 @@ const makeProvider = (initialState) => {
 };
 ```
 
-## `useSelector` Explained
+## `useSelector` Deconstructed
 
-React's data management update system is inextricably tied to rerenders, so computation needs to exist outside of it. This is accomplished by storing the selector functions inside a data structure that React does not manage. 
+React's data management update system is inextricably tied to rerenders, so computation needs to exist outside of it. Here are the events that occur in order to accomplish this (in order).
+
+This is accomplished by storing the selector functions inside a data structure that React does not manage.
+
+1. On instantiation of `makeProvider`, an array is created to hold all `useSelector` callbacks.
 
 ```typescript
 let subscribers = [];
 ```
 
-On every state update, the subscribed functions need to be computed.
+2. Each instance of `useSelector` stores its callback in the `subscribers` array.
 
 ```typescript
-// provider HOC
-const [state, dispatch] = useReducer(reducer, initialState);
-subscribers.forEach((fn) => {
-  fn(state);
-});
+const useSelector = (selector) => {
+  // ...
+  useEffect(() => {
+    // listener for `useSelector` to determine if a rerender is required.
+    const fn = (state) => {
+      // ...
+    };
+    subscribers.push(fn);
+  }, []);
+};
 ```
 
-The most recent state value needs to be available in order to correctly compute the initial value in `useSelector`.
+3. On state update, `subscribers` are all recomputed
 
 ```typescript
-// initialization
-let currentState = initialState;
-
-// provider HOC
-const [state, dispatch] = useReducer(reducer, initialState);
-currentState = state;
-
-// useSelector
-const currValRef = useRef(selector(currentState));
+const Provider = ({ children }) => {
+  // ...
+  const [state, dispatch] = useReducer(reducer, initialState);
+  subscribers.forEach((fn) => {
+    fn(state);
+  });
+};
 ```
 
+4. The most recent state value needs to be available in order to correctly compute the initial value in `useSelector`.
 
-Each hook retains computed data in a `useRef` hook, because assigning data to it does not trigger a rerender.
+```typescript
+const Provider = ({ children }) => {
+  // ...
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  let currentState = initialState;
+};
+```
+
+5. `useSelector` uses `currentState` to compute the current value on mount. Each hook retains computed data in a `useRef` hook.
+
+```typescript
+const useSelector = (selector) => {
+  // ...
+  const currValRef = useRef(selector(currentState));
+};
+```
+
+6. A rerender is forced when necessary. This setup defers the decision as to whether not a rerender should occur.
+
+```typescript
+const useSelector = (selector) => {
+  const [, forceRender] = useReducer((s) => s + 1, 0);
+  // ...
+
+  useEffect(() => {
+    // ...
+    const fn = (state) => {
+      const computed = selectorRef.current(state);
+      const prevValue = currValRef.current;
+      if (prevValue !== computed) {
+        currValRef.current = computed;
+        // force a rerender if the computed value fails strict equality
+        forceRender();
+      }
+    };
+    // ...
+  }, []);
+
+  // ...
+};
+```
 
 ## Selectors used in `useSelector`
 
-It is no coincidence that the interface of the selector matches the interface of `useSelector`. By invoking the selectors in `useSelector`, algorithms and UI are neatly separated, along with optimal rerender suppression.
+`useSelector` and the selector pattern share identical interfaces. Rerenders are optimally suppress and, as a side bonus, algorithms and UI are neatly separated in an easy-to-reason (pure) way.
 
 ```typescript
 const getDocList = (state) => state.docIds.map((id) => state.docs[id]);
@@ -207,18 +263,32 @@ const Component = (props) => {
 };
 ```
 
-## Computed Data Will Rerender
+## Computed Data Will Always Rerender
 
-This current strategy works because the selectors are returning nodes in the state tree. But if the operation inside the selector turns into algorithm that returns an object (which happens all the time), the selector will *always* trigger a rerender. Memoization makes this a solvable problem.
+This current strategy works because the selectors are returning nodes in the state tree. But if the operation inside the selector turns into algorithm that returns an object (which happens all the time), the selector will _always_ trigger a rerender.
+
+In the following example, `makeGetDocById` now returns a new object on every computation, failing strict equality on every render cycle. The trick to solving this is by returning the same object as often as possible: memoization.
 
 ```typescript
 const makeGetDocById = (id) => (state) => {
-  const doc = state.docs[id]
+  const doc = state.docs[id];
   return {
     ...doc,
-    timestamp: moment(doc.updatedAt).format('YYYY-MM-DD')
-  }
+    timestamp: moment(doc.updatedAt).format("YYYY-MM-DD"),
+  };
 };
 
 const useGetDocById = (id) => useSelector(makeGetDocById(id));
 ```
+
+## Conclusion
+
+Part 2 ends on a cliffhanger. Is this design paradigm so restrictive that one can't even compute custom data structures in a selector? This will *always* happen with a normalized `state` object. 
+
+Does this deprive developers from doing basic things like returning new objects in an algorithm?
+
+ hard-fought performance techniques? Should 
+
+
+What's the point of all of this if something as simple as returning a new object destroys all
+ sure readers on

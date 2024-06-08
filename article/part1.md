@@ -2,7 +2,7 @@
 
 ## React can be fast
 
-It's a shame that there is no style guide for React. One of the biggest mistakes that is made, almost without fail, is poor performance. The core architecture of many apps inevitably out-scale themselves. React apps start fine, but slowly accumulate performance problems. Poor architectural decisions make it slow. There is nothing inherently wrong with React. 
+It's a shame that there is no style guide for React. One of the biggest mistakes that is made, almost without fail, is poor performance. The core architecture of many apps inevitably out-scale themselves. React apps start fine, but slowly accumulate performance problems. Poor architectural decisions make it slow. There is nothing inherently wrong with React.
 
 Good architecture can be learned. But it requires a deep understanding of React, data structure mutations, and applying tried-and-true design patterns to component design. The first step is to learn what the [virtual DOM](https://legacy.reactjs.org/docs/faq-internals.html) is and the [reconciliation algorithm](https://legacy.reactjs.org/docs/reconciliation.html).
 
@@ -146,10 +146,11 @@ const App = () => {
     }
 
     return rows
-      .filter((row) =>
-        currentFilter?.conditions.every(
-          (cond) => row[cond.key] === cond.value
-        ) ?? true
+      .filter(
+        (row) =>
+          currentFilter?.conditions.every(
+            (cond) => row[cond.key] === cond.value
+          ) ?? true
       )
       .filter(({ name }) => name.includes(searchText));
   };
@@ -228,16 +229,11 @@ Here is a basic state management library that can be used to suppress rerenders.
 - Higher order component to access context data and process data before it is passed to a component.
 
 ```jsx
-import React, {
-  createContext,
-  useContext,
-  useReducer,
-} from "react";
+import React, { createContext, useContext, useReducer } from "react";
 
 const noop = () => null;
 
 const makeProvider = (initialState) => {
-
   const StateContext = createContext(initialState);
   const DispatchContext = createContext(noop);
 
@@ -252,15 +248,13 @@ const makeProvider = (initialState) => {
 
     return (
       <DispatchContext.Provider value={dispatch}>
-        <StateContext.Provider value={state}>
-          {children}
-        </StateContext.Provider>
+        <StateContext.Provider value={state}>{children}</StateContext.Provider>
       </DispatchContext.Provider>
     );
   };
 
   // HOC to connect state to components
-  const applyState = (mappedState) =>{
+  const applyState = (mappedState) => {
     return (Component) => {
       const MemoComponent = memo(Component);
       const ApplyStateComponent = (props) => {
@@ -277,7 +271,7 @@ const makeProvider = (initialState) => {
       ApplyStateComponent.displayName = `applyState{${Component.name}}`;
       return ApplyStateComponent;
     };
-  }
+  };
 
   const useDispatch = () => useContext(DispatchContext);
 
@@ -286,7 +280,7 @@ const makeProvider = (initialState) => {
     Provider,
     useDispatch,
   };
-}
+};
 
 export default makeProvider;
 ```
@@ -312,13 +306,15 @@ In a majority of cases, only `id` needs to be passed down from parent to child. 
 ```jsx
 const TableRows = ({ rowIds }) => (
   <>
-    {rowIds.map((id) => <TableRow id={id} key={id} />)}
+    {rowIds.map((id) => (
+      <TableRow id={id} key={id} />
+    ))}
   </>
 );
 
 const mappedState = () => (state) => ({
   rowIds: state.rowIds,
-})
+});
 
 export default applyState(mappedState)(TableRows);
 ```
@@ -326,10 +322,10 @@ export default applyState(mappedState)(TableRows);
 In the components that only receive `id` from the parent, `state` is accessed in `applyState`'s function resolver to get the specific `row`'s data.
 
 ```jsx
-const TableRow = props => <div />
+const TableRow = (props) => <div />;
 
 const mappedState = () => (state, ownProps) => ({
-    value: state.rows[ownProps.id],
+  value: state.rows[ownProps.id],
 });
 
 export default applyState(mappedState)(RowCell);
@@ -344,7 +340,7 @@ const RowCheckbox = (props) => {
   const { checked } = props;
 
   // Don't worry about this handler. We're concentrating on the pre-computation aspect of this code snippet
-  const toggleCheck = (e) => null
+  const toggleCheck = (e) => null;
 
   return <input onChange={toggleCheck} type="checkbox" checked={checked} />;
 };
@@ -363,19 +359,19 @@ The rendered rows is dynamic because of searching and filtering. This requires t
 ```jsx
 const TableRows = ({ rowIds }) => (
   <>
-    {rowIds.map((id) => <TableRow id={id} key={id} />)}
+    {rowIds.map((id) => (
+      <TableRow id={id} key={id} />
+    ))}
   </>
 );
 
 const getFilteredRowIds = (state) => {
-  const { filters, focusedFilter, rows } = state
+  const { filters, focusedFilter, rows } = state;
   const { conditions } = filters.find(({ id }) => id === focusedFilter);
 
   return rows
-    .filter(
-      (row) =>conditions.every((cond) => row[cond.key] === cond.value)
-    )
-    .map(({ id }) => id)
+    .filter((row) => conditions.every((cond) => row[cond.key] === cond.value))
+    .map(({ id }) => id);
 };
 
 const mappedState = () => (state) => ({
@@ -420,10 +416,14 @@ export default React.memo(Table);
 In most cases, it is better to have data close to the UI that use it. `RowCell` is a good case study for how this can be done. Create event handlers and extract `state` data in the locations where they are used. Oftentimes, only `id` is necessary. But in the case of individual cells, the name of the column is also required. The `TableRow` needs to pass down the column name, which requires `TableRow` to know what `columns` to render.
 
 ```jsx
-const TableRow = ({ columns, id } ) => (
+const TableRow = ({ columns, id }) => (
   <tr>
-    <td><RowCheckbox id={id} /></td>
-    {columns.map(({ key }) => <RowCell key={key} field={key} id={id} />)}
+    <td>
+      <RowCheckbox id={id} />
+    </td>
+    {columns.map(({ key }) => (
+      <RowCell key={key} field={key} id={id} />
+    ))}
   </tr>
 );
 
@@ -455,9 +455,7 @@ const RowCell = (props) => {
     });
   };
 
-  return (
-    <EditableCell value={value} onConfirm={handleEdit} />
-  );
+  return <EditableCell value={value} onConfirm={handleEdit} />;
 };
 
 const mappedState = () => (state, ownProps) => {
@@ -497,18 +495,18 @@ const heavy = () => {
 
 Here are how the render cycle speed changes, as the number of iterations increases. Any responsiveness slower than 50 ms is typically considered to be intrusive to the user experience. The unoptimized app almost immediately hurts the user experience.
 
-|Iterations | Optimized (ms)   | Unoptimized (ms) |
-|-----------|------------------|------------------|
-|100        |16.7              |32.6              |
-|200        |21.7              |46.2              |
-|300        |26.6              |58.2              |
-|400        |31.5              |78.2              |
-|500        |35.3              |85.7              |
-|1000       |61.1              |165               |
-|1250       |74.1              |198.7             |
-|1500       |85.1              |231.8             |
-|1750       |94.6              |258.7             |
-|2000       |106               |303.7             |
+| Iterations | Optimized (ms) | Unoptimized (ms) |
+| ---------- | -------------- | ---------------- |
+| 100        | 16.7           | 32.6             |
+| 200        | 21.7           | 46.2             |
+| 300        | 26.6           | 58.2             |
+| 400        | 31.5           | 78.2             |
+| 500        | 35.3           | 85.7             |
+| 1000       | 61.1           | 165              |
+| 1250       | 74.1           | 198.7            |
+| 1500       | 85.1           | 231.8            |
+| 1750       | 94.6           | 258.7            |
+| 2000       | 106            | 303.7            |
 
 ![scaling of clicking all checkbox using unoptimized app](../images/select-all-checkbox-scaling.png)
 
@@ -518,28 +516,30 @@ Front-loading algorithms in `applyState`, which always recomputes, may seem like
 
 ```jsx
 const TableRows = (props) => {
-    const { filters, focusedFilter, searchText, rows, rowIds } = props
-    const currentFilter = filters.find(({ id }) => id === focusedFilter);
+  const { filters, focusedFilter, searchText, rows, rowIds } = props;
+  const currentFilter = filters.find(({ id }) => id === focusedFilter);
 
-    const filteredRowIds = rowIds.filter((rowId) =>
+  const filteredRowIds = rowIds
+    .filter(
+      (rowId) =>
         currentFilter?.conditions.every(
-            (cond) => rows[rowId][cond.key] === cond.value
+          (cond) => rows[rowId][cond.key] === cond.value
         ) ?? true
     )
-        .filter((rowId) => rows[rowId].name.includes(searchText));
+    .filter((rowId) => rows[rowId].name.includes(searchText));
 
-    return (
-        <>
-            {filteredRowIds.map((id) => {
-                return <TableRow id={id} key={id} />;
-            })}
-        </>
-    );
+  return (
+    <>
+      {filteredRowIds.map((id) => {
+        return <TableRow id={id} key={id} />;
+      })}
+    </>
+  );
 };
 
 const mappedState = () => (state) => {
-    const { filters, focusedFilter, searchText, rowIds, rows } = state
-    return { filters, focusedFilter, searchText, rowIds, rows }
+  const { filters, focusedFilter, searchText, rowIds, rows } = state;
+  return { filters, focusedFilter, searchText, rowIds, rows };
 };
 
 export default applyState(mappedState)(TableRows);
@@ -547,9 +547,15 @@ export default applyState(mappedState)(TableRows);
 
 This true, but impractical. Maintainability comes first for enterprise software. Algorithms in UI violate separation of concerns and are not reusable. On top of that, there is already a solution for this. Functional (pure) memoization strategies enable patterns that are robust, extremely effective (when used correctly), and reusable. There is no denying that memoization has performance penalties. But the impact is normally small and provides massive increases in scalability. It is almost always worth it.
 
+## Commenting on the React Compiler
+
+There is plenty of talk about a new feature: The [React Compiler](https://react.dev/learn/react-compiler). It markets itself as the answer to suppressing useless rerenders "for free". But there are limits to what it can do. Poorly-designed apps have useless rerenders embedded within their DNA. No novel technology (short of sophisticated AI code refactoring) will ever fix foundational performance issues. A technology like this is not a free pass to be undisciplined.
+
+On top of that, a subset of the skills required for a fast React app are platform-agnostic. Any technology, library, or framework will benefit from this knowledge.
+
 ## To be continued
 
-With these concepts, typical web apps gain huge performance wins. But this is only scratching the surface of the knowledge for fully optimized React apps. To get the full picture, these topics need to be covered.
+With these concepts, typical web apps gain substantial amounts of responsiveness. But there are more performance wins that build on top of mindful component design, resulting in hyper-optimized applications. The following will take performance to a level that most developers have never seen in enterprise software.
 
 - Structuring normalized state trees
 - Robust memoization strategies for computed data
