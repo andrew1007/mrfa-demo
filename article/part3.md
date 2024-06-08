@@ -2,10 +2,9 @@
 
 ## Introduction
 
-Part 3 is about the concept 
+Part 3 is about the concept
 
-Understanding state tree transformations is so undervalued that the average developer doesn't think about (or even understand) it when designing an application. A mastery of this is a hidden superpower when working global state management systems. 
-
+Understanding state tree transformations is so undervalued that the average developer doesn't think about (or even understand) it when designing an application. A mastery of this is a hidden superpower when working global state management systems.
 
 It is the last piece of the puzzle to creating fast enterprise software using React. It scales infinitely. There's is no such thing as an application that is too large or complex. In fact, the true power of this design paradigm reveals itself in those situations.
 
@@ -19,7 +18,7 @@ Brittle, inflexible, and unstandardized memoization approaches are rife with haz
 
 Creating a structured framework for memoization fixes all of these things.
 
-1. Every algorithm in an application, regardless of size or complexity, can be memoized.
+1. Every global state algorithm, regardless of size or complexity, can be memoized.
 2. It is magnitudes harder to return stale values.
 3. Cache hits are maximized in a deterministic and easy-to-reason way.
 
@@ -55,22 +54,21 @@ The spread operator performs a shallow merge. Think of this operation as the cre
 
 ## Custom `createSelector`
 
-For learning purposes, here is a custom implementation of a powerful memoization function. It is functionally equivalent to `createSelector`, from the package [`reselect`](https://www.npmjs.com/package/reselect).
+For learning purposes, here is a custom implementation of a powerful memoization function. It has the core features of `createSelector`, from the package [`reselect`](https://www.npmjs.com/package/reselect).
 
 ```typescript
 function createSelector(selectors, computingFn) {
-  const empty = Symbol("emptyCache");
-  let computedCache = [];
-  let cache = empty;
+  let computedSelectorCache = [];
+  let cache;
 
   return (state) => {
-    const extracted = selectors.map((fn) => fn(state));
-    const hasChanges = extracted.some(
-      (computed, idx) => computedCache[idx] !== computed
+    const computedSelectors = selectors.map((fn) => fn(state));
+    const hasChanges = computedSelectors.some(
+      (computed, idx) => computedSelectorCache[idx] !== computed
     );
-    if (cache === empty || hasChanges) {
-      cache = computingFn(...extracted);
-      computedCache = extracted;
+    if (hasChanges) {
+      cache = computingFn(...computedSelectors);
+      computedSelectorCache = computedSelectors;
     }
 
     return cache;
@@ -78,18 +76,70 @@ function createSelector(selectors, computingFn) {
 }
 ```
 
-`createSelector` accepts an array of resolver functions. The purpose of these resolver functions are twofold:
+## `createSelector` Deconstructed
 
-1. The computed value of the function is available as an argument in `computingFn`.
-2. The computed value is checked for strict equality, to determine if it needs to be recomputed.
+The following sequence of operations occurs for effective memoization.
 
-If all resolvers computed to a value that meets strict equality, the cached value is returned. This saves computation time. But more importantly, a cached value is equal by reference. This suppresses useless rerenders. This has an immense implication: A normalized state tree rarely has data structures that a component requires. But now that doesn't matter, because computed values will maximally meet strict equality, when memoized.
+1. Prepare two caches: Resolver values and return value
+
+```typescript
+function createSelector(selectors, computingFn) {
+  let computedSelectorCache = [];
+  let cache;
+
+  /// ...
+}
+```
+
+Two caches are required: 1. For the algorithm's return value and 2. The return values of the selectors.
+
+2. Compare selector return values from previous arguments to current arguments
+
+```typescript
+function createSelector(selectors, computingFn) {
+  let computedSelectorCache = [];
+  let cache;
+
+  return (state) => {
+    const computedSelectors = selectors.map((fn) => fn(state));
+    const hasChanges = computedSelectors.some(
+      (computed, idx) => computedSelectorCache[idx] !== computed
+    );
+    // ...
+  };
+}
+```
+
+Selectors are pure functions. So if all selectors are computed and the resolved values are the same compared to the previous state, then the cached value can be safely returned.
+
+This does a "pre-verification" of a datum's equality before it is available to the algorithm. Combined with functional purity, stale caches are virtually impossible.
+
+3. If there are changes, update the cache and return the new value
+
+```typescript
+function createSelector(selectors, computingFn) {
+  // ...
+
+  return (state) => {
+    const computedSelectors = // ...
+    const hasChanges = // ....
+    if (hasChanges) {
+      cache = computingFn(...computedSelectors);
+      computedSelectorCache = computedSelectors;
+    }
+
+    return cache;
+  };
+}
+```
+
+If the selectors resolve to different arguments, then the `cache` recomputes.
 
 ## Visualizing Resolver Functions
 
-The hardest part about effective memoization is writing the correct resolver functions. It's helpful to think of a resolver as a function that "crawls" down a state tree to target required nodes. The nodes that are targeted should be the exact nodes that are required to compute the data.
+The hardest part about effective memoization is writing the correct resolver functions. It's helpful to think of a resolver as a function that traverses the tree to find nodes. The targeted nodes should be the exact ones required for computation.
 
-Take a look at a sample state tree that is normalized
+The following is a small, normalized, state tree.
 
 ```typescript
 export const normalizedState = {
@@ -116,32 +166,32 @@ A tree representation would look like this
 
 ![localImage](./resources/pt2-fig-2.png)
 
-If an array of titles is needed, the resolver functions should individually "target" the relevant nodes: `docs` and `docIds`.
+## Traversing the State Tree with Selectors
 
-## "Crawling" the State Tree with Selectors
-
-A selector function's argument is the `state` tree and the return value is a node in it. For example, to return the `docs` node, the selector would be as follows.
+A selector function's argument is the `state` tree and the return value is a node. To return the `docs` node, the selector would be:
 
 ```typescript
 const getDocs = (state) => state.docs;
 ```
 
-`getDocs` crawls down the state tree to select the `docs` node
+`getDocs` traverses the tree to select `docs`.
 
 ![localImage](./resources/pt2-fig-3.png)
 
-A selector is any function where the only argument is `state`. Here is an example that targets a child node in `docs`. There can be many childen, so `id` needs to be accounted for. This requires currying.
+## Factory Selectors
+
+A selector is any function where the only argument is `state`. To account for other parameters, currying is required. For example, if a key is specified by runtime (such as an `id`), it must be curried. Here is an example that targets a child node in `docs`.
 
 ```typescript
-const makeGetDocById = (id) => state => state.docs[id]
+const makeGetDocById = (id) => (state) => state.docs[id];
 
-const getDoc = makeGetDocById(1)
+const getDoc = makeGetDocById(1);
 ```
 
 ![localImage](./resources/pt2-fig-4.png)
 
-
 ## Composing Selectors
+
 The first argument of `createSelector` accepts an array of selectors. This is how multiple nodes can be used in a computation. `getDocs` and `getDocIds` are used together to compute the necessary data. This memoized selector will only recompute when either node (`docs` and `docIds`) changes value.
 
 ```typescript
@@ -157,10 +207,7 @@ const getDocTitles = createSelector([getDocs, docIds], (docs, docIds) => {
 
 ![localImage](./resources/pt2-fig-5.png)
 
-
-
 Now, this selector hook will only recompute (and thus trigger a rerender) when `docs` and/or `docIds` updates.
-
 
 // selector hook
 const useGetDocTitles = useSelector(getDocTitles);
@@ -170,50 +217,21 @@ const useGetDocTitles = useSelector(getDocTitles);
 One of the incredible powers of the selector model is that computed selectors can be used as resolver functions. Selectors are infinitely composable and can be reused with virtually no performance penalties (because they are memoized).
 
 ```typescript
-const capitalize = (str: string) => `${str[0].toUpperCase()}${str.slice(1)}`;
-const getParsedTitles = createSelector([getDocTitles], (titles) =>
-  capitalize(titles)
+const getDocTitles = createSelector([getDocs, docIds], (docs, docIds) => {
+  return docIds.map((id) => docs[id].title);
+});
+
+const capitalize = (str) => `${str[0].toUpperCase()}${str.slice(1)}`;
+const getCapitalizedTitles = createSelector([getDocTitles], (titles) =>
+  titles.map(capitalize)
 );
 
-const useGetParsedTitles = useSelector(getParsedTitles);
+const useGetCapitalizedTitles = useSelector(getCapitalizedTitles);
 ```
-
-## Factory Selectors for Multi-cache situations
-
-`createSelector` has a cache size of one. This meets most use cases. But some situations may require a larger cache. For example, when an algorithm needs to operate on something by id. This situation is common when many instances of a component are rendered, such as a table or list of UI elements.
-
-A selector like this will miss its cache because `id` is constantly changing. In this situation, a factory is required.
-
-```tsx
-const makeGetDocById = (id) => (state) => state.docs[id];
-
-const makeGetParsedDocById = (id) =>
-  createSelector([makeGetDocById(id)], (doc) => {
-    const { updatedAt, ...rest } = doc;
-    return {
-      ...rest,
-      date: dayjs(doc.updatedAt).format("YYYY-MM-DD"),
-    };
-  });
-
-const useGetParsedDocById = (id) => {
-  const getParsedDocById = useMemo(() => makeGetParsedDocById(id), [id]);
-  return useSelector(getParsedDocById);
-};
-
-const DocEntry = (props) => {
-  const parsedDoc = useGetParsedDocById(props.id);
-
-  return <>{JSON.stringify(parsedDoc)}</>;
-};
-```
-
-Now, each `useGetDocById` has its own cache, via individual instance of `makeGetParsedDocById`. This allows maximal strict equality matching.
-
 
 ## `createSelector` Resolver Design
 
-The hardest part about effective memoization is writing optimal resolver functions. They can be the difference between an app that slows to a crawl and another that is lightning fast. Remember that all of the performance savings when memoizing are from rerender suppression. It has little to do with the computation of the algorithm.
+The hardest part about effective memoization is writing optimal resolver functions. They can be the difference between an app that slows to a crawl and another that is lightning fast. Remember that most of the performance savings when memoizing are from rerender suppression. Algorithms are usually a non-issue.
 
 We can start by talking about a useless selector. One that targets the root node of the state tree, `getState`. The root node is guaranteed to be a new node during any state update. This selector will always miss its cache and recompute.
 
@@ -237,29 +255,53 @@ const getDocs = (state) => state.docs;
 
 const makeGetParsedDocById = (id) =>
   createSelector([getDocs], (docs) => {
-    const { updatedAt, ...rest } = docs[id];
+    const doc = docs[id];
+
     return {
-      ...rest,
+      ...doc,
       date: dayjs(doc.updatedAt).format("YYYY-MM-DD"),
     };
   });
 ```
 
-But best of all, our resolver function can reach deep into the state tree and target the exact node. This resolver has minimal performance penalties, because key access within an object is an O(1) operation.
+But best of all, the resolver function can traverse deeper into the state tree and target the exact node of interest. Granular resolvers are almost always better. Accessing the exact nodes that are required for computation maximizes the effectiveness of this caching strategy.
 
 ```typescript
 const makeGetDocById = (id) => (state) => state.docs[id];
+
 const makeGetParsedDocById = (id) =>
   createSelector([makeGetDocById(id)], (doc) => {
-    const { updatedAt, ...rest } = doc;
     return {
-      ...rest,
+      ...doc,
       date: dayjs(doc.updatedAt).format("YYYY-MM-DD"),
     };
   });
 ```
 
-Granular resolvers are almost always better. Accessing the exact nodes that are required for computation maximizes the effectivess of this caching strategy.
+## Factory Selectors for Multi-cache situations
+
+`createSelector` has a cache size of one. This meets most use cases. But some situations may require a larger cache. For example, when an algorithm needs to operate on something by id. This situation is common when many instances of a component are rendered, such as a table or list of UI elements.
+
+The factory selector above, `makeGetParsedDocById`, will miss constantly miss its cache because `id` changes. The factory selector needs its own copy of the selector in every hook, which can be accomplished with `useMemo`.
+
+```tsx
+const makeGetDocById = (id) => (state) => state.docs[id];
+
+const makeGetParsedDocById = (id) =>
+  createSelector([makeGetDocById(id)], (doc) => {
+    return {
+      ...doc,
+      date: dayjs(doc.updatedAt).format("YYYY-MM-DD"),
+    };
+  });
+
+const useGetParsedDocById = (id) => {
+  const getParsedDocById = useMemo(() => makeGetParsedDocById(id), [id]);
+  return useSelector(getParsedDocById);
+};
+```
+
+Now, each `useGetDocById` has its own cache, allowing maximal strict equality matching.
 
 ## Optimizing State Tree Mutations
 
@@ -313,3 +355,9 @@ const updateDate = (newDate, currId) => {
 ```
 
 ![localImage](./resources/pt2-fig-7.png)
+
+## Conclusion
+
+The foundation is laid out. The only thing left is to practice until this is all second-nature.
+
+It may be readily apparent that this scales to applications of any size... or maybe it doesn't. To drive the point home, part 4 will drive the point home with an analyses and benchmarks of a fully functional React application: A music player.
