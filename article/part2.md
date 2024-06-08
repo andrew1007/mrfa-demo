@@ -267,7 +267,7 @@ const Component = (props) => {
 
 This current strategy works because the selectors are returning nodes in the state tree. But if the operation inside the selector turns into algorithm that returns an object (which happens all the time), the selector will _always_ trigger a rerender.
 
-In the following example, `makeGetDocById` now returns a new object on every computation, failing strict equality on every render cycle. The trick to solving this is by returning the same object as often as possible: memoization.
+In the following example, `makeGetDocById` now returns a new object on every computation, failing strict equality on every render cycle. 
 
 ```typescript
 const makeGetDocById = (id) => (state) => {
@@ -283,12 +283,6 @@ const useGetDocById = (id) => useSelector(makeGetDocById(id));
 
 ## Conclusion
 
-Part 2 ends on a cliffhanger. Is this design paradigm so restrictive that one can't even compute custom data structures in a selector? This will *always* happen with a normalized `state` object. 
+Unfortunately, part 2 ends on a cliffhanger and makes these concepts look like a failing proposition. It may look like this design paradigm deprives developers of basic operations (like algorithms that return new objects).
 
-Does this deprive developers from doing basic things like returning new objects in an algorithm?
-
- hard-fought performance techniques? Should 
-
-
-What's the point of all of this if something as simple as returning a new object destroys all
- sure readers on
+But this is not the case at all. It's simply that explaining the solution is difficult and time-consuming, so it is being reserved for part 3. It is about visualizing state tree transformations, memoization, and understanding how to apply them to production code.

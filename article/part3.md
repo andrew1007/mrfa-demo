@@ -2,6 +2,31 @@
 
 ## Introduction
 
+Part 3 is about the concept 
+
+Understanding state tree transformations is so undervalued that the average developer doesn't think about (or even understand) it when designing an application. A mastery of this is a hidden superpower when working global state management systems. 
+
+
+It is the last piece of the puzzle to creating fast enterprise software using React. It scales infinitely. There's is no such thing as an application that is too large or complex. In fact, the true power of this design paradigm reveals itself in those situations.
+
+###
+
+Brittle, inflexible, and unstandardized memoization approaches are rife with hazards and weaknesses.
+
+1. Some algorithms may seem "too complex" to memoize
+2. Fear of silently returning stale values
+3. Fear of silently missing the cache every time
+
+Creating a structured framework for memoization fixes all of these things.
+
+1. Every algorithm in an application, regardless of size or complexity, can be memoized.
+2. It is magnitudes harder to return stale values.
+3. Cache hits are maximized in a deterministic and easy-to-reason way.
+
+Frameworks have rules (good rules though). And it requires an understanding of state tree transformations.
+
+## idk lol
+
 In part 2, it may have seemed strange that selector functions, regardless of complexity, were decoupled from `useSelector`. This is for two reasons:
 
 1. Pure functions are dead-easy to test
@@ -9,17 +34,11 @@ In part 2, it may have seemed strange that selector functions, regardless of com
 
 Memoizing operations in data structures is the last piece of the puzzle for highly optimized applications that are fast and maintainable. But memoizing operations that are derived from (essentially) a mini database is difficult. It requires an intuitive understanding of how the state tree changes as data is mutated, added, and removed from it.
 
-## Commenting on the React Compiler
-There is plenty of talk about a new feature: The [React Compiler](https://react.dev/learn/react-compiler). It markets itself as the answer to suppressing useless rerenders "for free". But in reality, a technology like this is not a free pass to be undisciplined. Poorly-designed apps have useless rerenders embedded within their DNA. No novel technology (short of AI code refactoring) will ever fix foundational performance issues. That being said, learning effective memoization and designing normalized state trees are still a worthy endeavor, because of the following:
-
-- It is platform-agnostic. Any technology, library, or framework will benefit from this knowledge.
-- The performance gains in React are massive, which will be thoroughly proven in part 4.
-
 ## Seeing State Tree as Nodes
 
 Mutations are easiest to understand when `state` is treated like nodes in a tree data structure. Moving forward, a colored node will denote a node that will fail strict equality; either a change in value, reference, or both.
 
-A new state tree is required when updating state. But the word "new" isn't a granular descriptor. Only the root node needs to be replaced in order for it to be defined as a "new tree". Subtree nodes don't have to change; neither reference nor value. The existing nodes just need to be connected to a new root node. Revisit the reducer function in `makeProvider`.
+A new state tree is required when updating state. But the word "new" isn't a granular descriptor. Only the root node needs to be replaced in order for it to be defined as a "new tree". Subtree nodes don't have to change reference nor value. The existing nodes just need to be connected to a new root node. Revisit the reducer function in `makeProvider`.
 
 ```typescript
 const reducer = (state, action) => ({
