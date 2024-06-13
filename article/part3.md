@@ -360,4 +360,4 @@ const updateDate = (newDate, currId) => {
 
 The foundation is laid out. The only thing left is to practice until this is all second-nature.
 
-It may be readily apparent that this scales to applications of any size... or maybe it doesn't. To drive the point home, part 4 will drive the point home with an analyses and benchmarks of a fully functional React application: A music player.
+It may be readily apparent that this scales to applications of any size... or maybe it doesn't seem apparent. To drive the point home, part 4 will drive the point home with an analyses and benchmarks of a fully functional React application: A music player.
