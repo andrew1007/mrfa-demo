@@ -16,21 +16,31 @@ const PlayStateIcon = {
   [idle]: Hidden
 };
 
-const PlayStatusChanger = () => {
+type PlayStatusChangerProps = {
+  onClick: () => void;
+  status: `${PlayState}`
+}
+
+export const PlayStatusChanger = ({ onClick, status }: PlayStatusChangerProps) => {
+  const Icon = PlayStateIcon[status]
+
+  return (
+    <div onClick={onClick}>
+      <HeavyUselessUI />
+      <Icon className="play-state-change-icon" />
+    </div>
+  );
+}
+
+const _PlayStatusChanger = () => {
   const status = useSelector((state) => state.dashboard.playState)
   const { togglePlayState } = usePlayerActions();
 
   const handleClick = () => {
     togglePlayState();
   };
-  const Icon = PlayStateIcon[status]
 
-  return (
-    <div onClick={handleClick}>
-      <HeavyUselessUI />
-      <Icon className="play-state-change-icon" />
-    </div>
-  );
+  return <PlayStatusChanger onClick={handleClick} status={status} />
 };
 
-export default memo(PlayStatusChanger);
+export default memo(_PlayStatusChanger);

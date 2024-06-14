@@ -21,12 +21,13 @@ Whenever optimization and rerender suppression is discussed, there is always the
 
 ## Benchmarks
 
-
 The application is a stripped-down music player, whose design isn't going to be winning any awards. What's more important to focus on is the responsiveness of the UI in various parts of the app, as well as how it changes as the app scales in complexity.
 
 ![localImage](./resources/pt4-fig-7.png)
 
-## Keystrokes
+## Keystroke Benchmarks
+
+It's almost depressing how something as simple as an input box can be the worst user experience in an application. Keystrokes need to fire many times in sequence and the user is constantly interacting with it the entire way through. This is one of the key places where performance really matters.
 
 When looking at the complexity, the speed difference doesn't seem too bad for keystrokes. When the UI complexity is low, the speeds are essentially the same: 0.8ms vs 2.1 ms. Sure, it's twice as fast, but in reality a 2ms keystroke is fantastic performance
 
@@ -40,11 +41,20 @@ The story changes completely as the app scales. By artificially scaling up the c
 
 ![localImage](./resources/pt4-fig-4.png)
 
-Bumping it up to the highest complexity, where mounting slows to a crawl. The scaling difference cannot even be compared: 6ms vs 224ms.
+Bumping it up to the highest complexity, where mounting slows to a crawl. The scaling difference cannot even be compared: 6ms vs 224ms. Keep in mind that this is *per* keystroke. The unoptimized app is virtually unusable.
 
 ![localImage](./resources/pt4-fig-1.png)
 
 ![localImage](./resources/pt4-fig-2.png)
+
+## Other Operation Benchmarks
+
+It should be no surprise that other parts of the app benefit in the exact same way. The performance differences at extreme complexity are colossal, but impractical. So the benchmarks to use will be a traditionally high-complexity: at complex speed.
+
+Here are some statistics for the nerds. For the non nerds, here is the summary: On average, the 
+- Average speed increase: 100%
+- Lowest speed increase: 30%
+- Highest speed increase: 400%
 
 x-axis: slowdown rate
 y-axis: render speed

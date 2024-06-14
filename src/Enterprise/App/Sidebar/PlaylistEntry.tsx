@@ -2,13 +2,30 @@ import { Route, State } from "../../store/types";
 import { useDispatch, useSelector } from "../../store";
 import { defaultPlaylist } from "src/Enterprise/store/selectors";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
-import { memo } from "react";
+import { MouseEventHandler, memo } from "react";
 
 type PlaylistEntryProps = {
+  onClick: MouseEventHandler<HTMLButtonElement>
+  isFocused: boolean;
+  title: string;
+  count: number;
+}
+
+export const PlaylistEntry = (props: PlaylistEntryProps) => {
+  const { onClick, isFocused, count, title } = props
+  return (
+    <button onClick={onClick} className={isFocused ? 'focused-playlist-entry' : ''}>
+      <HeavyUselessUI />
+      {title} ({count})
+    </button>
+  );
+}
+
+type _PlaylistEntryProps = {
   id: State["playlistIds"][0];
 };
 
-const PlaylistEntry = (props: PlaylistEntryProps) => {
+const _PlaylistEntry = (props: _PlaylistEntryProps) => {
   const dispatch = useDispatch();
   const playlist = useSelector(state => state.playlists[props.id] ?? defaultPlaylist);
   const isFocused = useSelector(state => state.focusedId === props.id)
@@ -21,12 +38,12 @@ const PlaylistEntry = (props: PlaylistEntryProps) => {
     }));
   };
 
-  return (
-    <button onClick={routeToPlaylist} className={isFocused ? 'focused-playlist-entry' : ''}>
-      <HeavyUselessUI />
-      {title} ({songs.length})
-    </button>
-  );
+  return <PlaylistEntry
+    onClick={routeToPlaylist}
+    isFocused={isFocused}
+    title={title}
+    count={songs.length}
+  />
 };
 
-export default memo(PlaylistEntry);
+export default memo(_PlaylistEntry);

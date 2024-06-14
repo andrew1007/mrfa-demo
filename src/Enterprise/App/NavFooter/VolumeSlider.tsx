@@ -1,10 +1,31 @@
-import { memo, useEffect, useState } from "react";
+import { ChangeEventHandler, memo, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "../../store";
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeMuteIcon from '@mui/icons-material/VolumeMute';
 import useDebounce from "src/Enterprise/hooks/useDebounce";
 
-const VolumeSlider = () => {
+type VolumeSliderProps = {
+  onChange: ChangeEventHandler<HTMLInputElement>;
+  value: number;
+}
+
+export const VolumeSlider = (props: VolumeSliderProps) => {
+  const { onChange, value } = props
+  return (
+    <div className="volume-slider-container">
+      {value === 0 ? <VolumeMuteIcon /> : <VolumeUpIcon />}
+      <input
+        type="range"
+        min="0"
+        max="100"
+        onChange={onChange}
+        value={value}
+      />
+    </div>
+  );
+}
+
+const _VolumeSlider = () => {
   const volume = useSelector(state => state.dashboard.volume);
 
   const dispatch = useDispatch();
@@ -27,18 +48,10 @@ const VolumeSlider = () => {
     update(value);
   }, [value]);
 
-  return (
-    <div className="volume-slider-container">
-      {value === 0 ? <VolumeMuteIcon /> : <VolumeUpIcon />}
-      <input
-        type="range"
-        min="0"
-        max="100"
-        onChange={(e) => setValue(Number(e.target.value))}
-        value={value}
-      />
-    </div>
-  );
+  return <VolumeSlider
+    onChange={(e) => setValue(Number(e.target.value))}
+    value={value}
+  />
 };
 
-export default memo(VolumeSlider);
+export default memo(_VolumeSlider);

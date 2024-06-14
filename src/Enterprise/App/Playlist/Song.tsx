@@ -2,15 +2,41 @@ import { SubState } from "../../store/types";
 import { useGetSong } from "../../store/selectors";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 import { useSelector } from "../../store";
-import { memo } from "react";
+import React, { MouseEventHandler, memo } from "react";
 import PlayIcon from "./PlayIcon";
 import usePlayerActions from "src/Enterprise/store/usePlayerActions";
 
 type SongProps = {
+  children: React.ReactNode // PlayIcon
+  onDoubleClick: MouseEventHandler<HTMLDivElement>;
+  title: string;
+  artist: string;
+  durationLabel: string;
+};
+
+export const Song = (props: SongProps) => {
+  const { children, artist, durationLabel, onDoubleClick, title } = props
+
+  return (
+    <>
+      <div className="song-root" onDoubleClick={onDoubleClick}>
+        {children}
+        <div className="song-title">{title}</div>
+        <div className="song-artist">
+          {artist}
+        </div>
+        <div className="song-duration">{durationLabel}</div>
+      </div>
+      <HeavyUselessUI />
+    </>
+  );
+}
+
+type _SongProps = {
   id: SubState["Playlist"]["songs"][0];
 };
 
-const Song = (props: SongProps) => {
+const _Song = (props: _SongProps) => {
   const song = useGetSong(props.id)
   const { setCurrentSong } = usePlayerActions();
   const playlistId = useSelector(state => state.focusedId);
@@ -23,19 +49,14 @@ const Song = (props: SongProps) => {
     })
   }
 
-  return (
-    <>
-      <div className="song-root" onDoubleClick={play}>
-        <PlayIcon songId={props.id} />
-        <div className="song-title">{title}</div>
-        <div className="song-artist">
-          {artist}
-        </div>
-        <div className="song-duration">{durationLabel}</div>
-      </div>
-      <HeavyUselessUI />
-    </>
-  );
+  return <Song
+    onDoubleClick={play}
+    title={title}
+    artist={artist}
+    durationLabel={durationLabel}
+  >
+    <PlayIcon songId={props.id} />
+  </Song>
 };
 
-export default memo(Song)
+export default memo(_Song)

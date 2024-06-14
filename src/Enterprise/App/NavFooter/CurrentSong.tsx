@@ -2,9 +2,12 @@ import React, { memo } from "react";
 import { useGetCurrentSong } from "src/Enterprise/store/selectors";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 
-const CurrentSong = () => {
-  const song = useGetCurrentSong()
-  const { artist, title } = song;
+type CurrentSongProps = {
+  song: ReturnType<typeof useGetCurrentSong>
+}
+
+export const CurrentSong = (props: CurrentSongProps) => {
+  const { artist, title } = props.song;
   return (
     <div>
       <HeavyUselessUI />
@@ -15,7 +18,12 @@ const CurrentSong = () => {
         {title ? `${title}-${artist}` : '--'}
       </div>
     </div>
-  );
+  )
+}
+
+const _CurrentSong = () => {
+  const song = useGetCurrentSong()
+  return <CurrentSong song={song} />
 };
 
-export default memo(CurrentSong)
+export default memo(_CurrentSong)

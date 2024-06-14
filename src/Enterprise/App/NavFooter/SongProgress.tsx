@@ -1,6 +1,7 @@
 import { debounce } from "lodash";
 import React, {
   ChangeEventHandler,
+  forwardRef,
   memo,
   useCallback,
   useEffect,
@@ -9,7 +10,36 @@ import React, {
 import { useDispatch, useSelector } from "../../store";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 
-const SongProgress = () => {
+type Selector = ReturnType<typeof useSongProgressSelector>
+
+type SongProgressProps = {
+  total: Selector['total'];
+  current: Selector['current'];
+  totalDuration: Selector['totalDuration'];
+  onChange: ChangeEventHandler<HTMLInputElement>
+}
+
+export const SongProgress = forwardRef<HTMLInputElement, SongProgressProps>((props, ref) => {
+  const { total, current, totalDuration, onChange } = props
+  return (
+    <div>
+      {total ? `${current}` : "--"}
+
+      <input
+        ref={ref}
+        min={0}
+        max={totalDuration || 0}
+        defaultValue={0}
+        onChange={onChange}
+        type="range"
+      />
+      {total ? `${total}` : "--"}
+      <HeavyUselessUI />
+    </div>
+  )
+})
+
+const _SongProgress = () => {
   const { total, current, currentDuration, totalDuration } = useSongProgressSelector();
   const progressRef = useRef() as React.MutableRefObject<HTMLInputElement>
   const dispatch = useDispatch();
@@ -32,21 +62,13 @@ const SongProgress = () => {
     []
   );
 
-  return (
-    <div>
-      {total ? `${current}` : "--"}
-      <input
-        ref={progressRef}
-        min={0}
-        max={totalDuration || 0}
-        defaultValue={0}
-        onChange={updateProgress}
-        type="range"
-      />
-      {total ? `${total}` : "--"}
-      <HeavyUselessUI />
-    </div>
-  );
+  return <SongProgress
+    total={total}
+    current={current}
+    ref={progressRef}
+    totalDuration={totalDuration}
+    onChange={updateProgress}
+  />
 };
 
 const secondsToSongDuration = (time: number) => {
@@ -67,4 +89,4 @@ const useSongProgressSelector = () => {
   }
 }
 
-export default memo(SongProgress);
+export default memo(_SongProgress);
