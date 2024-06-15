@@ -4,8 +4,8 @@ import { fetchPlaylistByUser, fetchSongs } from "../Api"
 import Sidebar from "./Sidebar"
 import Playlist from "./Playlist"
 import HeavyUselessUI from "../App/Shared/HeavyUselessUI"
-import NavFooter from "../App/NavFooter"
 import Footer from "./Footer"
+import useBaseAudioPlayer from "../hooks/useBaseAudioPlayer"
 
 const EnterpriseLocal = () => {
   const [playState, setPlayState] = useState(PlayState.idle)
@@ -17,6 +17,31 @@ const EnterpriseLocal = () => {
   const [currentSongId, setCurrentSongId] = useState<number>(-1)
   const [userName] = useState('Andrew')
   const [volume, setVolume] = useState(0)
+  const [currentDuration, setCurrentDuration] = useState(0)
+  const [totalDuration, setTotalDuration] = useState(0)
+
+  const getCurrentSong = () => {
+    const zeroState: State['songs'][0] = {
+      artist: '',
+      artistId: 0,
+      duration: 0,
+      id: 0,
+      source: '',
+      title: ''
+    }
+    return songs[currentSongId] ?? zeroState
+  }
+
+  useBaseAudioPlayer({
+    volume,
+    playState,
+    src: getCurrentSong().source,
+    currentDuration,
+    onDurationChange: ({ currentDuration, totalDuration }) => {
+      setCurrentDuration(currentDuration)
+      setTotalDuration(totalDuration)
+    }
+  })
 
   const fetchPlaylists = async () => {
     const { data } = await fetchPlaylistByUser(10);
@@ -41,6 +66,7 @@ const EnterpriseLocal = () => {
 
   const handleSongChange = (id: number) => {
     setCurrentSongId(id)
+    setPlayState(PlayState.playing)
   }
 
   const handleSongSearch = (text: string) => {
@@ -62,18 +88,6 @@ const EnterpriseLocal = () => {
     return playlists.find(({ id }) => id === currentPlaylistId) ?? zeroState
   }
 
-  const getCurrentSong = () => {
-    const zeroState: State['songs'][0] = {
-      artist: '',
-      artistId: 0,
-      duration: 0,
-      id: 0,
-      source: '',
-      title: ''
-    }
-    return songs[currentSongId] ?? zeroState
-  }
-
   const parsedSongs = () => {
     return getCurrentPlaylist().songs
       .map(id => songs[id])
@@ -91,12 +105,12 @@ const EnterpriseLocal = () => {
       )
   }
 
-  const handlePlayStatusChange = () => {
-
+  const handlePlayStatusChange = (nextPlayState: PlayState) => {
+    setPlayState(nextPlayState)
   }
 
-  const handleVolumeChange = () => {
-
+  const handleVolumeChange = (next: number) => {
+    setVolume(next)
   }
 
   return (
@@ -127,12 +141,13 @@ const EnterpriseLocal = () => {
           </div>
         </div>
         <Footer
-          currentDuration={10}
+          currentDuration={currentDuration}
           onPlayStatusChange={handlePlayStatusChange}
           onVolumeChange={handleVolumeChange}
           playState={playState}
           song={getCurrentSong()}
           volume={volume}
+          totalDuration={totalDuration}
         />
       </div>
     </div>

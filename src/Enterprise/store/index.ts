@@ -27,8 +27,8 @@ export const initialState: State = {
     songIds: [],
   },
   performance: {
-    slowdown: 1,
-    algorithmSlowdown: 1,
+    slowdown: 0,
+    algorithmSlowdown: 0,
   }
 };
 

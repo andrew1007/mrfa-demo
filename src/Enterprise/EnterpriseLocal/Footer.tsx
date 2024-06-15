@@ -1,5 +1,5 @@
-import { ChangeEventHandler, useEffect, useRef } from "react";
-import { PlayStateIcon } from "../App/NavFooter/PlayStatusChanger";
+import { useEffect, useRef } from "react";
+import { PlayStatusChanger } from "../App/NavFooter/PlayStatusChanger";
 import { secondsToSongDuration, SongProgress } from "../App/NavFooter/SongProgress";
 import { VolumeSlider } from "../App/NavFooter/VolumeSlider";
 import HeavyUselessUI from "../App/Shared/HeavyUselessUI";
@@ -11,25 +11,24 @@ type FooterProps = {
   playState: PlayState
   onPlayStatusChange: (nextPlayState: PlayState) => void;
   currentDuration: number;
-  onVolumeChange: ChangeEventHandler<HTMLInputElement>;
+  onVolumeChange: (nextVol: number) => void;
   volume: number
+  totalDuration: number;
 }
 
 const Footer = (props: FooterProps) => {
   const progressRef = useRef() as React.MutableRefObject<HTMLInputElement>
-  const { song, playState, onPlayStatusChange, currentDuration, onVolumeChange, volume } = props
+  const { song, playState, onPlayStatusChange, currentDuration, totalDuration, onVolumeChange, volume } = props
   const { artist, title, duration } = song
 
   useEffect(() => {
     progressRef.current.value = `${currentDuration}`;
   }, [currentDuration]);
 
-  const Icon = PlayStateIcon[playState]
-
   const handleSongProgressUpdate = () => { }
 
-  const handleVolumeChange = () => {
-    onVolumeChange
+  const handleVolumeChange = (e: any) => {
+    onVolumeChange(Number(e.target.value))
   }
 
   return (
@@ -46,17 +45,17 @@ const Footer = (props: FooterProps) => {
           </div>
         </div>
         <div>
-          <div onClick={() => onPlayStatusChange(
-            playState === PlayState.paused ? PlayState.playing : PlayState.paused
-          )}>
-            <HeavyUselessUI />
-            <Icon className="play-state-change-icon" />
-          </div>
+          <PlayStatusChanger
+            onClick={() => onPlayStatusChange(
+              playState === PlayState.paused ? PlayState.playing : PlayState.paused
+            )}
+            status={playState}
+          />
           <SongProgress
             total={secondsToSongDuration(duration)}
-            current={secondsToSongDuration(10)}
+            current={secondsToSongDuration(currentDuration)}
             onChange={handleSongProgressUpdate}
-            totalDuration={duration}
+            totalDuration={totalDuration}
             ref={progressRef}
           />
         </div>

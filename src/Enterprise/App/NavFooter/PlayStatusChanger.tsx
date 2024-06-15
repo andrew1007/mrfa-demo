@@ -25,9 +25,9 @@ export const PlayStatusChanger = ({ onClick, status }: PlayStatusChangerProps) =
   const Icon = PlayStateIcon[status]
 
   return (
-    <div onClick={onClick}>
+    <div>
       <HeavyUselessUI />
-      <Icon className="play-state-change-icon" />
+      <Icon onClick={onClick} className="play-state-change-icon" />
     </div>
   );
 }
