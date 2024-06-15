@@ -148,6 +148,7 @@ const EnterpriseLocal = () => {
           song={getCurrentSong()}
           volume={volume}
           totalDuration={totalDuration}
+          onSongProgressChange={next => setCurrentDuration(next)}
         />
       </div>
     </div>

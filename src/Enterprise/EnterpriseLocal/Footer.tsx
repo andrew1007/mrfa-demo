@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react";
 import { PlayStatusChanger } from "../App/NavFooter/PlayStatusChanger";
 import { secondsToSongDuration, SongProgress } from "../App/NavFooter/SongProgress";
 import { VolumeSlider } from "../App/NavFooter/VolumeSlider";
@@ -14,13 +13,17 @@ type FooterProps = {
   onVolumeChange: (nextVol: number) => void;
   volume: number
   totalDuration: number;
+  onSongProgressChange: (nextProgress: number) => void;
 }
 
 const Footer = (props: FooterProps) => {
-  const { song, playState, onPlayStatusChange, currentDuration, totalDuration, onVolumeChange, volume } = props
+  const { song, playState, onSongProgressChange, onPlayStatusChange, currentDuration, totalDuration, onVolumeChange, volume } = props
   const { artist, title, duration } = song
 
-  const handleSongProgressUpdate = () => { }
+  const handleSongProgressUpdate = (e: any) => {
+    const newProgress = Number(e.target.value);
+    onSongProgressChange(newProgress)
+  }
 
   const handleVolumeChange = (e: any) => {
     onVolumeChange(Number(e.target.value))
