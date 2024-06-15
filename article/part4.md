@@ -4,7 +4,7 @@
 
 When designed correctly, UI applications can be fast, [SOLID](https://en.wikipedia.org/wiki/SOLID), and scale to any level of complexity.
 
-This is the last step, where I prove that this works as well as I say it does. That it scales in situations where conventional approaches crumple like paper.
+This is the last step, where I put my money where my mouth is and prove that this works as well as I say it does. That it scales in situations where conventional approaches crumple like paper.
 
 A sample application that can be dynamically scaled in complexity will be benchmarked and its various architectural properties will be analyzed to help understand this approach's practicality and effectiveness.
 
@@ -24,9 +24,9 @@ Whenever optimization and rerender suppression is discussed, there is always the
 The local state implementation of the music player has a god component that controls every rule in the application. Upon closer inspection, there are certainly places where data could be managed in parts lower in the component hierarchy. But therein lies multiple problems
 
 1. Each feature becomes its own unique case study on where the optimal location is to store data.
-2. Future requirement changes will create massive refactors if data is necessary in components higher up (or a different tree) in the component hierarchy.
+2. Future requirement changes will create massive refactors if data is necessary in higher areas of the component hierarchy.
 
-There is now a direct conflict between maintainability and performance. Enterprise software is already difficult enough to maintain. When an external force, who does not have a developer's interest in mind, is now constantly dictating foundational elements of the code, this spells the beginning of the end for large applications.
+There is now a direct conflict between maintainability and performance. Enterprise software is already difficult enough to maintain. When an external force, that does not have a developer's interest in mind, is now constantly dictating foundational elements of the code, this spells the beginning of the end for large applications.
 
 That's not to say that the performant approach does not have rules, but they are good rules because they are within the best interests of the developers (and not the customer).
 
