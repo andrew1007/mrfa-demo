@@ -39,12 +39,9 @@ export type State = {
   playlists: Record<number, SubState["Playlist"]>;
   songs: Record<number, SubState["Song"]>;
   focusedId: number;
-  recentPlaylistIds: number[];
   search: {
     playlist: string;
-    recentPlaylists: string;
     song: string;
-    queue: string;
   };
   currentRoute: keyof typeof Route;
   dashboard: {

@@ -48,9 +48,6 @@ const getStateSong = (state: State, ownProps: songOwnProps) =>
   state.songs[ownProps.id] ?? defaultSong;
 type StateSong = ReturnType<typeof getStateSong>;
 
-const getQueueText = (state: State) => state.search.queue;
-type QueueText = ReturnType<typeof getQueueText>;
-
 const getSongQueueIds = (state: State) => state.queue.songIds;
 type SongQueueIds = ReturnType<typeof getSongQueueIds>;
 
@@ -116,22 +113,6 @@ export const useGetSong = (id: number) => {
   const getSong = useMemo(() => makeGetSong(id), [id]);
   return useSelector(getSong);
 };
-
-const getSearchSongQueueIds = createSelector(
-  [getQueueText, getSongs, getSongQueueIds, getShouldMissCache],
-  (searchText: QueueText, songs: Songs, songQueueIds: SongQueueIds) => {
-    if (!searchText) return songQueueIds;
-
-    const filtered = songQueueIds.filter((id) =>
-      songs[id]?.title.includes(searchText)
-    );
-
-    return filtered.length > 0 ? filtered : EMPTY_ARR as typeof filtered;
-  }
-);
-
-export const useGetSearchSongQueueIds = () =>
-  useSelector(getSearchSongQueueIds);
 
 export const getCurrentSong = createSelector(
   [getQueue, getSongs, getShouldMissCache],

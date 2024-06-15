@@ -10,12 +10,9 @@ export const initialState: State = {
   playlists: {},
   songs: {},
   focusedId: 0,
-  recentPlaylistIds: [],
   search: {
     playlist: "",
-    recentPlaylists: "",
     song: "",
-    queue: "",
   },
   currentRoute: Route.playlist,
   dashboard: {
