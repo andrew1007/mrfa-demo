@@ -5,8 +5,6 @@ import NavFooter from "./NavFooter";
 import Playlist from "./Playlist";
 import HeavyUselessUI from "./Shared/HeavyUselessUI";
 import Sidebar from "./Sidebar";
-import PerformanceBar from "./PerformanceBar";
-import Credit from "./Credit";
 
 const Routes: Record<State["currentRoute"], React.FC<any>> = {
   playlist: Playlist,
@@ -26,11 +24,9 @@ const App = () => {
           <div className="route-container">
             <Route />
           </div>
-          <PerformanceBar />
         </div>
         <NavFooter />
       </div>
-      <Credit />
     </div>
   );
 };

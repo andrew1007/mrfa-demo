@@ -9,7 +9,7 @@ type PlaylistProps = {
   playlist: State['playlists'][0]
   onSongSearch: (text: string) => void
   songSearchText: string
-  songs: State['songs'][0][]
+  songs: { song: State['songs'][0], visible: boolean }[]
   onSongChange: (id: number) => void
   focusedSongId: number;
   playState: PlayState;
@@ -34,21 +34,25 @@ const Playlist = (props: PlaylistProps) => {
       </div>
       <div className="songs-root">
         <HeavyUselessUI />
-        {songs.map((song) => {
+        {songs.map(({ song, visible }) => {
           const isCurrentSong = focusedSongId === song.id
-          return <Song
-            key={song.id}
-            artist={song.artist}
-            durationLabel={''}
-            onDoubleClick={() => onSongChange(song.id)}
-            title={song.title}
-          >
-            <PlayIcon
-              isCurrentSong={isCurrentSong}
-              isPlaying={isCurrentSong && playState === PlayState.playing}
-              onClick={onSongToggle}
-            />
-          </Song>
+          return <div key={song.id} style={{
+            display: visible ? 'block' : 'none'
+          }}>
+            <Song
+              key={song.id}
+              artist={song.artist}
+              durationLabel={''}
+              onDoubleClick={() => onSongChange(song.id)}
+              title={song.title}
+            >
+              <PlayIcon
+                isCurrentSong={isCurrentSong}
+                isPlaying={isCurrentSong && playState === PlayState.playing}
+                onClick={onSongToggle}
+              />
+            </Song>
+          </div>
         })}
       </div>
       <HeavyUselessUI />

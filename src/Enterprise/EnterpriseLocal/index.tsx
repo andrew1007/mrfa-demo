@@ -5,17 +5,18 @@ import Sidebar from "./Sidebar"
 import Playlist from "./Playlist"
 import HeavyUselessUI from "../App/Shared/HeavyUselessUI"
 import NavFooter from "../App/NavFooter"
-import Credit from "../App/Credit"
+import Footer from "./Footer"
 
 const EnterpriseLocal = () => {
-  const [playState, setPlayState] = useState(PlayState.paused)
+  const [playState, setPlayState] = useState(PlayState.idle)
   const [playlists, setPlaylists] = useState<State['playlists'][0][]>([])
   const [songs, setSongs] = useState<State['songs']>({})
   const [playlistSearchText, setPlaylistSearchText] = useState('')
   const [songSearchText, setSongSearchText] = useState('')
   const [currentPlaylistId, setCurrentPlaylistId] = useState<number>(-1)
   const [currentSongId, setCurrentSongId] = useState<number>(-1)
-  const [userName, setUserName] = useState('')
+  const [userName] = useState('Andrew')
+  const [volume, setVolume] = useState(0)
 
   const fetchPlaylists = async () => {
     const { data } = await fetchPlaylistByUser(10);
@@ -52,17 +53,50 @@ const EnterpriseLocal = () => {
   }
 
   const getCurrentPlaylist = () => {
-    return playlists.find(({ id }) => id === currentPlaylistId) as State['playlists'][0]
+    const zeroState: State['playlists'][0] = {
+      id: 0,
+      songs: [],
+      title: '',
+      userName: ''
+    }
+    return playlists.find(({ id }) => id === currentPlaylistId) ?? zeroState
+  }
+
+  const getCurrentSong = () => {
+    const zeroState: State['songs'][0] = {
+      artist: '',
+      artistId: 0,
+      duration: 0,
+      id: 0,
+      source: '',
+      title: ''
+    }
+    return songs[currentSongId] ?? zeroState
   }
 
   const parsedSongs = () => {
     return getCurrentPlaylist().songs
       .map(id => songs[id])
-      .filter(
-        song => [song.artist, song.title].some(text => {
-          return text.toLocaleLowerCase().includes(songSearchText.toLocaleLowerCase())
-        })
+      .filter(Boolean)
+      .map(
+        song => {
+          const visible = [song.artist, song.title].some(text => {
+            return text.toLocaleLowerCase().includes(songSearchText.toLocaleLowerCase())
+          })
+          return {
+            song,
+            visible
+          }
+        }
       )
+  }
+
+  const handlePlayStatusChange = () => {
+
+  }
+
+  const handleVolumeChange = () => {
+
   }
 
   return (
@@ -92,9 +126,15 @@ const EnterpriseLocal = () => {
             />
           </div>
         </div>
-        <NavFooter />
+        <Footer
+          currentDuration={10}
+          onPlayStatusChange={handlePlayStatusChange}
+          onVolumeChange={handleVolumeChange}
+          playState={playState}
+          song={getCurrentSong()}
+          volume={volume}
+        />
       </div>
-      <Credit />
     </div>
   )
 }

@@ -36,15 +36,17 @@ const Sidebar = (props: SidebarProps) => {
         placeholder="search playlists"
       />
       <HeavyUselessUI />
-      {playlists.map(playlist => {
-        return <PlaylistEntry
-          count={playlist.songs.length}
-          isFocused={focusedId === playlist.id}
-          onClick={() => onPlaylistClick(playlist.id)}
-          title={playlist.title}
-          key={playlist.id}
-        />
-      })}
+      <div className="playlist-container">
+        {playlists.map(playlist => {
+          return <PlaylistEntry
+            count={playlist.songs.length}
+            isFocused={focusedId === playlist.id}
+            onClick={() => onPlaylistClick(playlist.id)}
+            title={playlist.title}
+            key={playlist.id}
+          />
+        })}
+      </div>
     </div>
   );
 };
