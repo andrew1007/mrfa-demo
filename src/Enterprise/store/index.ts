@@ -27,8 +27,8 @@ export const initialState: State = {
     songIds: [],
   },
   performance: {
-    cacheMiss: false,
     slowdown: 1,
+    algorithmSlowdown: 1,
   }
 };
 

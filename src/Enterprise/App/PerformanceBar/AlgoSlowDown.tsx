@@ -14,15 +14,15 @@ function getClosest(arr: number[], val: number) {
   });
 }
 
-const SlowDown = () => {
+const AlgoSlowDown = () => {
   const dispatch = useDispatch()
-  const [value, setValue] = useState(initialState.performance.slowdown)
+  const [value, setValue] = useState(initialState.performance.algorithmSlowdown)
 
   const updateStore = useDebounce((next: number) => {
     dispatch(({ performance }) => ({
       performance: {
         ...performance,
-        slowdown: next
+        algorithmSlowdown: next
       }
     }))
   }, 500)
@@ -36,11 +36,10 @@ const SlowDown = () => {
   return (
     <div>
       <div>
-        HTML Complexity: {labels[value]}
-        <HelpToolTip desc="Adds larges amounts of HTML (hidden) to components" />
+        Algorithm Complexity: {labels[value]}
+        <HelpToolTip desc="Increases algorithmic complexity to components" />
       </div>
       <input
-        id="yearslider"
         onChange={update}
         type="range"
         min={Math.min(...tiers)}
@@ -54,4 +53,4 @@ const SlowDown = () => {
   )
 }
 
-export default memo(SlowDown)
+export default memo(AlgoSlowDown)

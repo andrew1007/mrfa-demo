@@ -1,4 +1,4 @@
-import CacheMiss from "./CacheMiss";
+import AlgoSlowDown from "./AlgoSlowDown";
 import SlowDown from "./SlowDown";
 
 const PerformanceBar = () => {
@@ -6,7 +6,7 @@ const PerformanceBar = () => {
         <div className="performance-bar-container">
             Performance Options
             <SlowDown />
-            <CacheMiss />
+            <AlgoSlowDown />
         </div>
     )
 }

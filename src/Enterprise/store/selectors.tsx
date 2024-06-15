@@ -20,8 +20,6 @@ export const defaultPlaylist: SubState["Playlist"] = {
 
 const EMPTY_ARR: any[] = [];
 
-export const getShouldMissCache = (state: State) => state.performance.cacheMiss ? Math.random() : 0
-
 const getPlaylistText = (state: State) => state.search.playlist;
 type PlaylistText = ReturnType<typeof getPlaylistText>;
 
@@ -48,14 +46,11 @@ const getStateSong = (state: State, ownProps: songOwnProps) =>
   state.songs[ownProps.id] ?? defaultSong;
 type StateSong = ReturnType<typeof getStateSong>;
 
-const getSongQueueIds = (state: State) => state.queue.songIds;
-type SongQueueIds = ReturnType<typeof getSongQueueIds>;
-
 const getQueue = (state: State) => state.queue;
 type Queue = ReturnType<typeof getQueue>;
 
 const getPlaylistSongIds = createSelector(
-  [getPlaylists, getFocusedId, getShouldMissCache],
+  [getPlaylists, getFocusedId],
   (playlists: Playlists, focusedId: FocusedPlaylist) => {
     return playlists[focusedId]?.songs ?? EMPTY_ARR;
   }
@@ -65,7 +60,7 @@ type PlaylistSongIds = ReturnType<typeof getPlaylistSongIds>;
 export const useGetPlaylistSongs = () => useSelector(getPlaylistSongIds)
 
 export const getSearchedPlaylistIds = createSelector(
-  [getPlaylistText, getPlaylists, getPlaylistIds, getShouldMissCache],
+  [getPlaylistText, getPlaylists, getPlaylistIds],
   (searchText: PlaylistText, playlists: Playlists, ids: PlaylistIds) => {
     if (!searchText) return ids;
 
@@ -80,7 +75,7 @@ export const useGetSearchedPlaylistIds = () => {
   return useSelector(getSearchedPlaylistIds);
 };
 export const getSearchedSongIds = createSelector(
-  [getSongText, getSongs, getPlaylistSongIds, getShouldMissCache],
+  [getSongText, getSongs, getPlaylistSongIds],
   (searchText: SongText, songs: Songs, songIds: PlaylistSongIds) => {
     if (!searchText) return new Set(songIds);
     const text = searchText.toLowerCase()
@@ -98,7 +93,7 @@ const makeGetStateSong = (id: number) => (state: State) =>
   state.songs[id] ?? defaultSong;
 
 const makeGetSong = (id: number) =>
-  createSelector([makeGetStateSong(id), getShouldMissCache],
+  createSelector([makeGetStateSong(id)],
     (song: StateSong) => {
       const { duration } = song;
       const minutes = Math.floor(duration / 60);
@@ -115,7 +110,7 @@ export const useGetSong = (id: number) => {
 };
 
 export const getCurrentSong = createSelector(
-  [getQueue, getSongs, getShouldMissCache],
+  [getQueue, getSongs],
   (queue: Queue, songs: Songs) => {
     const { position, songIds } = queue;
     return songs[songIds[position]] ?? defaultSong;
@@ -125,7 +120,7 @@ export const getCurrentSong = createSelector(
 export const useGetCurrentSong = () => useSelector(getCurrentSong);
 
 const makeGetIsCurrentSong = (id: number) => createSelector(
-  [getCurrentSong, getShouldMissCache, getShouldMissCache],
+  [getCurrentSong],
   (currentSong: ReturnType<typeof getCurrentSong>) => {
     return currentSong.id === id
   }
@@ -138,7 +133,7 @@ export const useGetIsFocusedSong = (id: number) => {
 
 const makeGetIsPlaying = (id: number) =>
   createSelector(
-    [getCurrentSong, getPlayState, getShouldMissCache],
+    [getCurrentSong, getPlayState],
     (song: SubState["Song"], playState: CurrentPlayState) => {
       const isCurrentSong = song.id === id;
       return playState === PlayState.playing && isCurrentSong;

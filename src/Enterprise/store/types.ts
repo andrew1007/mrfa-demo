@@ -57,6 +57,6 @@ export type State = {
   };
   performance: {
     slowdown: number,
-    cacheMiss: boolean,
+    algorithmSlowdown: number;
   }
 };
