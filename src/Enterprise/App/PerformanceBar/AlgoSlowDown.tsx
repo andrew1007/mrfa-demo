@@ -1,5 +1,5 @@
-import React, { memo, useState } from "react";
-import { initialState, useDispatch } from "src/Enterprise/store";
+import React, { memo, useLayoutEffect, useState } from "react";
+import { initialState, useDispatch, useSelector } from "src/Enterprise/store";
 import HelpToolTip from "../Shared/HelpTooltip";
 import useDebounce from "src/Enterprise/hooks/useDebounce";
 
@@ -17,8 +17,23 @@ function getClosest(arr: number[], val: number) {
 const AlgoSlowDown = () => {
   const dispatch = useDispatch()
   const [value, setValue] = useState(initialState.performance.algorithmSlowdown)
+  useSelector(state => state.performance.algorithmSlowdown)
+
+  /**
+   * Use vanilla to perform this operation ASAP
+   */
+  const showNotifier = (show: boolean) => {
+    const node = document.querySelector('#algo-slowdown-notifier') as HTMLDivElement
+    node.style.display = show ? 'block' : 'none'
+  }
+
+  useLayoutEffect(() => {
+    showNotifier(false)
+  }, [Math.random()])
+
 
   const updateStore = useDebounce((next: number) => {
+    showNotifier(true)
     dispatch(({ performance }) => ({
       performance: {
         ...performance,
@@ -48,6 +63,9 @@ const AlgoSlowDown = () => {
         step="1"
         list="ticks"
       />
+      <div id="algo-slowdown-notifier" style={{ display: 'none', color: 'red' }}>
+        Rerendering entire page, please wait...
+      </div>
     </div>
 
   )

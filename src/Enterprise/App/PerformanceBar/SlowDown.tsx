@@ -1,5 +1,5 @@
-import React, { memo, useState } from "react";
-import { initialState, useDispatch } from "src/Enterprise/store";
+import React, { memo, useEffect, useLayoutEffect, useState } from "react";
+import { initialState, useDispatch, useSelector } from "src/Enterprise/store";
 import HelpToolTip from "../Shared/HelpTooltip";
 import useDebounce from "src/Enterprise/hooks/useDebounce";
 
@@ -17,14 +17,30 @@ function getClosest(arr: number[], val: number) {
 const SlowDown = () => {
   const dispatch = useDispatch()
   const [value, setValue] = useState(initialState.performance.slowdown)
+  useSelector(state => state.performance.slowdown)
+
+  /**
+   * Use vanilla to perform this operation ASAP
+   */
+  const showNotifier = (show: boolean) => {
+    const node = document.querySelector('#slowdown-notifier') as HTMLDivElement
+    node.style.display = show ? 'block' : 'none'
+  }
+
+  useLayoutEffect(() => {
+    showNotifier(false)
+  }, [Math.random()])
 
   const updateStore = useDebounce((next: number) => {
-    dispatch(({ performance }) => ({
-      performance: {
-        ...performance,
-        slowdown: next
+    showNotifier(true)
+    dispatch(({ performance }) => {
+      return {
+        performance: {
+          ...performance,
+          slowdown: next
+        }
       }
-    }))
+    })
   }, 500)
 
   const update: OnChange = (value) => {
@@ -40,7 +56,6 @@ const SlowDown = () => {
         <HelpToolTip desc="Adds larges amounts of HTML (hidden) to components" />
       </div>
       <input
-        id="yearslider"
         onChange={update}
         type="range"
         min={Math.min(...tiers)}
@@ -49,6 +64,9 @@ const SlowDown = () => {
         step="1"
         list="ticks"
       />
+      <div id="slowdown-notifier" style={{ display: 'none', color: 'red' }}>
+        Remounting HTML, please wait...
+      </div>
     </div>
 
   )
