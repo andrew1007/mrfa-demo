@@ -19,6 +19,30 @@ Despite this, learning these concepts is invaluable, because these performance o
 
 Whenever optimization and rerender suppression is discussed, there is always the qualifier of "useless". Because every component, regardless of how it is design, has at least one: The mounting process. There is no if, ands or buts: If the UI is complex, no design strategy exists that will speed up the creation of HTML or the algorithms that power them. The best option to address massively complex UI is virtualization. But virtualization can also create its own set of problems. Deferring UI mounting until it is seen is an amortization process. If the mounting process is slow for those virtualized elements, responsive actions (like scrolling) will be hurt.
 
+## The Local State *Could* be Faster
+
+The local state implementation of the music player has a god component that controls every rule in the application. Upon closer inspection, there are certainly places where data could be managed in parts lower in the component hierarchy. But therein lies multiple problems
+
+1. Each feature becomes its own unique case study on where the optimal location is to store data.
+2. Future requirement changes will create massive refactors if data is necessary in components higher up (or a different tree) in the component hierarchy.
+
+There is now a direct conflict between maintainability and performance. Enterprise software is already difficult enough to maintain. When an external force, who does not have a developer's interest in mind, is now constantly dictating foundational elements of the code, this spells the beginning of the end for large applications.
+
+That's not to say that the performant approach does not have rules, but they are good rules because they are within the best interests of the developers (and not the customer).
+
+1. This structured system is one-size-fits-all in an overwhelming number of situations. Exceptions are few and far between.
+2. Data-availability refactors are never required
+
+Maintainability and performance now run in parallel. The best interests of the developers are there
+
+- Inherent separation of data and UI
+- An overwhelming majority of the application's data rules are functionally pure
+- Memoization has safeguards to prevent stale values and can be universally used
+- Developers have more creative liberty on how they want to structure their features
+- Data availability is not a concern
+- A team's shared understanding of how code should be written makes it more predictable/understandable
+- High performance is ensured or can be easily refactored to be performant
+
 ## Benchmarks
 
 The application is a stripped-down music player, whose design isn't going to be winning any awards. What's more important to focus on is the responsiveness of the UI in various parts of the app, as well as how it changes as the app scales in complexity.

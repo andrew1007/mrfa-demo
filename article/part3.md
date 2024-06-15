@@ -16,7 +16,7 @@ Brittle, inflexible, and unstandardized memoization approaches are rife with haz
 2. Fear of silently returning stale values
 3. Fear of silently missing the cache every time
 
-Creating a structured framework for memoization fixes all of these things.
+Creating a structured and functionally pure framework for memoization fixes all of these things.
 
 1. Every global state algorithm, regardless of size or complexity, can be memoized.
 2. It is magnitudes harder to return stale values.
