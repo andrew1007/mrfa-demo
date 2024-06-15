@@ -28,9 +28,10 @@ const AlgoSlowDown = () => {
   }
 
   useLayoutEffect(() => {
-    showNotifier(false)
+    setTimeout(() => {
+      showNotifier(false)
+    }, 500)
   }, [Math.random()])
-
 
   const updateStore = useDebounce((next: number) => {
     showNotifier(true)

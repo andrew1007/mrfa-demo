@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { PlayState } from "src/Enterprise/store/types";
 import { useDispatch, useSelector } from "../store";
-import useHotkeys from "./useHotkeys";
 import { useGetCurrentSong } from "../store/selectors";
 
 const useAudioPlayer = () => {
@@ -13,8 +12,6 @@ const useAudioPlayer = () => {
   const dispatch = useDispatch();
   const audio = useMemo(() => new Audio(), []);
   const [innerTime, setInnerTime] = useState(0);
-
-  useHotkeys(audio);
 
   useEffect(() => {
     if (src) {
