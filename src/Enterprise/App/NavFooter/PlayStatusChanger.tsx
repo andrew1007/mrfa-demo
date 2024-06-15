@@ -10,7 +10,7 @@ const { paused, playing, idle } = PlayState;
 
 const Hidden = () => <PlayCircleIcon style={{ visibility: 'hidden' }} />
 
-const PlayStateIcon = {
+export const PlayStateIcon = {
   [playing]: PauseCircleIcon,
   [paused]: PlayCircleIcon,
   [idle]: Hidden

@@ -47,11 +47,22 @@ const EnterpriseLocal = () => {
   }
 
   const handleSongToggle = () => {
-    
+    const { idle, paused, playing } = PlayState
+    setPlayState(prev => [paused, idle].includes(prev) ? playing : paused)
+  }
+
+  const getCurrentPlaylist = () => {
+    return playlists.find(({ id }) => id === currentPlaylistId) as State['playlists'][0]
   }
 
   const parsedSongs = () => {
-    return []
+    return getCurrentPlaylist().songs
+      .map(id => songs[id])
+      .filter(
+        song => [song.artist, song.title].some(text => {
+          return text.toLocaleLowerCase().includes(songSearchText.toLocaleLowerCase())
+        })
+      )
   }
 
   return (
@@ -75,7 +86,7 @@ const EnterpriseLocal = () => {
               onSongSearch={handleSongSearch}
               onSongToggle={handleSongToggle}
               playState={playState}
-              playlist={playlists.find(({ id }) => id === currentPlaylistId) as State['playlists'][0]}
+              playlist={getCurrentPlaylist()}
               songSearchText={songSearchText}
               songs={parsedSongs()}
             />

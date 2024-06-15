@@ -7,6 +7,7 @@ import React, {
   useEffect,
   useRef,
 } from "react";
+import useDebounce from "src/Enterprise/hooks/useDebounce";
 import { useDispatch, useSelector } from "../../store";
 import HeavyUselessUI from "../Shared/HeavyUselessUI";
 
@@ -49,8 +50,8 @@ const _SongProgress = () => {
   }, [currentDuration]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const updateProgress = useCallback(
-    debounce<ChangeEventHandler<HTMLInputElement>>((e) => {
+  const updateProgress: ChangeEventHandler<HTMLInputElement> = useDebounce(
+    (e) => {
       const newProgress = Number(e.target.value);
       dispatch(({ dashboard }) => ({
         dashboard: {
@@ -58,9 +59,7 @@ const _SongProgress = () => {
           currentDuration: newProgress,
         },
       }));
-    }, 100),
-    []
-  );
+    }, 100)
 
   return <SongProgress
     total={total}
@@ -71,7 +70,7 @@ const _SongProgress = () => {
   />
 };
 
-const secondsToSongDuration = (time: number) => {
+export const secondsToSongDuration = (time: number) => {
   if (!Number(time)) return "";
   const minutes = Math.floor(time / 60);
   const seconds = `0${time - minutes * 60}`.slice(-2);
