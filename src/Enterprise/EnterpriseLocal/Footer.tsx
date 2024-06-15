@@ -17,13 +17,8 @@ type FooterProps = {
 }
 
 const Footer = (props: FooterProps) => {
-  const progressRef = useRef() as React.MutableRefObject<HTMLInputElement>
   const { song, playState, onPlayStatusChange, currentDuration, totalDuration, onVolumeChange, volume } = props
   const { artist, title, duration } = song
-
-  useEffect(() => {
-    progressRef.current.value = `${currentDuration}`;
-  }, [currentDuration]);
 
   const handleSongProgressUpdate = () => { }
 
@@ -56,7 +51,7 @@ const Footer = (props: FooterProps) => {
             current={secondsToSongDuration(currentDuration)}
             onChange={handleSongProgressUpdate}
             totalDuration={totalDuration}
-            ref={progressRef}
+            currentDuration={currentDuration}
           />
         </div>
         <VolumeSlider

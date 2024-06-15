@@ -18,16 +18,23 @@ type SongProgressProps = {
   current: Selector['current'];
   totalDuration: Selector['totalDuration'];
   onChange: ChangeEventHandler<HTMLInputElement>
+  currentDuration: number;
 }
 
-export const SongProgress = forwardRef<HTMLInputElement, SongProgressProps>((props, ref) => {
-  const { total, current, totalDuration, onChange } = props
+export const SongProgress = (props: SongProgressProps) => {
+  const { total, current, totalDuration, onChange, currentDuration } = props
+  const progressRef = useRef() as React.MutableRefObject<HTMLInputElement>
+
+  useEffect(() => {
+    progressRef.current.value = `${currentDuration}`;
+  }, [currentDuration]);
+
   return (
     <div>
       {total ? `${current}` : "--"}
 
       <input
-        ref={ref}
+        ref={progressRef}
         min={0}
         max={totalDuration || 0}
         defaultValue={0}
@@ -38,16 +45,11 @@ export const SongProgress = forwardRef<HTMLInputElement, SongProgressProps>((pro
       <HeavyUselessUI />
     </div>
   )
-})
+}
 
 const _SongProgress = () => {
   const { total, current, currentDuration, totalDuration } = useSongProgressSelector();
-  const progressRef = useRef() as React.MutableRefObject<HTMLInputElement>
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    progressRef.current.value = `${currentDuration}`;
-  }, [currentDuration]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateProgress: ChangeEventHandler<HTMLInputElement> = useDebounce(
@@ -64,7 +66,7 @@ const _SongProgress = () => {
   return <SongProgress
     total={total}
     current={current}
-    ref={progressRef}
+    currentDuration={currentDuration}
     totalDuration={totalDuration}
     onChange={updateProgress}
   />
