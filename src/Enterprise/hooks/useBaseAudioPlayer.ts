@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { PlayState } from "src/Enterprise/store/types";
-import { useDispatch } from "../store";
 
 type BaseAudioPlayerParams = {
   volume: number;
