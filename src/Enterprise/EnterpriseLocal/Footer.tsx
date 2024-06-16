@@ -17,7 +17,17 @@ type FooterProps = {
 }
 
 const Footer = (props: FooterProps) => {
-  const { song, playState, onSongProgressChange, onPlayStatusChange, currentDuration, totalDuration, onVolumeChange, volume } = props
+  const {
+    song,
+    playState,
+    onSongProgressChange,
+    onPlayStatusChange,
+    currentDuration,
+    totalDuration,
+    onVolumeChange,
+    volume
+    
+  } = props
   const { artist, title, duration } = song
 
   const handleSongProgressUpdate = (e: any) => {
@@ -25,8 +35,8 @@ const Footer = (props: FooterProps) => {
     onSongProgressChange(newProgress)
   }
 
-  const handleVolumeChange = (e: any) => {
-    onVolumeChange(Number(e.target.value))
+  const handleVolumeChange = (nextVol: number) => {
+    onVolumeChange(nextVol)
   }
 
   return (

@@ -88,6 +88,13 @@ const EnterpriseLocal = () => {
     return playlists.find(({ id }) => id === currentPlaylistId) ?? zeroState
   }
 
+  const getParsedPlaylists = () => {
+    return playlists
+      .filter(
+        playlist => playlist.title.toLowerCase().includes(playlistSearchText)
+      )
+  }
+
   const parsedSongs = () => {
     return getCurrentPlaylist().songs
       .map(id => songs[id])
@@ -124,7 +131,7 @@ const EnterpriseLocal = () => {
             onPlaylistClick={(id) => setCurrentPlaylistId(id)}
             onPlaylistSearch={(text) => setPlaylistSearchText(text)}
             playlistSearchText={playlistSearchText}
-            playlists={playlists}
+            playlists={getParsedPlaylists()}
             userName={userName}
           />
           <div className="route-container">
