@@ -1,4 +1,4 @@
-# Make React Fast Again Part 4: Full Scale Application Analysis
+# Make React Fast Again Part 4: Scaled Up Application Analysis
 
 ## Introduction
 
@@ -21,14 +21,14 @@ Whenever optimization and rerender suppression is discussed, there is always the
 
 ## The Local State *Could* be Faster
 
-The local state implementation of the music player has a god component that controls every rule in the application. Upon closer inspection, there are certainly places where data could be managed in parts lower in the component hierarchy. But therein lies multiple problems
+The local state implementation of the music player has a god component that controls every rule in the application. Upon closer inspection, there are certainly places where data could be managed in parts lower in the component hierarchy, for fewer component rerenders. But therein lies multiple problems
 
 1. Each feature becomes its own unique case study on where the optimal location is to store data.
-2. Future requirement changes will create massive refactors if data is necessary in higher areas of the component hierarchy.
+2. Future requirement changes will create risky refactors if data is necessary in higher areas of the component hierarchy.
 
-There is now a constant risk of conflict between maintainability and performance. Enterprise software is already difficult enough to maintain. 
+Enterprise software is difficult enough to maintain in its own right. A constant conflict between maintainability and performance only makes it worse.
 
-When an external force, that does not have a developer's interest in mind, is now constantly dictating foundational elements of the code, this spells the beginning of the end for large applications.
+When an external force, that does not have a developer's interest in mind, is dictating foundational design of the code, this spells the beginning of the end for large applications.
 
 That's not to say that the performant approach does not have rules, but they are good rules because they are within the best interests of the developers (and not the customer).
 
@@ -39,8 +39,7 @@ Maintainability and performance now run in parallel. The best interests of the d
 
 - Inherent separation of data and UI
 - An overwhelming majority of the application's data rules are functionally pure
-- Memoization has safeguards to prevent stale values and can be universally used
-- Developers have more creative liberty on how they want to structure their features
+- Memoization has inherent safeguards to prevent stale values
 - Data availability is not a concern
 - A team's shared understanding of how code should be written makes it more predictable/understandable
 - High performance is ensured or can be easily refactored to be performant
