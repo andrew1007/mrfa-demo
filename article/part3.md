@@ -112,7 +112,7 @@ function createSelector(selectors, computingFn) {
 
 Selectors are pure functions. So if all selectors are computed and the resolved values are the same compared to the previous state, then the cached value can be safely returned.
 
-This does a "pre-verification" of a datum's equality before it is available to the algorithm. Combined with functional purity, stale caches are virtually impossible.
+This does a "pre-verification" of a datum's equality before it is available to the algorithm. Follow the rules laid out and memoization becomes a one-size-fits-all approach to any algorithm. Combined with functional purity, stale caches are virtually impossible.
 
 3. If there are changes, update the cache and return the new value
 
@@ -222,6 +222,7 @@ const getDocTitles = createSelector([getDocs, docIds], (docs, docIds) => {
 });
 
 const capitalize = (str) => `${str[0].toUpperCase()}${str.slice(1)}`;
+
 const getCapitalizedTitles = createSelector([getDocTitles], (titles) =>
   titles.map(capitalize)
 );
