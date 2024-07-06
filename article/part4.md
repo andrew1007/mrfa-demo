@@ -38,11 +38,11 @@ That's not to say that the performant approach does not have rules, but they are
 Maintainability and performance now run in parallel. The best interests of the developers are there
 
 - Inherent separation of data and UI
-- An overwhelming majority of the application's data rules are functionally pure
+- A majority of the application's data rules and algorithms are functionally pure and can be memoized
 - Memoization has safeguards to prevent stale values and can be universally used
 - Changing business requirements rarely impact architecture and data management decisions
 - Data availability is not a concern
-- A team's shared understanding of how code should be written makes it more predictable/understandable
+- A team's shared understanding of the application's architecture makes the system more understandable
 - High performance is ensured or can be easily refactored to be performant
 
 ## Benchmarks
@@ -53,21 +53,21 @@ The application is a stripped-down music player, whose design isn't going to be 
 
 ## Keystroke Benchmarks
 
-It's almost depressing how something as simple as an input box can be the worst user experience in an application. Keystrokes need to fire many times in sequence and the user is constantly interacting with it the entire way through. This is one of the key places where performance really matters.
+Something as simple as an input can be the worst user experience in an application. Keystrokes fire many times in sequence and gives constant user feedback during the process. Performance is important when users directly feel slowdowns.
 
-When looking at the complexity, the speed difference doesn't seem too bad for keystrokes. When the UI complexity is low, the speeds are essentially the same: 0.8ms vs 2.1 ms. Sure, it's twice as fast, but in reality a 2ms keystroke is fantastic performance
+When observing complexity, keystroke speed differences are negligible. Low complexity nets the similar speeds: 0.8ms vs 2.1 ms.
 
 ![localImage](./resources/pt4-fig-6.png)
 
 ![localImage](./resources/pt4-fig-5.png)
 
-The story changes completely as the app scales. By artificially scaling up the complexity to moderate, the designs that create useless rerenders rears its ugly head. Now it's 2.4 ms vs 119ms.
+The story changes when the app scales. Artificially scaling up complexity causes useless rerenders rears to rear its ugly head. Now it's 2.4 ms vs 119ms.
 
 ![localImage](./resources/pt4-fig-3.png)
 
 ![localImage](./resources/pt4-fig-4.png)
 
-Bumping it up to the highest complexity, where mounting slows to a crawl. The scaling difference cannot even be compared: 6ms vs 224ms. Keep in mind that this is *per* keystroke. The unoptimized app is virtually unusable.
+Bumping it up to the highest complexity. The scaling difference cannot even be compared: 6ms vs 224ms. Keep in mind that this is *per* keystroke. The un-optimized app is virtually unusable.
 
 ![localImage](./resources/pt4-fig-1.png)
 
@@ -75,7 +75,7 @@ Bumping it up to the highest complexity, where mounting slows to a crawl. The sc
 
 ## Other Operation Benchmarks
 
-It should be no surprise that other parts of the app benefit in the exact same way. The performance differences at extreme complexity are colossal, but impractical. So the benchmarks to use will be a traditionally high-complexity: at complex speed.
+Other parts of the app benefit equally. Performance differences at extreme complexity are colossal. But the level of complexity isn't realistic for most applications. Benchmarks analysis will use medium complexity.
 
 Here are some statistics for the nerds. For the non nerds, here is the summary: On average, the 
 - Average speed increase: 100%
@@ -105,5 +105,5 @@ In the unoptimized application, mounting is slow and continues to be slow.
 
 Writing high-performance applications becomes easy when working with a set of structured rules. The only hard part about this system is understanding state tree mutations. After that, the only thing that is asked out of developers is discipline (which is much easier to attain than intelligence).
 
-The first app you write won't be taken to the bleeding edge, because all of this takes time and practice. There are multiple concepts to juggle all at once: Effective memoization (state tree mutations) and mindful component design. There are, of course, other considerations to make when it comes to performance woes. If you inspect the audio player app carefully, you can see some of the optimization considerations that lie outside of rerender suppression. But this approach to designing React applications is a foundation on which all further performance optimizations sit on top of.
+The first app you write won't be taken to the bleeding edge, because all of this takes time and practice. There are multiple concepts to juggle all at once: Effective memoization (state tree mutations) and mindful component design. There are, of course, other considerations to make when it comes to performance woes.Strategies like debouncing, throttling, and virtualizing are still important. But mindful application design that is inherently fast is the foundation on which these optimizations sit on top of.
 
