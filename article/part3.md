@@ -131,7 +131,7 @@ The spread operator performs a shallow merge. Think of this operation as the cre
 
 ## Visualizing Resolver Functions
 
-The hardest part is writing the optimal resolver functions. It's helpful to think of a resolver function as an entity that "traverses" the state tree to access necessary nodes.
+The hardest part about effective selectors is writing optimal resolver functions. It's helpful to think of a resolver function as an entity that "traverses" the state tree to access necessary nodes.
 
 The following is a small, normalized, state tree.
 
@@ -141,12 +141,12 @@ export const normalizedState = {
     1: {
       title: "Performant React",
       id: 1,
-      updatedAt: 1668117919710, // 11-10-2022
+      updatedAt: 1668117919710,
     },
     2: {
       title: "React Presentation",
       id: 2,
-      updatedAt: 1636582015583, // 11-10-2021
+      updatedAt: 1636582015583,
     },
   },
   docIds: [1, 2],
@@ -174,7 +174,7 @@ const getDocs = (state) => state.docs;
 
 ## Factory Selectors
 
-A selector is any function where the only argument is `state`. To account for other parameters, currying is required. For example, if a parameter is specified in runtime (such as an `id`), it must be curried. Here is an example that targets a child node in `docs`.
+A selector's single argument is `state`. Currying is required for extra parameters. This is common when a parameter is specified in runtime (such as an `id`). Here is an example that targets a child node in `docs`.
 
 ```typescript
 const makeGetDocById = (id) => (state) => state.docs[id];
@@ -186,7 +186,7 @@ const getDoc = makeGetDocById(1);
 
 ## Composing Selectors
 
-The first argument of `createSelector` accepts an array of selectors. The ability to use multiple selectors provides an intuitive way to access multiple state tree nodes.
+`createSelector`'s first parameter is an array of selectors, allowing the use of multiple selectors at once. This provides an intuitive way to access multiple state tree nodes.
 
 `getDocs` and `getDocIds` are used together to compute the necessary data. This memoized selector will only recompute when either `docs` and/or `docIds` changes value.
 
@@ -205,7 +205,7 @@ const getDocTitles = createSelector([getDocs, docIds], (docs, docIds) => {
 
 ## Resolvers are Selectors
 
-Another incredible power this framework is that computed selectors can be used as resolver functions. Selectors are infinitely composable and can be reused with virtually no performance penalties (because they are memoized).
+Computed selectors can be used as resolver functions. They are infinitely composable, reusable, and incur virtually no performance penalties (because they are memoized).
 
 ```typescript
 const getDocTitles = createSelector([getDocs, docIds], (docs, docIds) => {
@@ -226,7 +226,7 @@ const useGetCapitalizedTitles = useSelector(getCapitalizedTitles);
 
 The hardest part about effective memoization is writing optimal resolver functions. They can make or break apps.
 
-We can start by talking about a useless selector. One that targets the root node of the state tree, `getState`. The root node is guaranteed to be a new node during any state update. This selector will always miss its cache and recompute.
+It is easy to accidentally create ineffective selectors. An obvious example would be targeting the root node. The root node is guaranteed to be a new node during any state update. This selector, `getState`, will always miss its cache and recompute.
 
 ```typescript
 // useless resolver fn
@@ -274,34 +274,39 @@ const makeGetParsedDocById = (id) =>
 
 ## Factory Selectors for Multi-cache situations
 
-`createSelector` has a cache size of one. This meets most use cases. But some situations may require a larger cache. For example, when an algorithm needs to operate on something by id. This situation is common when many instances of a component are rendered, such as a table or list of UI elements.
+`createSelector` has a cache size of one. This meets most use cases. But some situations may require a larger cache. For example, when an algorithm needs to find data by id. This is common when rendering many component instances, such as a table or list of UI elements.
 
-The factory selector above, `makeGetParsedDocById`, will miss its cache because the single instance will be constantly invoked with a different `id`. The factory selector needs its own copy of the selector in every hook, which can be accomplished with `useMemo`.
+Without any extra techniques, `makeGetParsedDocById` would create a new selector instance (and a new cache) on every render cycle. This guarantees cache misses.
 
 ```tsx
 const makeGetDocById = (id) => (state) => state.docs[id];
 
 const makeGetParsedDocById = (id) =>
-  createSelector([makeGetDocById(id)], (doc) => {
-    return {
-      ...doc,
-      date: dayjs(doc.updatedAt).format("YYYY-MM-DD"),
-    };
-  });
+  createSelector([makeGetDocById(id)], (doc) => ({
+    ...doc,
+    date: dayjs(doc.updatedAt).format("YYYY-MM-DD"),
+  }));
 
+const useGetParsedDocById = (id) => {
+  const getParsedDocById = makeGetParsedDocById(id);
+  return useSelector(getParsedDocById);
+};
+```
+
+A persistent cache can be created using `useMemo`. Using a memoization hook retains an instance of the selector for as long as possible.
+
+```tsx
 const useGetParsedDocById = (id) => {
   const getParsedDocById = useMemo(() => makeGetParsedDocById(id), [id]);
   return useSelector(getParsedDocById);
 };
 ```
 
-Now, each `useGetDocById` has its own cache, allowing maximal strict equality matching.
-
 ## Optimizing State Tree Mutations
 
-All of this hard work, by targeting unchanged nodes is useless if nodes are needlessly changing. The next step is minimizing the number of changed nodes when performing state transformations.
+State tree mutations matter. If nodes are needlessly changing, selectors cannot work their magic. Painstakingly targeting specific nodes is useless if nodes are needlessly changing.
 
-Copying unchanged nodes is a common issue. In the following code snippet, the state transformation algorithm creates a new node for every object in `docs`. A rerender is triggered in every instance of `useGetDocById`. It is irrespective of the nodes that have changed in value. The react dev tools performance profile confirms this.
+Copying nodes with unchanged values is a common issue. This algorithm's intent is to update one node's value. But in reality, every node in `docs` updates. A cache miss occurs in every instance of `useGetDocById`. The dev tools profiler confirms this.
 
 ```typescript
 const updateDate = (newDate, currId) => {
