@@ -60,8 +60,6 @@ The memoization strategy of `createSelector` is directly integrated with its dat
 
 This standardization is a double-edged sword, because it is easy to write ineffective selectors. Selector design is integral to the success of `createSelector`. The best selectors optimally navigate the `state` tree to target the exact node(s) of interest. Accessing the exact nodes that are required for computation maximizes the effectiveness of this caching strategy.
 
-Best of all, the resolver function can traverse deeper into the state tree and target the exact node of interest. Granular resolvers are almost always better. Accessing the exact nodes that are required for computation maximizes the effectiveness of this caching strategy.
-
 ```typescript
 const makeGetDocById = (id) => (state) => state.docs[id];
 
