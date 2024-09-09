@@ -173,3 +173,7 @@ const mappedState = () => (state, ownProps) => {
 
 export default applyState(mappedState)(RowCell);
 ```
+
+## Conclusions
+
+This design approach is, without a doubt unconventional. 

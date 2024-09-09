@@ -19,7 +19,7 @@ Despite this, learning these concepts is invaluable, because these performance o
 
 Whenever optimization and rerender suppression is discussed, there is always the qualifier of "useless". Because every component, regardless of how it is design, has at least one: The mounting process. There is no if, ands or buts: If the UI is complex, no design strategy exists that will speed up the creation of HTML or the algorithms that power them. The best option to address massively complex UI is virtualization. But virtualization can also create its own set of problems. Deferring UI mounting until it is seen is an amortization process. If the mounting process is slow for those virtualized elements, responsive actions (like scrolling) will be hurt.
 
-## The Local State *Could* be Faster
+## The Local State _Could_ be Faster
 
 The local state implementation of the music player has a god component that controls every rule in the application. Upon closer inspection, there are certainly places where data could be managed in parts lower in the component hierarchy, which would isolate rerenders to specific parts of the app. But therein lies multiple problems.
 
@@ -67,7 +67,7 @@ The story changes when the app scales. Artificially scaling up complexity causes
 
 ![localImage](./resources/pt4-fig-4.png)
 
-Bumping it up to the highest complexity. The scaling difference cannot even be compared: 6ms vs 224ms. Keep in mind that this is *per* keystroke. The un-optimized app is virtually unusable.
+Bumping it up to the highest complexity. The scaling difference cannot even be compared: 6ms vs 224ms. Keep in mind that this is _per_ keystroke. The un-optimized app is virtually unusable.
 
 ![localImage](./resources/pt4-fig-1.png)
 
@@ -77,7 +77,8 @@ Bumping it up to the highest complexity. The scaling difference cannot even be c
 
 Other parts of the app benefit equally. Performance differences at extreme complexity are colossal. But the level of complexity isn't realistic for most applications. Benchmarks analysis will use medium complexity.
 
-Here are some statistics for the nerds. For the non nerds, here is the summary: On average, the 
+Here are some statistics for the nerds. For the non nerds, here is the summary: On average, the
+
 - Average speed increase: 100%
 - Lowest speed increase: 30%
 - Highest speed increase: 400%
@@ -106,4 +107,3 @@ In the unoptimized application, mounting is slow and continues to be slow.
 Writing high-performance applications becomes easy when working with a set of structured rules. The only hard part about this system is understanding state tree mutations. After that, the only thing that is asked out of developers is discipline (which is much easier to attain than intelligence).
 
 The first app you write won't be taken to the bleeding edge, because all of this takes time and practice. There are multiple concepts to juggle all at once: Effective memoization (state tree mutations) and mindful component design. There are, of course, other considerations to make when it comes to performance woes.Strategies like debouncing, throttling, and virtualizing are still important. But mindful application design that is inherently fast is the foundation on which these optimizations sit on top of.
-

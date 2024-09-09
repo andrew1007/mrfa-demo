@@ -1,21 +1,14 @@
 # Normalized State Trees
 
-
 ## Introduction
 
-The complexity of modern frontend applications are immense. The way data is structured, managed, transformed, and computed will be the central point of interest. The better the data is designed, the simpler it is to maintain and optimize a React app.The principles of designing backend systems
-
-Design decisions are easier when the application is treated like a server with a thin UI layer on top of it. In a server, data is king and is always treated with respect.
+The complexity of modern frontend applications are immense, making data design more important than ever before. As your understanding of optimization matures, data design and management becomes more important than component design. The way data is structured, managed, transformed, and computed will be the central point of interest. React apps are easier to maintain and optimize with a well-designed schema.
 
 ## Normalized State Data
 
-Normalization is imperative for a maintainable SSOT (single source of truth) data model. Do not duplicate stored data. It may be helpful to think of a state tree as a server-side database.
+Normalization is imperative for a maintainable SSOT (single source of truth) data model. Do not duplicate stored data. In the same way data normalization is respected on the backend, similar attitudes apply to frontend data management. It may be helpful to think of a state tree as a server-side database.
 
-In the same way data (and its normalization) is respected on the backend, similar attitudes should apply to how the frontend manages data.
-
-Duplication becomes less alluring when data is easily accessible. This is commonly done by storing data as records in key-value pairs. This also provides the benefit of O(1) key access. An array of records can be converted using a simple one-liner.
-
-If order matters in a part of an application (that cannot computed), retain an array of `ids`.
+Duplication becomes less alluring when data is designed to be easily accessible. This is commonly done by storing data as records (key-value pairs). This also provides the benefit of O(1) key access. If order matters in a part of an application (that cannot be inferred), retain an array of `ids`.
 
 ```typescript
 const normalizedState = {
@@ -35,13 +28,19 @@ const normalizedState = {
 };
 ```
 
-## Derive values instead of storing them
+## Ignore data's current use cases
 
-Store minimal information in state and compute the data.
+To get an array of documents, this would be computed.
 
 ```typescript
 const getDocList = (state) => state.docIds.map((id) => state.docs[id]);
 ```
+
+This may seem like useless effort and computational resources if the only use case of this data is rendering a list of documents. For example, this could be stored as an array with no consequence. This is technically true, but multiple use cases inevitably occur as enterprise applications mature. Convenience-oriented data design create future liabilities and headaches. Agnostic design makes future development as painless as possible. Also, a spoiler for the future: normalized state trees unlock a powerful and straightforward memoization framework.
+
+## Derive values instead of storing them
+
+Store minimal information in state and compute the data.
 
 Saving computed values is duplication in disguise. Storing computed values requires permanent maintenance for the lifespan of the app. When the data origin changes, the computed value needs to be updated in conjunction.
 

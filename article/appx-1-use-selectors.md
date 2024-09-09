@@ -1,4 +1,3 @@
-
 ## Selectors: consistent and predictable data computation
 
 The selector pattern is an algorithm design philosophy. It places emphasis on consistent interfaces for algorithms, which is perfect when there is a singular source of data for (almost) all parts of the application.
@@ -35,7 +34,6 @@ Selectors other parameters are trickier to write. The function needs to be curri
 ```typescript
 const makeGetDocById = (id) => (state) => state.docs[id];
 ```
-
 
 ## `useSelector`
 
@@ -121,7 +119,7 @@ React's data management update system is inextricably tied to rerenders, so comp
 
 This is accomplished by storing the selector functions inside a data structure that React does not manage.
 
-1. On instantiation of `makeProvider`, an array is created to hold all `useSelector` callbacks.
+1. On instantiation of `makeProvider`, an array is created to hold all `useSelector` callbacks. These callbacks function as listeners.
 
 ```typescript
 let subscribers = [];
@@ -157,24 +155,24 @@ const Provider = ({ children }) => {
 4. The most recent state value needs to be available in order to correctly compute the initial value in `useSelector`.
 
 ```typescript
-const Provider = ({ children }) => {
-  // ...
-  const [state, dispatch] = useReducer(reducer, initialState);
-
+const makeProvider = (initialState) => {
   let currentState = initialState;
-};
-```
 
-5. `useSelector` uses `currentState` to compute the current value on mount. Each hook retains computed data in a `useRef` hook.
-
-```typescript
-const useSelector = (selector) => {
+  const Provider = ({ children }) => {
+    // ...
+    const [state, dispatch] = useReducer(reducer, initialState);
+    currentState = state;
+  };
   // ...
-  const currValRef = useRef(selector(currentState));
+
+  const useSelector = (selector) => {
+    // ...
+    const currValRef = useRef(selector(currentState));
+  };
 };
 ```
 
-6. A rerender is forced when necessary. This setup defers the decision as to whether not a rerender should occur.
+6. A rerender is forced when the selector's cached value has changed. This setup defers the rerender decision.
 
 ```typescript
 const useSelector = (selector) => {
@@ -201,7 +199,7 @@ const useSelector = (selector) => {
 
 ## Selectors used in `useSelector`
 
-`useSelector` and the selector pattern share identical interfaces. Rerenders are optimally suppress and, as a side bonus, algorithms and UI are neatly separated in an easy-to-reason (pure) way.
+With `useSelector`, rerenders are optimally suppressed. As a side bonus, algorithms and UI are neatly separated in an easy-to-reason (pure) way.
 
 ```typescript
 const getDocList = (state) => state.docIds.map((id) => state.docs[id]);
@@ -216,3 +214,7 @@ const Component = (props) => {
   return null;
 };
 ```
+
+## Equality failure when returning objects
+
+`useSelector`'s rerender suppression strategy fails for `useGetDocList`. `getDocList` returns a new array on every computation. `useSelector`'s caching strategy may appear useless. But this is only a temporary issue. Memoization solves this problem. But we are not ready for that yet. First, we need to learn how to conceptualize state trees and how their nodes change.

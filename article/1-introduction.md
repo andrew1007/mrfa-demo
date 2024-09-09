@@ -101,17 +101,22 @@ The flame graph has changed. There are now gray cells. These represent component
 
 ![memoed to prevent cascading rerenders](../images/memoed-supressed-rerender.png)
 
-It would be naive to think that we're done. Any professional developer knows that this example looks nothing like enterprise software. We need to develop a full-scale architecture in order to leverage the power of `React.memo` in apps that render thousands of DOM nodes and trigger hundreds of heavy render cycles (possibly thousands) per minute.
+It would be naive to think the performance conversation is over. Any professional developer knows that enterprise software.
+
+this example looks nothing like enterprise software. A full-scale architecture is required to truly optimize enterprise software.
+
+leverage the full power of `React.memo`.
+In apps that render thousands of DOM nodes and trigger hundreds of heavy render cycles (possibly thousands) per minute.
 
 ## Check out the demo
 
-Seeing is believing. The rest of the article will refer to an basic app. It can be run in a local environment, which is available in this [repo](https://github.com/andrew1007/mrfa-demo/tree/main) (type definitions included).
+Seeing is believing. The rest of the articles will refer to an basic app. It can be run in a local environment, which is available in this [repo](https://github.com/andrew1007/mrfa-demo/tree/main) (type definitions included).
 
 ## God components are slow
 
 In order to see what a fast implementation looks like, first we need to look at one that is slow.
 
-Here is the god component of a searchable, filterable, and selectable table using local state. The local state data management system forces the creation of a god component. The topmost component must manage all data and event handlers. Data needs to be repeatedly passed down from the top of the component hierarchy.
+This god component is a searchable, filterable, and selectable table. The local state data management system forces the creation of a god component. The topmost component must manage all data and event handlers. Data needs to be repeatedly passed down from the top of the component hierarchy.
 
 ```jsx
 import { useEffect, useState } from "react";
@@ -213,3 +218,11 @@ Inspecting the flame graph reveals useless rerenders. On checkbox select and sel
 ![performance of click all checkbox using unoptimized app](../images/local-state-dev-tool.png)
 
 Technically, `useCallback` and `useMemo` could be used to retain reference equality. But these should be avoided. They are brittle to use and must be vigilantly maintained. These hooks rely on a dependency array, which is susceptible to ineffective memoization and/or stale values. Liberal use of them inevitably become liabilities in large applications. All of these issues and considerations are a non-issue if a different data management design pattern is used. It starts by managing data outside of the component hierarchy: the Context API.
+
+## To be continued
+
+With these concepts, typical web apps gain substantial amounts of responsiveness. But there are more performance wins that build on top of mindful component design, resulting in hyper-optimized applications. The following will take performance to a level that most developers have never seen in enterprise software.
+
+- Structuring normalized state trees
+- Robust memoization strategies for computed data
+- Dispatching optimal state transformations
