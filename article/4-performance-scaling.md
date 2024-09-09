@@ -76,7 +76,7 @@ export default applyState(mappedState)(TableRows);
 
 This true, but impractical. Maintainability comes first for enterprise software. Algorithms in UI violate separation of concerns and are not reusable. On top of that, there is already a solution for this. Functional (pure) memoization strategies enable patterns that are robust (when used correctly), and reusable.
 
-## Commenting on the React Compiler
+## Comments on the React Compiler
 
 There is plenty of talk about a new feature: The [React Compiler](https://react.dev/learn/react-compiler). It markets itself as the answer to suppressing useless rerenders "for free". This is without a doubt, an update that is highly welcomed. Free wins are a good thing, but there are limits to what it can do. Poorly-designed apps have useless rerenders embedded within their DNA. No novel technology (short of sophisticated AI code refactoring) will ever fix foundational performance issues. A technology like this is not a free pass to be undisciplined.
 
