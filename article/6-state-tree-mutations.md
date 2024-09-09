@@ -1,10 +1,10 @@
+# State tree mutations and traversal
+
 ## Seeing State as a Tree
 
-So far, many terms have been used to describe to global state. Things like database and SSOT (single source of truth). But for memoization, the most important descriptor is a tree data structure.
+Algorithms and functions are used interface with `state`. But visualizing these operations as tree transformations and node access is a superpower that is a hidden in plain sight.
 
-A state update is commonly referred to as an update of a JavaScript object. But temporarily, reframe what that means: Think of it as a mutation of nodes in a tree data structure. Moving forward, a colored node will denote a node that will fail strict equality; either a change in value, reference, or both.
-
-The following is a small, normalized, state tree.
+Moving forward, a colored node will denote a node that will fail strict equality; either a change in value, reference, or both. The following is a small, normalized, state tree.
 
 ```typescript
 export const normalizedState = {
@@ -31,9 +31,17 @@ A tree representation would look like this
 
 ![localImage](./resources/pt2-fig-2.png)
 
+## Optimizing State Tree Mutations
+
+Minimizing node replacements during tree transformations is imperative. Reconciliation, React's rerender analyzer, checks for node changes. Useless node updates equate to useless rerenders.
+
+Minimizing tree transformations takes complete priority. The performance of the transformation algorithm is almost never important. After all, algorithms should be assumed to be fast, until proven otherwise.
+
+In the previous examples, example #2 is clearly the superior approach. It minimizes the number of node changes required to create the desired state tree.
+
 ## Update Operations
 
-A new tree is required when updating state. For React, the minimum criteria is replacement of the root node. Subtree nodes (the values) don't have to change. Revisit the reducer function in `makeProvider`.
+Root node replacement is the minimum criteria for a state update in React. Subtree nodes (the values) don't have to change. Revisit the reducer function in `makeProvider`.
 
 ```typescript
 const reducer = (state, action) => ({
@@ -42,7 +50,7 @@ const reducer = (state, action) => ({
 });
 ```
 
-The spread operator performs a shallow merge. Think of this operation as the creation of a new root node for the state tree. An empty object `dispatch` would represent a new state tree with no other node changes.
+The spread operator creates a new object. This object creation is conceptually the same as a new root for `state`. An empty object `dispatch` represents this.
 
 ```typescript
 dispatch(() => ({}));
@@ -50,14 +58,16 @@ dispatch(() => ({}));
 
 ![localImage](./resources/pt2-fig-1.png)
 
-[fig 1] The root node mutation after `reducer` computation
+[fig 1] The root node replacement after `reducer` computation
 
-## State Tree Mutations Using Code
 
-A dispatch function's algorithm is the programmer's tool to transform a state tree. Let's visualize how various algorithms transform the tree.
+## Tree Transformation Algorithm Analysis 
 
-Ex. 1
-This algorithm creates a new `docs` node (`Object.entries`). All subnodes in `docs` are also replaced with new nodes. Note that only one node has changed its value, but all of them have been replaced.
+Transforming a tree with an algorithm is easy. But picking the best transformation algorithm is hard. It requires a developer to analyze the code and understand what is happening to the nodes in the tree.
+
+Here is a comparison between two algorithms that modify a single value (the `date` key) in `state`. The resulting values will be the same, but they are completely different in their node transformations.
+
+In this algorithm, every single subnode in `docs` is shallow merged (AKA node replacement). This results in an excessive number of useless node changes.
 
 ```typescript
 const updateDate = (newDate, currId) => {
@@ -76,8 +86,7 @@ const updateDate = (newDate, currId) => {
 
 ![localImage](./resources/pt2-fig-6.png)
 
-Ex. 2
-This algorithm is functionally identical. But now that we're thinking about node transformations, they are worlds apart. This transformation strategy will return the same subnode if the `id` is different.
+The following transformation algorithm is almost identical. But in terms of node replacements, they are worlds apart. The specific node in question is surgically replaced, via conditional shallow merge. No other nodes are affected.
 
 ```typescript
 const updateDate = (newDate, currId) => {
@@ -101,19 +110,9 @@ const updateDate = (newDate, currId) => {
 
 ![localImage](./resources/pt2-fig-7.png)
 
-## Optimizing State Tree Mutations
-
-From an algorithmic perspective, useless node replacements have [virtually] no runtime difference. But in React, rerenders, one of the heaviest operation in React, are done by checking for node changes.
-
-Useless node changes will also impact our [pending] memoization strategy. As you will discover in the future, useless node updates equate to useless rerenders. To put it succinctly, tree transformation strategies make or break React apps.
-
-In the previous examples, example #2 is clearly the superior approach. It minimizes the number of node changes required to create the desired state tree.
-
 ## Tree traversal with selectors
 
-In the same way we represent tree transformations with algorithms, we do the same for accessing specific nodes in the tree. The selector model is designed for this. The single argument is *always* the entire state tree.
-
-Back in the world of JavaScript, we describe a selector function's argument as the `state` tree and the return value is a node. To return the `docs` node, the selector would be:
+A selector is a function that is designed to traverse the `state` tree and access nodes of interest. This is analogous to reducer functions, which are designed to transform the `state` tree. A selector is a function whose argument is the entire `state` tree, and return value is, for the time being, a node in the `state` tree. To return the `docs` node, the selector would be.
 
 ```typescript
 const getDocs = (state) => state.docs;
@@ -125,9 +124,7 @@ const getDocs = (state) => state.docs;
 
 ## Traversing dynamic nodes with factory selectors
 
-It is straightforward to target deterministic nodes, like with `getDocs`. But the subnode key values are determined in runtime. This problem is compounded by the fact that the selector model has a single argument. These two problems are solved by creating a curried function that returns a selector. Moving forward, I will call them factory functions.
-
-The subnodes of the `docs` key are ids. So the factory function's argument needs to have this be passed in at runtime. 
+Curried selectors (factories) are required to traverse the tree to target dynamic nodes. For example, the `docs` subkeys are `ids`, which are determined at runtime. Accounting for new arguments (`id`) requires arguments to be split, via factory selectors.
 
 ```typescript
 const makeGetDocById = (id) => (state) => state.docs[id];
@@ -142,15 +139,14 @@ makeGetDocById(1);
 ![localImage](./resources/pt2-fig-4.png)
 
 ## Composing selectors
-The consistent interface of selectors mean that they can be built on top of each other. This displays one of the most powerful properties of this design philosophy. Selectors are infinitely reusable in other selectors. As applications (and its algorithms) grow in complexity, infinite reusability becomes invaluable.
 
-The `makeDocById` can also be written using `getDocs`.
+Selectors can be combined and/or stacked to any level of complexity. This is true by definition, because selectors have a consistent and predictable interface (the `state` tree). As applications (and its algorithms) grow in complexity, infinite reusability becomes invaluable.
+
+For sake of example, `getDocs` can be easily integrated into `makeDocById`.
 
 ```typescript
 const makeGetDocById = (id) => (state) => {
-  const docs = getDocs(state)
-  return docs[id]
-  };
+  const docs = getDocs(state);
+  return docs[id];
+};
 ```
-
-

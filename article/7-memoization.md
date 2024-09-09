@@ -1,3 +1,62 @@
+# Memoization
+
+## Introduction
+
+Brittle, inflexible, and unstandardized memoization approaches are rife with hazards and weaknesses.
+
+1. Some algorithms may seem "too complex" to memoize
+2. Stale caches are a common source of silent errors
+3. Each challenge becomes its own memoization "case study"
+
+A memoization framework, that leverages selector functions, fixes all of these.
+
+1. Every global state algorithm can be memoized.
+2. It has inherent safeguards against stale caches.
+3. The memoization strategy is identical, regardless of size or complexity.
+
+## `createSelector`
+
+Selector-based memoization uses a powerful methodology, in the form of `createSelector`, from the npm package [`reselect`](https://www.npmjs.com/package/reselect). While simple to write, `reselect` is more robust. A deconstruction and explanation of the magic behind `createSelector` can be found in appendix 2.
+
+```typescript
+function createSelector(selectors, computingFn) {
+  let computedSelectorCache = [];
+  let cache;
+
+  return (state) => {
+    const computedSelectors = selectors.map((fn) => fn(state));
+    const hasChanges = computedSelectors.some(
+      (computed, idx) => computedSelectorCache[idx] !== computed
+    );
+    if (hasChanges) {
+      cache = computingFn(...computedSelectors);
+      computedSelectorCache = computedSelectors;
+    }
+
+    return cache;
+  };
+}
+```
+
+## `createSelector` data access, via Tree Traversal
+
+Selector functions are `createSelector`'s mechanism to access data. Selector-evaluated data are arguments in the computation callback. `createSelector` is designed to be transparently integrated into applications that rely on the selector model for algorithms.
+
+```typescript
+const getDocs = (state) => state.docs;
+
+const getDocDates = createSelector([getDocs], (docs) => {
+  return Object.values(docs).map(({ updatedAt }) => updatedAt);
+});
+```
+
+## `createSelector` memoization, via Tree Traversal
+
+The memoization strategy of `createSelector` is directly integrated with its data access mechanism. This is the incredible strength of this caching system. 
+
+## Traversing the state tree for data
+
+Effective use of `createSelector` requires optimal resolver design. Resolvers are used to traverse the tree to target nodes that hold the data of interest.
 
 ## Traversing the State Tree with Selectors
 
