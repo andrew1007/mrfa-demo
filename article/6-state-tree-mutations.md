@@ -124,7 +124,7 @@ const getDocs = (state) => state.docs;
 
 ## Traversing dynamic nodes with factory selectors
 
-Curried selectors (factories) are required to traverse the tree to target dynamic nodes. For example, the `docs` subkeys are `ids`, which are determined at runtime. Accounting for new arguments (`id`) requires arguments to be split, via factory selectors.
+Curried selectors (factories) are required to traverse the tree to target dynamic nodes. For example, the `docs` sub-keys are `ids`, which are determined at runtime. Accounting for new arguments (`id`) requires arguments to be split, via factory selectors.
 
 ```typescript
 const makeGetDocById = (id) => (state) => state.docs[id];

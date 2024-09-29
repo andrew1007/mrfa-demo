@@ -28,20 +28,70 @@ const normalizedState = {
 };
 ```
 
-## Ignore data's current use cases
+## Normalization is important
 
-To get an array of documents, this would be computed.
+Normalization is priority #1 when designing `state` trees. Denormalized trees tend to make memoization difficult (more on this later).Current use cases of the data should be ignored. Never structure `state` data because it is "convenient".
+
+For example, an array of documents (commonly done in any application) in the normalized tree needs to be computed.
 
 ```typescript
 const getDocList = (state) => state.docIds.map((id) => state.docs[id]);
 ```
 
-This may seem like useless effort and computational resources if the only use case of this data is rendering a list of documents. For example, this could be stored as an array with no consequence. This is technically true, but multiple use cases inevitably occur as enterprise applications mature. Convenience-oriented data design create future liabilities and headaches. Agnostic design makes future development as painless as possible. Also, a spoiler for the future: normalized state trees unlock a powerful and straightforward memoization framework.
+It is imperative to normalize for the following reasons:
 
-## Derive values instead of storing them
+1. It is a future-proof design.
+2. Normalization has simple rules, making it easy to learn.
+3. It is universally compatible with all data design situations. There are no exceptions.
+4. It is easier to traverse the `state` tree. The importance of this will be discussed later.
 
-Store minimal information in state and compute the data.
+## Infer Data (via computation) instead of Flags
 
-Saving computed values is duplication in disguise. Storing computed values requires permanent maintenance for the lifespan of the app. When the data origin changes, the computed value needs to be updated in conjunction.
+Flags sometimes breaks normalization. Solving a challenge usings flag can be duplication in disguise. When used, they must be vigilantly maintained over the lifespan of the feature. It is a code smell if a flag's _only_ reason to change is data-related. More likely than not, the flag can be converted into an algorithm to infer its value.
 
-Never denormalize a state tree for speculative optimization. Assume an algorithm is fast until proven otherwise. On top of this, algorithms become a vanishing concern when computed values are cached. Powerful, functional, and robust memoization strategies will be covered (in part 3).
+For example, a duplication flag would be zero state rendering with a flag. Updating is directly tied to document data updates and no other conditions.
+
+```tsx
+const normalizedState = {
+  // ...
+  docIds: [1, 2],
+  loading: false,
+  hasDocuments: false,
+};
+
+const ZeroState = () => <>ZeroState</>;
+
+const DocumentList = () => <>DocumentList</>;
+
+const Loader = () => <>Loader</>;
+
+const Documents = (props) => {
+  const { hasDocuments, loading } = props;
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(() => ({
+      loading: true,
+    }));
+
+    fetchDocs().then((docs) => ({
+      docs: {}, // ... empty POJO for brevity
+      docIds: docs.map(({ id }) => id),
+      hasDocuments: docs.length > 0,
+      loading: true,
+    }));
+  }, []);
+
+  if (loading) {
+    return <Loader />;
+  }
+
+  return <>{hasDocuments ? <DocumentList /> : <ZeroState />}</>;
+};
+```
+
+The more robust approach is inferring this checking the values of `loading` and `docIds`. Using `hasDocuments` as a flag breaks normalization and increases the application's complexity.
+
+```typescript
+const getHasDocuments = (state) => !state.loading && state.docIds.length > 0
+```
