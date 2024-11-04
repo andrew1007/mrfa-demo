@@ -66,7 +66,7 @@ const DocumentList = () => <>DocumentList</>;
 const Loader = () => <>Loader</>;
 
 const Documents = (props) => {
-  const { hasDocuments, loading } = props;
+  const { hasDocuments, loading, id } = props;
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -74,13 +74,13 @@ const Documents = (props) => {
       loading: true,
     }));
 
-    fetchDocs().then((docs) => ({
+    fetchDocs(id).then((docs) => ({
       docs: {}, // ... empty POJO for brevity
-      docIds: docs.map(({ id }) => id),
+      docIds: docs.map(doc => doc.id),
       hasDocuments: docs.length > 0,
       loading: true,
     }));
-  }, []);
+  }, [id]);
 
   if (loading) {
     return <Loader />;
@@ -90,7 +90,7 @@ const Documents = (props) => {
 };
 ```
 
-The more robust approach is inferring this checking the values of `loading` and `docIds`. Using `hasDocuments` as a flag breaks normalization and increases the application's complexity.
+Using `hasDocuments` as a flag breaks normalization and increases the application's complexity. The more robust approach is inferring this, using `loading` and `docIds`.
 
 ```typescript
 const getHasDocuments = (state) => !state.loading && state.docIds.length > 0

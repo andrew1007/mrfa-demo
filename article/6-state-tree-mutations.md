@@ -1,8 +1,8 @@
-# State tree mutations and traversal
+# State tree mutations and selector traversal
 
 ## Seeing State as a Tree
 
-Algorithms and functions are used interface with `state`. But visualizing these operations as tree transformations and node access is a superpower that is a hidden in plain sight.
+This section will discuss how to see `state` as a tree data structure. The transformation and node access are the central points of interest. From personal experience, this tends to be the easiest way to intuitively create a mental model of how `state` transforms as the app dispatches updates.
 
 Moving forward, a colored node will denote a node that will fail strict equality; either a change in value, reference, or both. The following is a small, normalized, state tree.
 
@@ -31,14 +31,6 @@ A tree representation would look like this
 
 ![localImage](./resources/pt2-fig-2.png)
 
-## Optimizing State Tree Mutations
-
-Minimizing node replacements during tree transformations is imperative. Reconciliation, React's rerender analyzer, checks for node changes. Useless node updates equate to useless rerenders.
-
-Minimizing tree transformations takes complete priority. The performance of the transformation algorithm is almost never important. After all, algorithms should be assumed to be fast, until proven otherwise.
-
-In the previous examples, example #2 is clearly the superior approach. It minimizes the number of node changes required to create the desired state tree.
-
 ## Update Operations
 
 Root node replacement is the minimum criteria for a state update in React. Subtree nodes (the values) don't have to change. Revisit the reducer function in `makeProvider`.
@@ -60,33 +52,45 @@ dispatch(() => ({}));
 
 [fig 1] The root node replacement after `reducer` computation
 
-
-## Tree Transformation Algorithm Analysis 
+## Tree Transformation Algorithm Analysis
 
 Transforming a tree with an algorithm is easy. But picking the best transformation algorithm is hard. It requires a developer to analyze the code and understand what is happening to the nodes in the tree.
 
-Here is a comparison between two algorithms that modify a single value (the `date` key) in `state`. The resulting values will be the same, but they are completely different in their node transformations.
+Here is a comparison between two algorithms that modify a single value (the `date` key) in `state`. The resulting values will be the same, but they are completely different in their tree transformation strategy.
 
-In this algorithm, every single subnode in `docs` is shallow merged (AKA node replacement). This results in an excessive number of useless node changes.
+This algorithm results in an excessive number of useless node changes.
 
 ```typescript
 const updateDate = (newDate, currId) => {
   dispatch((state) => {
     return {
       docs: Object.fromEntries(
-        Object.entries(state.docs).map(([id, doc]) => ({
-          ...doc,
-          date: currId === id ? newDate : doc.date,
-        }))
+        Object.entries(state.docs).map(([id, doc]) => [
+          doc.id,
+          {
+            ...doc,
+            date: currId === id ? newDate : doc.date,
+          },
+        ])
       ),
     };
   });
 };
 ```
 
+In this algorithm, every single subnode in `docs` is replaced (via spread), regardless of whether or not any values have changed
+
+
+```typescript
+{
+  ...doc,
+  date: currId === id ? newDate : doc.date,
+}
+```
+
 ![localImage](./resources/pt2-fig-6.png)
 
-The following transformation algorithm is almost identical. But in terms of node replacements, they are worlds apart. The specific node in question is surgically replaced, via conditional shallow merge. No other nodes are affected.
+The following example is optimal. The specific node in question is surgically replaced, via conditional shallow merge. No other nodes are affected.
 
 ```typescript
 const updateDate = (newDate, currId) => {
@@ -95,12 +99,15 @@ const updateDate = (newDate, currId) => {
       docs: Object.fromEntries(
         Object.entries(state.docs).map(([id, doc]) => {
           if (id === currId) {
-            return {
-              ...doc,
-              date: doc.date,
-            };
+            return [
+              id,
+              {
+                ...doc,
+                date: newDate,
+              },
+            ];
           }
-          return doc;
+          return [id, doc];
         })
       ),
     };
@@ -108,23 +115,57 @@ const updateDate = (newDate, currId) => {
 };
 ```
 
+The algorithm is almost identical. But in terms of node replacements, this small difference completely changes how the `state` tree changes from this operation.
+
+```typescript
+if (id === currId) {
+  return [
+    id,
+    {
+      ...doc,
+      date: doc.date,
+    },
+  ];
+}
+return [id, doc];
+```
+
 ![localImage](./resources/pt2-fig-7.png)
+
+## Optimizing State Tree Mutations
+
+Reconciliation, React's rerender analyzer, checks for node changes. Useless node updates equate to useless rerenders. Minimizing node replacements during tree transformations is imperative. In most cases, reducing tree transformations takes priority over algorithm performance. After all, algorithms should be assumed to be fast, until proven otherwise.
+
+In the previous examples, example #2 is clearly the superior approach. It minimizes the number of node changes required to create the desired state tree.
+
+
+## Selectors
+
+A selector is a pure function whose only argument is the `state` tree. It places emphasis on consistent interfaces for algorithms, which is perfect when there is a singular source of data for (almost) all parts of the application.
+
+The benefits are immense:
+
+- They are [pure functions](https://en.wikipedia.org/wiki/Pure_function)
+- Easy to test
+- Easy to refactor
+- Uniform arguments make code easier to reason about
+- Algorithms are decoupled from UI
+- Enables structured and predictable memoization patterns (discussed later)
+- Infinitely reusable with virtually no performance penalties (with memoization).
 
 ## Tree traversal with selectors
 
-A selector is a function that is designed to traverse the `state` tree and access nodes of interest. This is analogous to reducer functions, which are designed to transform the `state` tree. A selector is a function whose argument is the entire `state` tree, and return value is, for the time being, a node in the `state` tree. To return the `docs` node, the selector would be.
+This model can be used to create functions that, abstractly, traverse a state tree. In this simple example, `getDocs` traverses the tree (down one level) to "select" the `docs` node.
 
 ```typescript
 const getDocs = (state) => state.docs;
 ```
 
-`getDocs` traverses the tree (down one level) to select the `docs` node.
-
 ![localImage](./resources/pt2-fig-3.png)
 
 ## Traversing dynamic nodes with factory selectors
 
-Curried selectors (factories) are required to traverse the tree to target dynamic nodes. For example, the `docs` sub-keys are `ids`, which are determined at runtime. Accounting for new arguments (`id`) requires arguments to be split, via factory selectors.
+Curried selectors (factories) are required for traversal to nodes whose keys are determined at runtime. For example, the `docs` sub-keys are `ids`. Factory selectors are required to accommodate keys cannot be predefined.
 
 ```typescript
 const makeGetDocById = (id) => (state) => state.docs[id];
@@ -140,9 +181,9 @@ makeGetDocById(1);
 
 ## Composing selectors
 
-Selectors can be combined and/or stacked to any level of complexity. This is true by definition, because selectors have a consistent and predictable interface (the `state` tree). As applications (and its algorithms) grow in complexity, infinite reusability becomes invaluable.
+Selectors, with their consistent argument, can be composed and/or stacked to any level of complexity. As applications grow in complexity, infinite reusability becomes invaluable.
 
-For sake of example, `getDocs` can be easily integrated into `makeDocById`.
+As a simple example, `getDocs` can be easily integrated into `makeDocById`.
 
 ```typescript
 const makeGetDocById = (id) => (state) => {
@@ -150,3 +191,7 @@ const makeGetDocById = (id) => (state) => {
   return docs[id];
 };
 ```
+
+## Conclusion
+
+A standardized memoization strategy is the key to creating large applications that are blazing fast. But the foundation of enabling a powerful memoization strategy requires a foundational understanding of how state trees mutate.

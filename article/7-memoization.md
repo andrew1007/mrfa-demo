@@ -6,7 +6,7 @@ Brittle, inflexible, and unstandardized memoization approaches are rife with haz
 
 1. Some algorithms may seem "too complex" to memoize
 2. Stale caches are a common source of silent errors
-3. Each challenge becomes its own memoization "case study"
+3. Everyone memoization challenge becomes a unique "case study" to solve
 
 A memoization framework, that leverages selector functions, fixes all of these.
 
@@ -14,9 +14,12 @@ A memoization framework, that leverages selector functions, fixes all of these.
 2. It has inherent safeguards against stale caches.
 3. The memoization strategy is identical, regardless of size or complexity.
 
+## `useSelector`
+The higher order component, via `applyState` approach was taken for learning purposes. It is the more "formal" way, because data management stays within React's data flow paradigm. A hook, `useSelector` is more practical to use in React apps. It has the same rerender suppression capabilities as `applyState`. A custom `useSelector` is integrated into `makeProvider`, which is functionally equivalent to redux's [`useSelector`](https://react-redux.js.org/api/hooks#useselector) The implementation details of the custom implementation are detailed in appendix 1.
+
 ## `createSelector`
 
-Selector-based memoization uses a powerful methodology, in the form of `createSelector`, from the npm package [`reselect`](https://www.npmjs.com/package/reselect). While simple to write, `reselect` is more robust. A deconstruction and explanation of the magic behind `createSelector` can be found in appendix 2.
+Selector-based memoization uses a powerful methodology, in the form of `createSelector`, from the npm package [`reselect`](https://www.npmjs.com/package/reselect). While simple to write, `reselect` is more robust. A deconstruction and explanation of `createSelector` is in appendix 2.
 
 ```typescript
 function createSelector(selectors, computingFn) {
@@ -52,7 +55,7 @@ const getDocDates = createSelector([getDocs], (docs) => {
 
 ## `createSelector` memoization, via Tree Traversal
 
-The memoization strategy of `createSelector` is directly integrated with its data access mechanism. If all selectors traverse to unchanged nodes, then the cached value is returned. This cache verifications system is an incredible strength. It is virtually impossible to return stale values, because data access and cache verification are in the same operation.
+The memoization strategy of `createSelector` is directly integrated with its data access mechanism. If all selectors traverse to unchanged nodes, then the cached value is returned. This cache verifications system is an incredible strength. It is virtually impossible to return stale values, because data access and cache verification are the same operation.
 
 ## Resolver Design
 
@@ -74,7 +77,7 @@ const makeGetParsedDocById = (id) =>
 
 ## Resolvers are Selectors
 
-Earlier, selectors were referred to as functions that traverse the `state` tree. But the other layer to `createSelector` is that selectors, regardless of their return value, are also valid resolver functions.
+Earlier, selectors were referred to as functions that traverse the `state` tree. But the next layer is that `createSelector` selectors, regardless of their return value, are also valid resolver functions.
 
 ```typescript
 const getDocs = (state) => state.docs;
@@ -98,7 +101,7 @@ const useGetCapitalizedTitles = () => useSelector(getCapitalizedTitles);
 
 The same instance of a factory selector is required for the lifespan of the component. A new instance means a new cache, which guarantees cache misses. This is solved using `useMemo`.
 
-The factory selector `makeGetParsedDocById` retains its instance between render cycles through memoization.
+With `useMemo`, the factory selector `makeGetParsedDocById` retains its instance between render cycles through memoization.
 
 ```tsx
 const makeGetDocById = (id) => (state) => state.docs[id];

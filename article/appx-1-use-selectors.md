@@ -177,7 +177,3 @@ const Component = (props) => {
   return null;
 };
 ```
-
-## Equality failure when returning objects
-
-`useSelector`'s rerender suppression strategy fails for `useGetDocList`. `getDocList` returns a new array on every computation. `useSelector`'s caching strategy may appear useless. But this is only a temporary issue. Memoization solves this problem. But we are not ready for that yet. First, we need to learn how to conceptualize state trees and how their nodes change.

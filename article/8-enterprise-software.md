@@ -6,7 +6,7 @@ When designed correctly, UI applications can be fast, [SOLID](https://en.wikiped
 
 This is the last step, where I put my money where my mouth is and prove that this works as well as I say it does. That it scales in situations where conventional approaches crumple like paper.
 
-A sample application that can be dynamically scaled in complexity will be benchmarked and its various architectural properties will be analyzed to help understand this approach's practicality and effectiveness.
+A sample application will be benchmarked. Its architectural properties will be analyzed to understand this approach's practicality and effectiveness.
 
 ## Component Initial Render Performance
 
@@ -14,8 +14,8 @@ There is constant talk about *re*render suppression, because the very first rend
 
 Despite this, learning these concepts is invaluable, because these performance optimizations still drastically improve the user experience because:
 
-- The initial mounting phase of a component is usually not the only render that occurs during the startup phase of the app. Most applications rerender hundreds of times before the application is ready for the user to interface with.
-- The responsiveness increases drastically after all of the UI is fully mounted.
+1. The initial mounting phase of a component is usually not the only render that occurs during the startup phase of the app. Most applications rerender hundreds of times before the application is ready for the user to interface with.
+2. The responsiveness increases drastically after all of the UI is fully mounted.
 
 Whenever optimization and rerender suppression is discussed, there is always the qualifier of "useless". Because every component, regardless of how it is design, has at least one: The mounting process. There is no if, ands or buts: If the UI is complex, no design strategy exists that will speed up the creation of HTML or the algorithms that power them. The best option to address massively complex UI is virtualization. But virtualization can also create its own set of problems. Deferring UI mounting until it is seen is an amortization process. If the mounting process is slow for those virtualized elements, responsive actions (like scrolling) will be hurt.
 
