@@ -30,7 +30,7 @@ Enterprise software is difficult enough to maintain in its own right. A constant
 
 When an external force, that does not have a developer's interest in mind, is dictating foundational design of the code, this spells the beginning of the end for large applications.
 
-That's not to say that the performant approach does not have rules, but they are good rules because they are within the best interests of the developers, while not impacting the customer's experience.
+That's not to say that the performant approach does not have rules, but they are good rules because they are within the best interests of the developers.
 
 1. This structured system is one-size-fits-all in an overwhelming number of situations. Exceptions are few and far between.
 2. Data-availability refactors are never required

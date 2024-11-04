@@ -30,7 +30,7 @@ const normalizedState = {
 
 ## Normalization is important
 
-Normalization is priority #1 when designing `state` trees. Denormalized trees tend to make memoization difficult (more on this later).Current use cases of the data should be ignored. Never structure `state` data because it is "convenient".
+Normalization is priority #1 when designing `state` trees. Denormalized trees tend to make memoization difficult (more on this later). Current use cases of the data should be ignored. Never structure `state` data because it is "convenient".
 
 For example, an array of documents (commonly done in any application) in the normalized tree needs to be computed.
 

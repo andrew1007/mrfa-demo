@@ -94,44 +94,23 @@ let subscribers = [];
 const useSelector = (selector) => {
   // ...
   useEffect(() => {
-    // listener for `useSelector` to determine if a rerender is required.
-    const fn = (state) => {
+    const listener = (state) => {
       // ...
     };
-    subscribers.push(fn);
+    subscribers.push(listener);
   }, []);
 };
 ```
 
-3. On state update, `subscribers` are all recomputed
+3. On state update, all `listener`s are recomputed.
 
 ```typescript
 const Provider = ({ children }) => {
   // ...
   const [state, dispatch] = useReducer(reducer, initialState);
-  subscribers.forEach((fn) => {
-    fn(state);
+  subscribers.forEach((listener) => {
+    listener(state);
   });
-};
-```
-
-4. The most recent state value needs to be available in order to correctly compute the initial value in `useSelector`.
-
-```typescript
-const makeProvider = (initialState) => {
-  let currentState = initialState;
-
-  const Provider = ({ children }) => {
-    // ...
-    const [state, dispatch] = useReducer(reducer, initialState);
-    currentState = state;
-  };
-  // ...
-
-  const useSelector = (selector) => {
-    // ...
-    const currValRef = useRef(selector(currentState));
-  };
 };
 ```
 

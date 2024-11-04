@@ -43,7 +43,7 @@ function createSelector(selectors, computingFn) {
 
 ## `createSelector` data access, via Tree Traversal
 
-Selector functions are `createSelector`'s mechanism to access data. Selector-evaluated data are arguments in the computation callback. `createSelector` is designed to be transparently integrated into applications that rely on the selector model for algorithms.
+`createSelector`'s uses selector functions to make data available in a pure way. When a `createSelector` function is invoked, the array of selectors are evaluated and their return values become arguments in the computation callback. 
 
 ```typescript
 const getDocs = (state) => state.docs;
@@ -53,15 +53,19 @@ const getDocDates = createSelector([getDocs], (docs) => {
 });
 ```
 
+`createSelector` is designed to be transparently integrated into applications that rely on the selector model for algorithms. When invoking a `createSelector` function, the argument is still the same: the `state` tree.
+
 ## `createSelector` memoization, via Tree Traversal
 
-The memoization strategy of `createSelector` is directly integrated with its data access mechanism. If all selectors traverse to unchanged nodes, then the cached value is returned. This cache verifications system is an incredible strength. It is virtually impossible to return stale values, because data access and cache verification are the same operation.
+The memoization strategy of `createSelector` is directly integrated with its data access mechanism. The cache is returned if strict equality is met for all evaluated selectors. This cache verifications system is an incredible strength. It is virtually impossible to return stale values, because data access and cache verification are the same operation.
+
+For tree-traversal selectors, traversing down to an unchanged node meets the strict equality requirement.
 
 ## Resolver Design
 
-`createSelector` standardizes cache verification. This contrasts most memoization methodologies, where it is the developer's duty to write their own verification conditions. Most notably, with `useMemo` and its dependency array.
+`createSelector` standardizes cache verification. This contrasts most memoization methodologies, like `useMemo`, where it is the developer's duty to write their own verification conditions.
 
-This standardization is a double-edged sword, because it is easy to write ineffective selectors. Selector design is integral to the success of `createSelector`. The best selectors optimally navigate the `state` tree to target the exact node(s) of interest. Accessing the exact nodes that are required for computation maximizes the effectiveness of this caching strategy.
+But this standardization is a double-edged sword, because it is easy to write ineffective selectors. Selector design is integral to the success of `createSelector`. Traversing down to precise nodes for computation maximizes the effectiveness of this caching strategy.
 
 ```typescript
 const makeGetDocById = (id) => (state) => state.docs[id];
@@ -77,7 +81,7 @@ const makeGetParsedDocById = (id) =>
 
 ## Resolvers are Selectors
 
-Earlier, selectors were referred to as functions that traverse the `state` tree. But the next layer is that `createSelector` selectors, regardless of their return value, are also valid resolver functions.
+Just like with normal selectors, `createSelector` allows infinite reusability. A `createSelector` function can be used in the resolver array, regardless of their return value.
 
 ```typescript
 const getDocs = (state) => state.docs;
@@ -111,10 +115,6 @@ const makeGetParsedDocById = (id) =>
     ...doc,
     date: dayjs(doc.updatedAt).format("YYYY-MM-DD"),
   }));
-
-const useGetParsedDocById = id => {
-  return useMemo(() => makeGetParsedDocById(id), [id])
-}
 
 const useGetParsedDocById = (id) => {
   const getParsedDocById = useMemo(() => makeGetParsedDocById(id), [id]);
