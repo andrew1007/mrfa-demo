@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { createSelector, useSelector } from ".";
+import { createSelector, useFactorySelector, useSelector } from ".";
 import { PlayState, State, SubState } from "./types";
 
 const defaultSong: SubState["Song"] = {
@@ -104,10 +104,11 @@ const makeGetSong = (id: number) =>
       };
     });
 
-export const useGetSong = (id: number) => {
-  const getSong = useMemo(() => makeGetSong(id), [id]);
-  return useSelector(getSong);
-};
+export const useGetSong = useFactorySelector((id: number) => makeGetSong(id))
+// (id: number) => {
+//   const getSong = useMemo(() => makeGetSong(id), [id]);
+//   return useSelector(getSong);
+// };
 
 export const getCurrentSong = createSelector(
   [getQueue, getSongs],

@@ -1,5 +1,3 @@
-import { useEffect, useMemo, useState } from "react";
-import { PlayState } from "src/Enterprise/store/types";
 import { useDispatch, useSelector } from "../store";
 import { useGetCurrentSong } from "../store/selectors";
 import useBaseAudioPlayer from "./useBaseAudioPlayer";

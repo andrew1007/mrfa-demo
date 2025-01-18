@@ -133,6 +133,13 @@ const makeProvider = <T,>(initialState: T) => {
     return currValRef.current;
   };
 
+  const useFactorySelector = <Ret, Args extends any[]>(fn: (...args: Args) => (state: T) => Ret): (...args: Args) => Ret => {
+    return (...args: Args) => {
+      const selectorInstance = useMemo(() => fn(...args), [...args])
+      return useSelector(state => selectorInstance(state))
+    }
+  }
+
   const useDispatch = () => useContext(DispatchContext);
 
   return {
@@ -141,6 +148,7 @@ const makeProvider = <T,>(initialState: T) => {
     useDispatch,
     createSelector,
     useSelector,
+    useFactorySelector,
   };
 }
 

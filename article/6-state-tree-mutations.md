@@ -134,14 +134,11 @@ return [id, doc];
 
 ## Optimizing State Tree Mutations
 
-Reconciliation, React's rerender analyzer, checks for node changes. Useless node updates equate to useless rerenders. Minimizing node replacements during tree transformations is imperative. In most cases, reducing tree transformations takes priority over algorithm performance. After all, algorithms should be assumed to be fast, until proven otherwise.
-
-In the previous examples, example #2 is clearly the superior approach. It minimizes the number of node changes required to create the desired state tree.
-
+Reconciliation, React's rerender analyzer, checks for node changes. Useless node updates equate to useless rerenders. Minimizing node replacements during tree transformations is imperative. In most cases, reducing tree transformations takes priority over algorithm performance. Algorithms are assumed to be fast until proven otherwise.
 
 ## Selectors
 
-A selector is a pure function whose only argument is the `state` tree. It places emphasis on consistent interfaces for algorithms, which is perfect when there is a singular source of data for (almost) all parts of the application.
+A selector is a pure function (in most cases) whose singular argument is the `state` tree. This model places emphasis on consistent interfaces for algorithms, which is perfect when there is a singular source of data for (almost) all parts of the application.
 
 The benefits are immense:
 

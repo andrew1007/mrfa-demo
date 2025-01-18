@@ -8,23 +8,14 @@ This is the last step, where I put my money where my mouth is and prove that thi
 
 A sample application will be benchmarked. Its architectural properties will be analyzed to understand this approach's practicality and effectiveness.
 
-## Component Initial Render Performance
-
-There is constant talk about *re*render suppression, because the very first render cycle, the mounting process, is fundamentally impossible to optimize with these techniques. There are other tricks in the bag of tools for this (such as virtualization), but there is no structural framework or concrete rules on when to use them.
-
-Despite this, learning these concepts is invaluable, because these performance optimizations still drastically improve the user experience because:
-
-1. The initial mounting phase of a component is usually not the only render that occurs during the startup phase of the app. Most applications rerender hundreds of times before the application is ready for the user to interface with.
-2. The responsiveness increases drastically after all of the UI is fully mounted.
-
-Whenever optimization and rerender suppression is discussed, there is always the qualifier of "useless". Because every component, regardless of how it is design, has at least one: The mounting process. There is no if, ands or buts: If the UI is complex, no design strategy exists that will speed up the creation of HTML or the algorithms that power them. The best option to address massively complex UI is virtualization. But virtualization can also create its own set of problems. Deferring UI mounting until it is seen is an amortization process. If the mounting process is slow for those virtualized elements, responsive actions (like scrolling) will be hurt.
-
 ## The Local State _Could_ be Faster
 
-The local state implementation of the music player has a god component that controls every rule in the application. Upon closer inspection, there are certainly places where data could be managed in parts lower in the component hierarchy, which would isolate rerenders to specific parts of the app. But therein lies multiple problems.
+The local state implementation of the music player has a god component that controls every rule in the application.
+
+Upon closer inspection, there are certainly places where data could be managed in parts lower in the component hierarchy, which would isolate rerenders to specific parts of the app. But therein lies multiple problems.
 
 1. Each feature becomes its own unique case study on where the optimal location is to store data.
-2. Future requirement changes will create risky refactors if data is necessary in higher areas of the component hierarchy.
+2. Future requirements may cause data to be necessary in other locations of the app, causing high-risks changes.
 
 Enterprise software is difficult enough to maintain in its own right. A constant conflict between maintainability and performance only makes it worse.
 
